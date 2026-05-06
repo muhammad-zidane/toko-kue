@@ -22,12 +22,21 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     public function orders()
-{
-    return $this->hasMany(Order::class);
-}
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
+     * Check if user is admin.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
 
     /**
      * The attributes that should be hidden for serialization.

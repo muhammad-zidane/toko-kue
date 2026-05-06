@@ -31,8 +31,12 @@ class OrderController extends Controller
         ]);
 
         $totalPrice = 0;
+        // Validasi stok terlebih dahulu
         foreach ($request->items as $item) {
             $product = Product::findOrFail($item['product_id']);
+            if ($product->stock < $item['quantity']) {
+                return back()->withErrors(['stock' => "Stok {$product->name} tidak mencukupi. Tersisa {$product->stock}."]);
+            }
             $totalPrice += $product->price * $item['quantity'];
         }
 
@@ -47,26 +51,38 @@ class OrderController extends Controller
 
         foreach ($request->items as $item) {
             $product = Product::findOrFail($item['product_id']);
+
             OrderItem::create([
                 'order_id'   => $order->id,
                 'product_id' => $product->id,
                 'quantity'   => $item['quantity'],
                 'price'      => $product->price,
             ]);
+
+            // Kurangi stok produk
+            $product->decrement('stock', $item['quantity']);
         }
 
         Payment::create([
             'order_id'       => $order->id,
-            'payment_method' => 'transfer',
+            'payment_method' => $request->payment_method ?? 'transfer',
             'status'         => 'unpaid',
             'amount'         => $totalPrice,
         ]);
+
+        // Bersihkan cart setelah order berhasil
+        session()->forget('cart');
 
         return redirect()->route('orders.payment', $order)->with('success', 'Pesanan berhasil dibuat!');
     }
 
     public function show(Order $order)
     {
+        // Ownership check
+        if ($order->user_id !== auth()->id()) {
+            abort(403);
+        }
+
         $order->load('orderItems.product', 'payment');
         return view('orders.show', compact('order'));
     }

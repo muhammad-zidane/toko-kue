@@ -152,7 +152,7 @@
     <div class="navbar-inner">
         <a href="/" class="navbar-logo">Jagoan Kue</a>
         <ul class="navbar-links">
-            <li><a href="/home">Beranda</a></li>
+            <li><a href="/">Beranda</a></li>
             <li><a href="/products" class="active">Katalog</a></li>
             <li><a href="/orders">Pemesanan</a></li>
         </ul>

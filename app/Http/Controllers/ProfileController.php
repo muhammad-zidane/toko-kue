@@ -12,6 +12,19 @@ use Illuminate\View\View;
 class ProfileController extends Controller
 {
     /**
+     * Display the user's profile overview page.
+     */
+    public function index(Request $request): View
+    {
+        $user = $request->user()->load('orders');
+        $orderCount = $user->orders->count();
+        $activeOrders = $user->orders->whereIn('status', ['pending', 'processing'])->count();
+        $totalSpent = $user->orders->where('status', 'completed')->sum('total_price');
+
+        return view('profile.index', compact('user', 'orderCount', 'activeOrders', 'totalSpent'));
+    }
+
+    /**
      * Display the user's profile form.
      */
     public function edit(Request $request): View

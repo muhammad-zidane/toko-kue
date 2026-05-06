@@ -214,25 +214,20 @@
         <h2 class="section-title">Testimoni</h2>
         <p class="section-subtitle">Yang orang-orang rasakan.</p>
         <div class="testimoni-grid">
-            @php
-            $testimonials = [
-                ['text' => 'Kuenya enak sesuai dengan gambar', 'name' => 'Muhammad Zidane', 'role' => 'Software Engginer di Antropic'],
-                ['text' => 'Bintang 5', 'name' => 'Feno Zikrillah', 'role' => 'Game Developper di Sony Entertainment'],
-                ['text' => 'Kue nya bikin nagih banget!', 'name' => 'Rafael Tirta Ramadhan', 'role' => 'Software Enginer di Perkebunan Rafael'],
-            ];
-            @endphp
-            @foreach($testimonials as $t)
+                @forelse($testimonials as $t)
             <div class="testimoni-card">
-                <p class="testimoni-text">"{{ $t['text'] }}"</p>
+                <p class="testimoni-text">"{{ $t->text }}"</p>
                 <div class="testimoni-author">
-                    <div class="testimoni-avatar">{{ strtoupper(substr($t['name'], 0, 1)) }}</div>
+                    <div class="testimoni-avatar">{{ strtoupper(substr($t->name, 0, 1)) }}</div>
                     <div>
-                        <p class="testimoni-name">{{ $t['name'] }}</p>
-                        <p class="testimoni-role">{{ $t['role'] }}</p>
+                        <p class="testimoni-name">{{ $t->name }}</p>
+                        <p class="testimoni-role">{{ $t->role }}</p>
                     </div>
                 </div>
             </div>
-            @endforeach
+            @empty
+            <p style="grid-column: span 3; text-align: center; color: var(--gray);">Belum ada testimoni.</p>
+            @endforelse
         </div>
     </div>
 </section>

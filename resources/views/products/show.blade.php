@@ -386,4 +386,8 @@
         updateSubtotal(val);
     });
 
-  
+
+</script>
+
+</body>
+</html>
