@@ -40,16 +40,20 @@ export async function request(path: string, options: RequestInit = {}) {
 /**
  * Helper to login a user and return the cookies.
  */
-export async function login(email = "admin@example.com", password = "password") {
-  // First, get CSRF cookie (Laravel Sanctum/Breeze pattern)
-  // Or just post to /login if sessions are used.
-  
+export async function login(email = "admin@tokokue.com", password = "password") {
   const response = await request("/login", {
     method: "POST",
     body: JSON.stringify({ email, password }),
     redirect: "manual",
   });
 
-  const setCookie = response.headers.get("set-cookie");
-  return setCookie;
+  // Fetch's get("set-cookie") joins with commas.
+  // We need to be careful with commas in dates.
+  // However, for testing session persistence, we mainly need laravel_session.
+  // @ts-ignore
+  const cookies = response.headers.getSetCookie();
+  if (!cookies || cookies.length === 0) return "";
+
+  // Return the raw cookies joined by semicolon
+  return cookies.join("; ");
 }

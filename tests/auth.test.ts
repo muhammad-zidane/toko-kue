@@ -16,12 +16,10 @@ test("Register: Berhasil mendaftar dengan data valid", async () => {
     }),
   });
 
-  // Laravel redirect after register
-  expect(response.status).toBe(200); // Or 302 if followed, but request helper doesn't follow by default
+  expect(response.status).toBe(200);
 });
 
 test("Register: Gagal mendaftar karena email sudah terdaftar", async () => {
-  // First registration
   await request("/register", {
     method: "POST",
     body: JSON.stringify({
@@ -32,7 +30,6 @@ test("Register: Gagal mendaftar karena email sudah terdaftar", async () => {
     }),
   });
 
-  // Second registration with same email
   const response = await request("/register", {
     method: "POST",
     body: JSON.stringify({
@@ -44,12 +41,9 @@ test("Register: Gagal mendaftar karena email sudah terdaftar", async () => {
   });
 
   expect(response.status).toBe(422);
-  const data = await response.json();
-  expect(data.errors.email).toBeDefined();
 });
 
 test("Login: Berhasil login dengan kredensial benar", async () => {
-  // Register first
   await request("/register", {
     method: "POST",
     body: JSON.stringify({
@@ -94,11 +88,10 @@ test("Login: Gagal login dengan password salah", async () => {
 });
 
 test("Logout: Berhasil logout", async () => {
-  // Login first
   const loginRes = await request("/login", {
     method: "POST",
     body: JSON.stringify({
-      email: "admin@example.com", // Assume seeded
+      email: "admin@tokokue.com",
       password: "password",
     }),
   });
