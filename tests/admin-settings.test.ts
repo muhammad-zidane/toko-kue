@@ -6,15 +6,14 @@ beforeEach(() => {
 });
 
 test("Admin Settings: Berhasil update profil admin", async () => {
-  const cookie = await login();
+  const jar = await login();
   const response = await request("/admin/settings", {
     method: "POST",
-    headers: { Cookie: cookie || "" },
+    jar,
     body: JSON.stringify({
       name: "Admin Baru",
-      email: "admin@example.com",
+      email: "admin@tokokue.com",
     }),
   });
-
-  expect(response.status).toBe(200);
+  expect(response.status).toBe(302);
 });

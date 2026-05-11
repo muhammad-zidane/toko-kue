@@ -6,9 +6,7 @@ beforeEach(() => {
 });
 
 test("Admin Analytics: Berhasil melihat halaman analisis", async () => {
-  const cookie = await login();
-  const response = await request("/admin/analytics", {
-    headers: { Cookie: cookie || "" },
-  });
+  const jar = await login();
+  const response = await request("/admin/analytics", { jar });
   expect(response.status).toBe(200);
 });

@@ -6,9 +6,7 @@ beforeEach(() => {
 });
 
 test("Admin Finance: Berhasil melihat halaman keuangan", async () => {
-  const cookie = await login();
-  const response = await request("/admin/finance", {
-    headers: { Cookie: cookie || "" },
-  });
+  const jar = await login();
+  const response = await request("/admin/finance", { jar });
   expect(response.status).toBe(200);
 });

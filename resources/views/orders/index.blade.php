@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jagoan Kue - Riwayat Pesanan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --pink: #F0507A; --brown-dark: #2C1810; --cream: #FFF8EE; --cream-dark: #F5EDD8; --white: #FFFFFF; --gray: #6B7280; --text-dark: #1A1A1A; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text-dark); background: var(--cream); }
+        a { text-decoration: none; }
+        .navbar { background-color: var(--brown-dark); padding: 16px 24px; position: sticky; top: 0; z-index: 100; }
+        .navbar-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+        .navbar-logo { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; color: var(--pink); }
+        .navbar-links { display: flex; gap: 32px; list-style: none; }
+        .navbar-links a { color: white; font-size: 14px; font-weight: 500; opacity: 0.9; }
+        .navbar-actions { display: flex; align-items: center; gap: 12px; }
+        .btn-cart { background-color: var(--pink); color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; }
+        .btn-login { border: 1.5px solid white; color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; }
+
+        .page { max-width: 1100px; margin: 0 auto; padding: 32px 24px 60px; }
+        .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+        .page-subtitle { font-size: 14px; color: var(--gray); margin-bottom: 22px; line-height: 1.6; }
+        .top-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
+        .btn-primary { background: var(--pink); color: white; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; display: inline-block; }
+
+        .alert-success { background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; padding: 12px 14px; border-radius: 12px; font-size: 13px; margin: 14px 0 0; }
+        .alert-error { background: #FFF1F2; border: 1px solid #FECDD3; color: #9F1239; padding: 12px 14px; border-radius: 12px; font-size: 13px; margin: 14px 0 0; }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 20px; }
+        .card { background: var(--white); border-radius: 16px; border: 1px solid #EDE0D4; padding: 20px; }
+        .meta { font-size: 12px; color: var(--gray); font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; }
+        .code { margin-top: 6px; font-size: 16px; font-weight: 800; }
+        .total { margin-top: 10px; font-size: 13px; color: var(--gray); }
+        .total strong { color: var(--brown-dark); }
+        .badges { text-align: right; display: flex; flex-direction: column; gap: 8px; }
+        .badge { display: inline-block; padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #F3F4F6; color: #111827; }
+        .badge-warn { background: #FEF3C7; color: #92400E; }
+        .actions { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; }
+        .btn-outline { border: 1.5px solid #D1C0B8; color: var(--brown-dark); padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; display: inline-block; }
+
+        .empty { grid-column: 1 / -1; text-align: center; padding: 28px; }
+
+        @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } .navbar-links { display: none; } }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="navbar-inner">
+        <a href="/" class="navbar-logo">Jagoan Kue</a>
+        <ul class="navbar-links">
+            <li><a href="/">Beranda</a></li>
+            <li><a href="/products">Katalog</a></li>
+            <li><a href="/orders">Pemesanan</a></li>
+        </ul>
+        <div class="navbar-actions">
+            <a href="/cart" class="btn-cart">🛒 Keranjang</a>
+            @auth
+                <a href="/profile" class="btn-login">{{ auth()->user()->name }}</a>
+            @else
+                <a href="/login" class="btn-login">Login</a>
+            @endauth
+        </div>
+    </div>
+</nav>
+
+<div class="page">
+    <div class="top-row">
+        <div>
+            <h1 class="page-title">Riwayat Pesanan</h1>
+            <p class="page-subtitle">Lihat status pesanan dan lanjutkan pembayaran bila diperlukan.</p>
+        </div>
+        <a href="/products" class="btn-primary">+ Belanja Lagi</a>
+    </div>
+
+    @if (session('success'))
+        <div class="alert-success">{{ session('success') }}</div>
+    @endif
+
+    @if ($errors->any())
+        <div class="alert-error">{{ $errors->first() }}</div>
+    @endif
+
+    <div class="grid">
+        @forelse ($orders as $order)
+            @php
+                $paymentStatus = $order->payment->status ?? 'unpaid';
+                $status = $order->status ?? 'pending';
+            @endphp
+
+            <div class="card">
+                <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
+                    <div>
+                        <p class="meta">{{ $order->created_at?->format('d M Y, H:i') }}</p>
+                        <p class="code">{{ $order->order_code }}</p>
+                        <p class="total">Total: <strong>Rp {{ number_format((int) $order->total_price, 0, ',', '.') }}</strong></p>
+                    </div>
+                    <div class="badges">
+                        <span class="badge">{{ ucfirst($status) }}</span>
+                        <span class="badge badge-warn">{{ ucfirst($paymentStatus) }}</span>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <a class="btn-outline" href="{{ route('orders.show', $order) }}">Detail</a>
+
+                    @if ($status === 'pending' && $paymentStatus === 'unpaid')
+                        <a class="btn-primary" href="{{ route('orders.payment', $order) }}">Bayar Sekarang</a>
+                    @endif
+                </div>
+            </div>
+        @empty
+            <div class="card empty">
+                <p style="font-size:18px; font-weight:800;">Belum ada pesanan</p>
+                <p style="font-size:13px; color:var(--gray); margin-top:8px; line-height:1.6;">Yuk mulai belanja kue favoritmu.</p>
+                <a href="/products" class="btn-primary" style="margin-top:14px;">Lihat Katalog</a>
+            </div>
+        @endforelse
+    </div>
+
+    <div style="margin-top:18px;">
+        {{ $orders->links() }}
+    </div>
+</div>
+</body>
+</html>

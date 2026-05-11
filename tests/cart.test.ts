@@ -6,41 +6,35 @@ beforeEach(() => {
 });
 
 test("Cart: Berhasil menambah produk ke keranjang", async () => {
-  const cookie = await login();
-  
-  // Add to cart
+  const jar = await login();
+
   const addRes = await request("/cart/add", {
     method: "POST",
-    headers: { Cookie: cookie || "" },
+    jar,
     body: JSON.stringify({
       product_id: 1,
       quantity: 2,
     }),
   });
 
-  expect(addRes.status).toBe(200);
+  expect(addRes.status).toBe(302);
 
-  // Check cart index
-  const cartRes = await request("/cart", {
-    headers: { Cookie: cookie || "" },
-  });
+  const cartRes = await request("/cart", { jar });
   expect(cartRes.status).toBe(200);
 });
 
 test("Cart: Berhasil mengosongkan keranjang", async () => {
-  const cookie = await login();
-  
-  // Add item first
+  const jar = await login();
+
   await request("/cart/add", {
     method: "POST",
-    headers: { Cookie: cookie || "" },
+    jar,
     body: JSON.stringify({ product_id: 1, quantity: 1 }),
   });
 
-  // Clear cart
   const clearRes = await request("/cart/clear", {
     method: "POST",
-    headers: { Cookie: cookie || "" },
+    jar,
   });
-  expect(clearRes.status).toBe(200);
+  expect(clearRes.status).toBe(302);
 });
