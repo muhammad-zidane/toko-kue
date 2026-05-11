@@ -6,9 +6,7 @@ beforeEach(() => {
 });
 
 test("Admin Customers: Berhasil melihat daftar pelanggan", async () => {
-  const cookie = await login();
-  const response = await request("/admin/customers", {
-    headers: { Cookie: cookie || "" },
-  });
+  const jar = await login();
+  const response = await request("/admin/customers", { jar });
   expect(response.status).toBe(200);
 });

@@ -3,57 +3,135 @@ import { execSync } from "child_process";
 export const BASE_URL = "http://localhost:8000";
 
 /**
- * Resets the database to a clean state.
+ * Simple cookie jar untuk menyimpan cookies antar request.
  */
-export function resetDatabase() {
-  try {
-    // We assume the user has php installed and is in the project root
-    execSync("php artisan migrate:fresh --seed", { stdio: "ignore" });
-  } catch (error) {
-    console.error("Failed to reset database. Make sure PHP is installed and accessible.");
+export class CookieJar {
+  private cookies: Map<string, string> = new Map();
+
+  /** Parse Set-Cookie headers dari response dan simpan */
+  addFromResponse(response: Response) {
+    // @ts-ignore - getSetCookie is available in Bun
+    const setCookies: string[] = response.headers.getSetCookie?.() || [];
+    for (const cookie of setCookies) {
+      const nameValue = cookie.split(";")[0];
+      const eqIndex = nameValue.indexOf("=");
+      if (eqIndex > 0) {
+        const name = nameValue.substring(0, eqIndex).trim();
+        this.cookies.set(name, nameValue);
+      }
+    }
+  }
+
+  /** Dapatkan string Cookie header untuk dikirim ke request selanjutnya */
+  toString(): string {
+    return Array.from(this.cookies.values()).join("; ");
+  }
+
+  /** Dapatkan value dari cookie tertentu */
+  get(name: string): string | undefined {
+    const entry = this.cookies.get(name);
+    if (!entry) return undefined;
+    const eqIndex = entry.indexOf("=");
+    return entry.substring(eqIndex + 1);
+  }
+
+  /** Bersihkan semua cookies */
+  clear() {
+    this.cookies.clear();
   }
 }
 
 /**
- * Helper to make a request and handle cookies (for session/auth).
+ * Reset database ke kondisi awal (fresh migrate + seed).
  */
-export async function request(path: string, options: RequestInit = {}) {
+export function resetDatabase() {
+  try {
+    execSync("php artisan migrate:fresh --seed", {
+      stdio: "ignore",
+      cwd: process.cwd(),
+    });
+  } catch (error) {
+    console.error("Failed to reset database.");
+  }
+}
+
+/**
+ * Buat session login dan kembalikan CookieJar yang sudah ter-autentikasi.
+ */
+export async function login(
+  email = "admin@tokokue.com",
+  password = "password"
+): Promise<CookieJar> {
+  const jar = new CookieJar();
+
+  // 1. GET halaman login untuk mendapatkan XSRF-TOKEN dan session cookie awal
+  const csrfRes = await fetch(`${BASE_URL}/login`, { redirect: "manual" });
+  jar.addFromResponse(csrfRes);
+
+  // 2. Ambil XSRF-TOKEN untuk proteksi CSRF
+  const xsrfToken = jar.get("XSRF-TOKEN");
+
+  // 3. POST login dengan kredensial dan CSRF token
+  const loginRes = await fetch(`${BASE_URL}/login`, {
+    method: "POST",
+    redirect: "manual",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Cookie: jar.toString(),
+      ...(xsrfToken
+        ? { "X-XSRF-TOKEN": decodeURIComponent(xsrfToken) }
+        : {}),
+    },
+    body: JSON.stringify({ email, password }),
+  });
+  jar.addFromResponse(loginRes);
+
+  return jar;
+}
+
+/**
+ * Buat HTTP request dengan dukungan CookieJar.
+ */
+export async function request(
+  path: string,
+  options: RequestInit & { jar?: CookieJar } = {}
+): Promise<Response> {
+  const { jar, ...fetchOptions } = options;
   const url = `${BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
-  
-  // Add common headers
-  const headers = new Headers(options.headers || {});
+
+  const headers = new Headers(fetchOptions.headers || {});
+
+  // Tambahkan cookies dari jar
+  if (jar) {
+    headers.set("Cookie", jar.toString());
+
+    // Tambahkan XSRF token untuk request non-GET (CSRF protection)
+    if (fetchOptions.method && fetchOptions.method !== "GET") {
+      const xsrf = jar.get("XSRF-TOKEN");
+      if (xsrf) {
+        headers.set("X-XSRF-TOKEN", decodeURIComponent(xsrf));
+      }
+    }
+  }
+
   if (!headers.has("Accept")) {
     headers.set("Accept", "application/json");
   }
-  if (!headers.has("Content-Type") && options.body) {
+  if (!headers.has("Content-Type") && fetchOptions.body) {
     headers.set("Content-Type", "application/json");
   }
 
   const response = await fetch(url, {
-    ...options,
+    redirect: "manual",
+    ...fetchOptions,
     headers,
   });
 
+  // Update jar dengan cookies baru dari response
+  if (jar) {
+    jar.addFromResponse(response);
+  }
+
   return response;
-}
-
-/**
- * Helper to login a user and return the cookies.
- */
-export async function login(email = "admin@tokokue.com", password = "password") {
-  const response = await request("/login", {
-    method: "POST",
-    body: JSON.stringify({ email, password }),
-    redirect: "manual",
-  });
-
-  // Fetch's get("set-cookie") joins with commas.
-  // We need to be careful with commas in dates.
-  // However, for testing session persistence, we mainly need laravel_session.
-  // @ts-ignore
-  const cookies = response.headers.getSetCookie();
-  if (!cookies || cookies.length === 0) return "";
-
-  // Return the raw cookies joined by semicolon
-  return cookies.join("; ");
 }

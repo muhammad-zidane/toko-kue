@@ -6,25 +6,23 @@ beforeEach(() => {
 });
 
 test("Admin Categories: Berhasil menambah kategori", async () => {
-  const cookie = await login();
+  const jar = await login();
   const response = await request("/admin/categories", {
     method: "POST",
-    headers: { Cookie: cookie || "" },
+    jar,
     body: JSON.stringify({
       name: "Kategori Baru",
       description: "Deskripsi kategori",
     }),
   });
-
-  expect(response.status).toBe(200);
+  expect(response.status).toBe(302);
 });
 
 test("Admin Categories: Berhasil hapus kategori", async () => {
-  const cookie = await login();
+  const jar = await login();
   const response = await request("/admin/categories/1", {
     method: "DELETE",
-    headers: { Cookie: cookie || "" },
+    jar,
   });
-
-  expect(response.status).toBe(200);
+  expect(response.status).toBe(302);
 });

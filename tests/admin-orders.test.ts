@@ -6,21 +6,28 @@ beforeEach(() => {
 });
 
 test("Admin Orders: Berhasil melihat daftar pesanan", async () => {
-  const cookie = await login();
-  const response = await request("/admin/orders", {
-    headers: { Cookie: cookie || "" },
-  });
+  const jar = await login();
+  const response = await request("/admin/orders", { jar });
   expect(response.status).toBe(200);
 });
 
-test("Admin Orders: Berhasil update status pesanan", async () => {
-  const cookie = await login();
-  
-  // Update status of order 1 to processing
-  const response = await request("/admin/orders/1/status/processing", {
-    method: "PATCH",
-    headers: { Cookie: cookie || "" },
+test("Admin Orders: Berhasil update status pesanan ke processing", async () => {
+  const jar = await login();
+
+  // Buat order dulu
+  await request("/orders", {
+    method: "POST",
+    jar,
+    body: JSON.stringify({
+      shipping_address: "Jl. Test",
+      items: [{ product_id: 1, quantity: 1 }],
+    }),
   });
 
-  expect(response.status).toBe(200);
+  const response = await request("/admin/orders/1/status/processing", {
+    method: "PATCH",
+    jar,
+  });
+
+  expect(response.status).toBe(302);
 });

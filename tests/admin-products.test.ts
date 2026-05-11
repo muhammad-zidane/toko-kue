@@ -6,10 +6,10 @@ beforeEach(() => {
 });
 
 test("Admin Products: Berhasil menambah produk baru", async () => {
-  const cookie = await login();
+  const jar = await login();
   const response = await request("/admin/products", {
     method: "POST",
-    headers: { Cookie: cookie || "" },
+    jar,
     body: JSON.stringify({
       name: "Produk Baru",
       category_id: 1,
@@ -18,16 +18,14 @@ test("Admin Products: Berhasil menambah produk baru", async () => {
       stock: 10,
     }),
   });
-
-  expect(response.status).toBe(200);
+  expect(response.status).toBe(302);
 });
 
 test("Admin Products: Berhasil hapus produk", async () => {
-  const cookie = await login();
-  const response = await request("/admin/products/1", {
+  const jar = await login();
+  const response = await request("/admin/products/kue-ulang-tahun-coklat", {
     method: "DELETE",
-    headers: { Cookie: cookie || "" },
+    jar,
   });
-
-  expect(response.status).toBe(200);
+  expect(response.status).toBe(302);
 });

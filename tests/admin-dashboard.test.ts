@@ -1,14 +1,21 @@
 import { expect, test, beforeEach } from "bun:test";
-import { request, resetDatabase, login } from "./helpers";
+import { request, resetDatabase, login, CookieJar, BASE_URL } from "./helpers";
 
 beforeEach(() => {
   resetDatabase();
 });
 
 test("Admin: Customer tidak bisa akses dashboard admin", async () => {
-  // Register a regular customer
+  // Login sebagai admin dulu, lalu buat customer via seeder (customer sudah ada)
+  // Kita langsung login sebagai user yang bukan admin
+  // Register customer baru lewat helper
+  const jar = new CookieJar();
+  const csrfRes = await fetch(`${BASE_URL}/register`, { redirect: "manual" });
+  jar.addFromResponse(csrfRes);
+
   await request("/register", {
     method: "POST",
+    jar,
     body: JSON.stringify({
       name: "Customer",
       email: "customer@example.com",
@@ -17,20 +24,14 @@ test("Admin: Customer tidak bisa akses dashboard admin", async () => {
     }),
   });
 
-  const cookie = await login("customer@example.com", "password");
-  
-  const response = await request("/admin/dashboard", {
-    headers: { Cookie: cookie || "" },
-    redirect: "manual",
-  });
-
+  // Login sebagai customer
+  const customerJar = await login("customer@example.com", "password");
+  const response = await request("/admin/dashboard", { jar: customerJar });
   expect(response.status).toBe(403);
-});
+}, 15000); // Timeout 15 detik karena banyak request
 
 test("Admin: Admin berhasil akses dashboard", async () => {
-  const cookie = await login(); // Default is admin@example.com
-  const response = await request("/admin/dashboard", {
-    headers: { Cookie: cookie || "" },
-  });
+  const jar = await login();
+  const response = await request("/admin/dashboard", { jar });
   expect(response.status).toBe(200);
-});
+}, 15000);
