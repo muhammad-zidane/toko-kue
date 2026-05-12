@@ -25,6 +25,10 @@
     </style>
 </head>
 <body class="bg-white">
+    {{-- 1. Loader --}}
+    <div id="page-loader">
+        <div class="loader-spinner"></div>
+    </div>
 
     {{-- NAVBAR --}}
     <nav style="background-color: var(--brown-dark);" class="sticky top-0 z-50 px-6 py-4">
@@ -36,22 +40,22 @@
 
             {{-- Nav Links --}}
             <div class="hidden md:flex items-center gap-8">
-                <a href="/" class="text-white hover:opacity-80 text-sm font-medium">Beranda</a>
-                <a href="/products" class="text-white hover:opacity-80 text-sm font-medium">Katalog</a>
-                <a href="/orders" class="text-white hover:opacity-80 text-sm font-medium">Pemesanan</a>
+                <a href="/" class="text-white hover:opacity-80 text-sm font-medium nav-link-anim">Beranda</a>
+                <a href="/products" class="text-white hover:opacity-80 text-sm font-medium nav-link-anim">Katalog</a>
+                <a href="/orders" class="text-white hover:opacity-80 text-sm font-medium nav-link-anim">Pemesanan</a>
             </div>
 
             {{-- Actions --}}
             <div class="flex items-center gap-3">
-                <a href="/cart" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white" style="background-color: var(--pink);">
+                <a href="/cart" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white hover-scale" style="background-color: var(--pink);">
                     🛒 Keranjang
                 </a>
                 @auth
-                    <a href="/profile" class="px-4 py-2 rounded-lg border text-sm font-semibold text-white border-white hover:bg-white hover:text-gray-900 transition">
+                    <a href="/profile" class="px-4 py-2 rounded-lg border text-sm font-semibold text-white border-white hover:bg-white hover:text-gray-900 transition hover-scale">
                         {{ auth()->user()->name }}
                     </a>
                 @else
-                    <a href="/login" class="px-4 py-2 rounded-lg border text-sm font-semibold text-white border-white hover:bg-white hover:text-gray-900 transition">
+                    <a href="/login" class="px-4 py-2 rounded-lg border text-sm font-semibold text-white border-white hover:bg-white hover:text-gray-900 transition hover-scale">
                         Login
                     </a>
                 @endauth
@@ -60,7 +64,10 @@
     </nav>
 
     {{-- MAIN CONTENT --}}
-    @yield('content')
+    <div class="fade-in-content">
+        @yield('content')
+    </div>
+
 
     {{-- FOOTER --}}
     <footer style="background-color: var(--brown-dark);" class="text-white py-14 px-6 mt-0">

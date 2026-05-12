@@ -5,7 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jagoan Kue - Kue Lezat Dikirim ke Pintumu</title>
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @endif
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -120,118 +124,125 @@
         }
     </style>
 </head>
-<body>
-
-{{-- NAVBAR --}}
-<nav class="navbar">
-    <div class="navbar-inner">
-        <a href="/" class="navbar-logo">Jagoan Kue</a>
-        <ul class="navbar-links">
-            <li><a href="/">Beranda</a></li>
-            <li><a href="/products">Katalog</a></li>
-            <li><a href="/orders">Pemesanan</a></li>
-        </ul>
-        <div class="navbar-actions">
-            <a href="/cart" class="btn-cart">🛒 Keranjang</a>
-            @auth
-                <a href="/profile" class="btn-login">{{ auth()->user()->name }}</a>
-            @else
-                <a href="/login" class="btn-login">Login</a>
-            @endauth
-        </div>
+<body class="bg-white">
+    {{-- 1. Loader --}}
+    <div id="page-loader">
+        <div class="loader-spinner"></div>
     </div>
-</nav>
 
-{{-- HERO --}}
-<section class="hero">
-    <div class="hero-inner">
-        <div class="hero-text">
-            <h1 class="hero-title">
-                Kue Lezat, Dikirim<br>
-                Hangat ke <span>Pintumu</span>
-            </h1>
-            <p class="hero-subtitle">
-                Menyediakan Bermacam-macam kue yang<br>dibuat oleh cinta
-            </p>
-            <div class="hero-buttons">
-                <a href="/orders" class="btn-primary">Pemesanan</a>
-                <a href="/products" class="btn-secondary">Katalog</a>
-            </div>
-        </div>
-        <div class="hero-image">
-            <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&q=80" alt="Kue Lezat">
-        </div>
-    </div>
-</section>
-
-{{-- KATEGORI --}}
-<section class="section section-white">
-    <div class="section-inner">
-        <h2 class="section-title">Jelajahi Kategori</h2>
-        <div class="category-grid" style="margin-top: 40px;">
-            @forelse($categories as $category)
-            <a href="/products?category={{ $category->slug }}" class="category-card">
-                <img src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=600&q=80" alt="{{ $category->name }}">
-                <div class="category-info">
-                    <h3>{{ $category->name }}</h3>
-                    <p>{{ $category->products_count ?? 0 }} Produk</p>
+    <div class="fade-in-content">
+        {{-- NAVBAR --}}
+        <nav class="navbar">
+            <div class="navbar-inner">
+                <a href="/" class="navbar-logo">Jagoan Kue</a>
+                <ul class="navbar-links">
+                    <li><a href="/" class="nav-link-anim">Beranda</a></li>
+                    <li><a href="/products" class="nav-link-anim">Katalog</a></li>
+                    <li><a href="/orders" class="nav-link-anim">Pemesanan</a></li>
+                </ul>
+                <div class="navbar-actions">
+                    <a href="/cart" class="btn-cart hover-scale">🛒 Keranjang</a>
+                    @auth
+                        <a href="/profile" class="btn-login hover-scale">{{ auth()->user()->name }}</a>
+                    @else
+                        <a href="/login" class="btn-login hover-scale">Login</a>
+                    @endauth
                 </div>
-            </a>
-            @empty
-            <p style="grid-column: span 2; text-align: center; color: var(--gray);">Belum ada kategori.</p>
-            @endforelse
-        </div>
-    </div>
-</section>
+            </div>
+        </nav>
 
-{{-- PRODUK UNGGULAN --}}
-<section class="section section-cream">
-    <div class="section-inner">
-        <h2 class="section-title">Produk Unggulan</h2>
-        <div class="product-grid" style="margin-top: 40px;">
-            @forelse($featuredProducts as $product)
-            <div class="product-card">
-                <img src="{{ $product->image ? asset('storage/' . $product->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=600&q=80' }}"
-                     alt="{{ $product->name }}">
-                <div class="product-info">
-                    <h3>{{ $product->name }}</h3>
-                    <p>{{ $product->description }}</p>
-                    <div class="product-footer">
-                        <span class="product-price">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                        <a href="/products/{{ $product->slug }}" class="product-order">Pesan Sekarang →</a>
+        {{-- HERO --}}
+        <section class="hero">
+            <div class="hero-inner">
+                <div class="hero-text scroll-reveal">
+                    <h1 class="hero-title">
+                        Kue Lezat, Dikirim<br>
+                        Hangat ke <span>Pintumu</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Menyediakan Bermacam-macam kue yang<br>dibuat oleh cinta
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="/orders" class="btn-primary hover-scale">Pemesanan</a>
+                        <a href="/products" class="btn-secondary hover-scale">Katalog</a>
                     </div>
                 </div>
-            </div>
-            @empty
-            <p style="grid-column: span 3; text-align: center; color: var(--gray);">Belum ada produk.</p>
-            @endforelse
-        </div>
-    </div>
-</section>
-
-{{-- TESTIMONI --}}
-<section class="section section-white">
-    <div class="section-inner">
-        <h2 class="section-title">Testimoni</h2>
-        <p class="section-subtitle">Yang orang-orang rasakan.</p>
-        <div class="testimoni-grid">
-                @forelse($testimonials as $t)
-            <div class="testimoni-card">
-                <p class="testimoni-text">"{{ $t->text }}"</p>
-                <div class="testimoni-author">
-                    <div class="testimoni-avatar">{{ strtoupper(substr($t->name, 0, 1)) }}</div>
-                    <div>
-                        <p class="testimoni-name">{{ $t->name }}</p>
-                        <p class="testimoni-role">{{ $t->role }}</p>
-                    </div>
+                <div class="hero-image scroll-reveal" style="transition-delay: 0.2s;">
+                    <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&q=80" alt="Kue Lezat">
                 </div>
             </div>
-            @empty
-            <p style="grid-column: span 3; text-align: center; color: var(--gray);">Belum ada testimoni.</p>
-            @endforelse
-        </div>
+        </section>
+
+        {{-- KATEGORI --}}
+        <section class="section section-white">
+            <div class="section-inner">
+                <h2 class="section-title scroll-reveal">Jelajahi Kategori</h2>
+                <div class="category-grid" style="margin-top: 40px;">
+                    @forelse($categories as $category)
+                    <a href="/products?category={{ $category->slug }}" class="category-card stagger-item hover-scale">
+                        <img src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=600&q=80" alt="{{ $category->name }}">
+                        <div class="category-info">
+                            <h3>{{ $category->name }}</h3>
+                            <p>{{ $category->products_count ?? 0 }} Produk</p>
+                        </div>
+                    </a>
+                    @empty
+                    <p style="grid-column: span 2; text-align: center; color: var(--gray);">Belum ada kategori.</p>
+                    @endforelse
+                </div>
+            </div>
+        </section>
+
+        {{-- PRODUK UNGGULAN --}}
+        <section class="section section-cream">
+            <div class="section-inner">
+                <h2 class="section-title scroll-reveal">Produk Unggulan</h2>
+                <div class="product-grid" style="margin-top: 40px;">
+                    @forelse($featuredProducts as $product)
+                    <div class="product-card stagger-item hover-scale">
+                        <img src="{{ $product->image ? asset('storage/' . $product->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=600&q=80' }}"
+                             alt="{{ $product->name }}">
+                        <div class="product-info">
+                            <h3>{{ $product->name }}</h3>
+                            <p>{{ $product->description }}</p>
+                            <div class="product-footer">
+                                <span class="product-price">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                                <a href="/products/{{ $product->slug }}" class="product-order">Pesan Sekarang →</a>
+                            </div>
+                        </div>
+                    </div>
+                    @empty
+                    <p style="grid-column: span 3; text-align: center; color: var(--gray);">Belum ada produk.</p>
+                    @endforelse
+                </div>
+            </div>
+        </section>
+
+        {{-- TESTIMONI --}}
+        <section class="section section-white">
+            <div class="section-inner">
+                <h2 class="section-title scroll-reveal">Testimoni</h2>
+                <p class="section-subtitle scroll-reveal">Yang orang-orang rasakan.</p>
+                <div class="testimoni-grid">
+                    @forelse($testimonials as $t)
+                    <div class="testimoni-card stagger-item">
+                        <p class="testimoni-text">"{{ $t->text }}"</p>
+                        <div class="testimoni-author">
+                            <div class="testimoni-avatar">{{ strtoupper(substr($t->name, 0, 1)) }}</div>
+                            <div>
+                                <p class="testimoni-name">{{ $t->name }}</p>
+                                <p class="testimoni-role">{{ $t->role }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    @empty
+                    <p style="grid-column: span 3; text-align: center; color: var(--gray);">Belum ada testimoni.</p>
+                    @endforelse
+                </div>
+            </div>
+        </section>
     </div>
-</section>
+
 
 {{-- FOOTER --}}
 <footer class="footer">
