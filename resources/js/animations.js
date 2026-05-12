@@ -19,12 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
         rootMargin: '0px 0px -50px 0px'
     };
 
-    const scrollObserver = new IntersectionObserver((entries) => {
+    const scrollObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('active');
-                // Optional: Unobserve after animating
-                // scrollObserver.unobserve(entry.target);
+                observer.unobserve(entry.target); // Menghemat memori setelah animasi selesai
             }
         });
     }, observerOptions);
@@ -34,12 +33,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Stagger effect for grids
-    const staggerObserver = new IntersectionObserver((entries) => {
+    const staggerObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach((entry, index) => {
             if (entry.isIntersecting) {
                 setTimeout(() => {
                     entry.target.classList.add('active');
                 }, index * 100);
+                observer.unobserve(entry.target); // Menghemat memori setelah animasi selesai
             }
         });
     }, observerOptions);
@@ -57,6 +57,9 @@ document.addEventListener('DOMContentLoaded', () => {
             link.target !== '_blank'
         ) {
             link.addEventListener('click', (e) => {
+                // Jangan blokir jika pengguna ingin membuka di tab/jendela baru
+                if (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
+
                 e.preventDefault();
                 const targetUrl = link.href;
                 document.body.classList.add('page-fade-out');
