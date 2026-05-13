@@ -35,12 +35,6 @@
     @endif
 </head>
 <body>
-    {{-- 1. Loader --}}
-    <div id="page-loader">
-        <div class="loader-spinner"></div>
-    </div>
-
-    <div class="fade-in-content">
 <nav class="navbar"><div class="navbar-inner"><a href="{{ route('admin.dashboard') }}" class="navbar-logo">Jagoan Kue — Admin</a><a href="{{ route('admin.dashboard') }}" class="btn-back">← Dashboard</a></div></nav>
 <div class="page">
     <h1 class="page-title">Tambah Produk Baru</h1>
@@ -60,6 +54,5 @@
         </form>
     </div>
 </div>
-    </div>
 </body>
 </html>

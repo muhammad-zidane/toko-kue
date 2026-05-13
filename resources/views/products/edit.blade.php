@@ -38,18 +38,12 @@
     @endif
 </head>
 <body>
-    {{-- 1. Loader --}}
-    <div id="page-loader">
-        <div class="loader-spinner"></div>
-    </div>
-
-    <div class="fade-in-content">
 <nav class="navbar"><div class="navbar-inner"><a href="{{ route('admin.dashboard') }}" class="navbar-logo">Jagoan Kue — Admin</a><a href="{{ route('admin.dashboard') }}" class="btn-back">← Dashboard</a></div></nav>
 <div class="page">
     <h1 class="page-title">Edit Produk: {{ $product->name }}</h1>
     @if($errors->any())<div class="alert-error">@foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>@endif
     <div class="card">
-        <form method="POST" action="{{ route('admin.products.update', $product) }}" enctype="multipart/form-data">
+        <form id="product-edit-form" method="POST" action="{{ route('admin.products.update', $product) }}" enctype="multipart/form-data">
             @csrf @method('PUT')
             <div class="form-group"><label>Nama Produk</label><input type="text" name="name" value="{{ old('name', $product->name) }}" required></div>
             <div class="form-group"><label>Kategori</label><select name="category_id" required><option value="">— Pilih —</option>@foreach($categories as $cat)<option value="{{ $cat->id }}" {{ old('category_id', $product->category_id)==$cat->id?'selected':'' }}>{{ $cat->name }}</option>@endforeach</select></div>
@@ -63,13 +57,18 @@
                 @if($product->image)<img src="{{ asset('storage/' . $product->image) }}" class="current-image" alt="Current"><small>Gambar saat ini. Upload baru untuk mengganti.</small>@endif
                 <input type="file" name="image" accept="image/*" style="margin-top:8px;">
             </div>
-            <div class="form-actions">
-                <form method="POST" action="{{ route('admin.products.destroy', $product) }}" onsubmit="return confirm('Yakin hapus produk ini?')">@csrf @method('DELETE')<button type="submit" class="btn-delete">Hapus Produk</button></form>
-                <div class="form-actions-right"><a href="{{ route('admin.dashboard') }}" class="btn-cancel">Batal</a><button type="submit" class="btn-submit">Simpan Perubahan</button></div>
-            </div>
         </form>
+        <div class="form-actions">
+            <form method="POST" action="{{ route('admin.products.destroy', $product) }}" onsubmit="return confirm('Yakin hapus produk ini?')">
+                @csrf @method('DELETE')
+                <button type="submit" class="btn-delete">Hapus Produk</button>
+            </form>
+            <div class="form-actions-right">
+                <a href="{{ route('admin.dashboard') }}" class="btn-cancel">Batal</a>
+                <button type="submit" form="product-edit-form" class="btn-submit">Simpan Perubahan</button>
+            </div>
+        </div>
     </div>
 </div>
-    </div>
 </body>
 </html>

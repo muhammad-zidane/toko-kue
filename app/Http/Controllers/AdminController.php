@@ -14,20 +14,8 @@ use Carbon\Carbon;
 
 class AdminController extends Controller
 {
-    /**
-     * Cek apakah user adalah admin. Jika bukan, abort 403.
-     */
-    private function checkAdmin()
-    {
-        if (!auth()->user() || !auth()->user()->isAdmin()) {
-            abort(403, 'Akses ditolak. Hanya admin yang dapat mengakses halaman ini.');
-        }
-    }
-
     public function dashboard()
     {
-        $this->checkAdmin();
-
         $now = Carbon::now();
         $startOfThisMonth = $now->copy()->startOfMonth();
         $startOfLastMonth = $now->copy()->subMonth()->startOfMonth();
@@ -79,7 +67,8 @@ class AdminController extends Controller
 
         // Recent Activities (from recent orders)
         $recentActivities = $latestOrders->map(function ($order) use ($now) {
-            $minsAgo = $now->diffInMinutes($order->created_at);
+            // Selisih dari created_at → now (selalu ≥ 0). $now->diffInMinutes($created_at) bisa negatif di Carbon 3.
+            $minsAgo = max(0, (int) round($order->created_at->diffInMinutes($now)));
             if ($minsAgo < 60) $timeLabel = $minsAgo . ' menit yang lalu';
             elseif ($minsAgo < 1440) $timeLabel = floor($minsAgo / 60) . ' jam yang lalu';
             else $timeLabel = floor($minsAgo / 1440) . ' hari yang lalu';
@@ -124,25 +113,19 @@ class AdminController extends Controller
 
     public function orders()
     {
-        $this->checkAdmin();
-
-        $orders = Order::with('user', 'payment')->latest()->paginate(10);
+        $orders = Order::with(['user', 'payment', 'orderItems'])->latest()->paginate(10);
         return view('admin.orders', compact('orders'));
     }
 
     public function orderDetail(Order $order)
     {
-        $this->checkAdmin();
-
-        $order->load('user', 'orderItems.product', 'payment');
+        $order->load(['user', 'orderItems.product', 'payment']);
         return view('admin.order-detail', compact('order'));
     }
 
     public function updateOrderStatus(Order $order, $status)
     {
-        $this->checkAdmin();
-
-        $validStatuses = ['pending', 'processing', 'completed', 'cancelled'];
+$validStatuses = ['pending', 'processing', 'completed', 'cancelled'];
         if (!in_array($status, $validStatuses)) {
             return back()->withErrors(['status' => 'Status tidak valid.']);
         }
@@ -159,17 +142,13 @@ class AdminController extends Controller
 
     public function categories()
     {
-        $this->checkAdmin();
-
-        $categories = Category::withCount('products')->latest()->get();
+$categories = Category::withCount('products')->latest()->get();
         return view('admin.categories', compact('categories'));
     }
 
     public function storeCategory(Request $request)
     {
-        $this->checkAdmin();
-
-        $request->validate([
+$request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
         ]);
@@ -185,18 +164,15 @@ class AdminController extends Controller
 
     public function destroyCategory(Category $category)
     {
-        $this->checkAdmin();
-
-        $category->delete();
+$category->delete();
         return back()->with('success', 'Kategori berhasil dihapus!');
     }
 
     public function customers()
     {
-        $this->checkAdmin();
-
         $customers = User::where('role', '!=', 'admin')
-            ->with('orders')
+            ->withCount('orders')
+            ->with(['orders' => fn($q) => $q->select('id', 'user_id', 'status', 'created_at')])
             ->latest()
             ->get();
 
@@ -209,9 +185,7 @@ class AdminController extends Controller
 
     public function analytics()
     {
-        $this->checkAdmin();
-
-        $now = Carbon::now();
+$now = Carbon::now();
         $startOfThisMonth = $now->copy()->startOfMonth();
         $startOfLastMonth = $now->copy()->subMonth()->startOfMonth();
         $endOfLastMonth = $now->copy()->subMonth()->endOfMonth();
@@ -265,9 +239,7 @@ class AdminController extends Controller
 
     public function finance()
     {
-        $this->checkAdmin();
-
-        $payments = Payment::with('order.user')->latest()->get();
+$payments = Payment::with('order.user')->latest()->get();
 
         $totalRevenue = $payments->where('status', 'paid')->sum('amount');
         $pendingPayments = $payments->where('status', 'unpaid')->sum('amount');
@@ -285,9 +257,7 @@ class AdminController extends Controller
 
     public function updateSettings(Request $request)
     {
-        $this->checkAdmin();
-
-        $request->validate([
+$request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email',
             'password' => 'nullable|min:8|confirmed',
@@ -308,9 +278,7 @@ class AdminController extends Controller
 
     public function adminProducts()
     {
-        $this->checkAdmin();
-
-        $products = Product::with('category')->latest()->paginate(15);
+$products = Product::with('category')->latest()->paginate(15);
         return view('admin.products', compact('products'));
     }
 }

@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -17,6 +18,12 @@ class ProductController extends Controller
 
     public function show(Product $product)
 {
+    $product->load([
+        'reviews' => function ($query) {
+            $query->with(['user', 'images'])->latest();
+        },
+    ]);
+
     return view('products.show', compact('product'));
 }
 
@@ -37,15 +44,15 @@ class ProductController extends Controller
             'image'       => 'nullable|image|max:2048',
         ]);
 
-        $data = $request->all();
-        $data['slug'] = Str::slug($request->name);
+        $data = $request->only(['name', 'category_id', 'description', 'price', 'stock']);
+        $data['slug'] = $this->generateUniqueSlug($request->name);
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('products', 'public');
         }
 
         Product::create($data);
-        return redirect()->route('products.index')->with('success', 'Produk berhasil ditambahkan!');
+        return redirect()->route('admin.products.index')->with('success', 'Produk berhasil ditambahkan!');
     }
 
     public function edit(Product $product)
@@ -65,20 +72,39 @@ class ProductController extends Controller
             'image'       => 'nullable|image|max:2048',
         ]);
 
-        $data = $request->all();
-        $data['slug'] = Str::slug($request->name);
+        $data = $request->only(['name', 'category_id', 'description', 'price', 'stock']);
+        $data['slug'] = $this->generateUniqueSlug($request->name, $product->id);
 
         if ($request->hasFile('image')) {
+            if ($product->image) {
+                Storage::disk('public')->delete($product->image);
+            }
             $data['image'] = $request->file('image')->store('products', 'public');
         }
 
         $product->update($data);
-        return redirect()->route('products.index')->with('success', 'Produk berhasil diperbarui!');
+        return redirect()->route('admin.products.index')->with('success', 'Produk berhasil diperbarui!');
+    }
+
+    private function generateUniqueSlug(string $name, ?int $excludeId = null): string
+    {
+        $base = Str::slug($name);
+        $slug = $base;
+        $counter = 1;
+
+        while (Product::where('slug', $slug)->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))->exists()) {
+            $slug = $base . '-' . $counter++;
+        }
+
+        return $slug;
     }
 
     public function destroy(Product $product)
     {
+        if ($product->image) {
+            Storage::disk('public')->delete($product->image);
+        }
         $product->delete();
-        return redirect()->route('products.index')->with('success', 'Produk berhasil dihapus!');
+        return redirect()->route('admin.products.index')->with('success', 'Produk berhasil dihapus!');
     }
 }

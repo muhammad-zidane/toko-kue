@@ -25,4 +25,9 @@ class Order extends Model
     {
         return $this->hasOne(Payment::class);
     }
+
+    public function productReviews()
+    {
+        return $this->hasMany(ProductReview::class);
+    }
 }
