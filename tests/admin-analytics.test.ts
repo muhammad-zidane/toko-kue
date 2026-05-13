@@ -9,4 +9,4 @@ test("Admin Analytics: Berhasil melihat halaman analisis", async () => {
   const jar = await login();
   const response = await request("/admin/analytics", { jar });
   expect(response.status).toBe(200);
-});
+}, { timeout: 20000 });

@@ -1,44 +1,114 @@
-# Perencanaan Implementasi Animasi UI/UX
+Kamu adalah Laravel developer berpengalaman.
+Ikuti instruksi dengan KETAT. Jangan berasumsi di luar yang tertulis.
 
-## Ringkasan Tugas
-Tugas ini bertujuan untuk menambahkan animasi pada web untuk meningkatkan pengalaman pengguna (UX) agar terasa lebih dinamis, modern, dan profesional. Seluruh animasi **harus** dibuat menggunakan native CSS dan JavaScript (tanpa library eksternal seperti GSAP, jQuery, atau Animate.css). Animasi harus berjalan dengan mulus (smooth) dan tidak mengganggu navigasi, fungsionalitas, maupun waktu muat halaman.
+---
 
-## Skenario Animasi
+## Planning
 
-### 1. Animasi Loading & Fade-in (Saat Halaman Terbuka)
-*   **Target Halaman:** Semua halaman utama (Beranda, Daftar Produk, Detail Produk, Keranjang, dll).
-*   **Skenario:**
-    *   Saat halaman sedang memuat aset (sebelum DOM Ready), tampilkan indikator loading yang simpel dan tidak mencolok di tengah layar (misalnya spinner kecil atau logo yang berdenyut/pulse).
-    *   Setelah halaman selesai dimuat, hilangkan elemen loading tersebut dengan efek fade-out yang halus.
-    *   Segera setelah loading hilang, konten utama halaman harus muncul menggunakan efek *fade-in* (transisi *opacity* dari 0 ke 1) yang dikombinasikan dengan sedikit *slide-up* (bergeser naik dari bawah) agar terasa dinamis.
-*   **Catatan:** Durasi animasi masuk ini harus cukup cepat agar pengunjung tidak merasa menunggu.
+## Context
+Proyek  : Jagoan Kue (E-commerce pemesanan kue)
+Stack   : Laravel 11, MySQL, Blade, Tailwind CSS
+Fitur   : Seksi Testimoni di halaman detail produk (`products.show`)
 
-### 2. Scroll Animation (Muncul Saat Di-scroll)
-*   **Target Halaman:** Beranda, Halaman Produk, dan halaman dengan konten panjang.
-*   **Skenario:**
-    *   Gunakan JavaScript `IntersectionObserver` untuk mendeteksi elemen mana saja yang mulai masuk ke dalam area pandang (*viewport*) saat pengguna melakukan scroll.
-    *   Elemen-elemen di bawah lipatan (*below the fold*) seperti banner promosi, daftar kategori, atau baris produk harus dalam keadaan tersembunyi (opacity 0 dan posisinya sedikit lebih rendah).
-    *   Saat elemen tersebut di-scroll dan masuk ke layar, picu kelas CSS untuk memberikan animasi muncul (misalnya *fade-in up* atau *fade-in* dari samping).
-    *   Untuk elemen yang berjejer dalam satu *grid* (misalnya daftar produk), gunakan efek *staggering* (jeda waktu kemunculan per elemen) sehingga elemen tidak muncul serentak, melainkan bergantian secara berurutan.
+---
 
-### 3. Hover Effect (Efek Saat Kursor Diarahkan)
-*   **Target Halaman:** Semua halaman yang memiliki elemen interaktif (tombol, link, kartu).
-*   **Skenario:**
-    *   **Tombol (Buttons):** Berikan umpan balik visual saat kursor berada di atas tombol. Misalnya, transisi warna latar belakang, penambahan *box-shadow* yang membuatnya seolah terangkat, atau efek pergeseran skala membesar sedikit.
-    *   **Card Produk:** Saat kartu produk di-hover, buat kartu seolah-olah mendekat ke pengguna (menggunakan transform *scale* ringan) dan tambahkan bayangan yang lebih tegas. Bisa juga dengan memunculkan tombol "Tambah" atau ikon aksi yang awalnya tersembunyi.
-    *   **Navigasi/Link:** Pada tautan navbar, berikan efek kemunculan garis bawah (*underline*) yang dianimasikan dari arah tengah, kiri, atau kanan secara mulus.
-*   **Catatan:** Pada perangkat *mobile* (layar sentuh), pastikan efek ini diadaptasi agar tidak menimbulkan *bug* klik ganda (*double-tap issue*).
+## Yang Akan Dibuat
+Sistem testimoni yang memungkinkan user yang sudah membeli
+suatu produk memberikan ulasan berupa rating dan komentar.
+Testimoni ditampilkan dalam bentuk carousel geser kanan ke kiri.
 
-### 4. Page Transition (Transisi Antar Halaman)
-*   **Target Halaman:** Seluruh perpindahan halaman di dalam aplikasi.
-*   **Skenario:**
-    *   Saat pengguna mengklik tautan untuk berpindah halaman, tunda sedikit proses navigasi default browser.
-    *   Jalankan animasi *fade-out* singkat pada keseluruhan konten halaman yang sedang aktif.
-    *   Setelah halaman aktif benar-benar *fade-out*, lanjutkan proses perpindahan halaman standar. (Animasi masuk untuk halaman berikutnya akan di-handle oleh poin nomor 1 di atas).
-*   **Catatan:** Skenario ini harus sangat optimal dan berdurasi pendek agar tidak membuat transisi halaman terasa memakan waktu atau lemot.
+---
 
-## Kriteria Penerimaan (Acceptance Criteria)
-1.  **Teknologi:** Hanya menggunakan properti CSS (seperti `transition`, `animation`, `@keyframes`) dan native API JavaScript (`IntersectionObserver`, `Event Listener`).
-2.  **Performa:** Animasi dioptimalkan menggunakan *hardware acceleration*. Utamakan untuk menganimasi properti `transform` dan `opacity` guna menghindari *repaint* dan *reflow* berlebih pada *rendering* browser.
-3.  **Kenyamanan Pengguna:** Animasi terasa konsisten, tidak berlebihan, dan tidak mengganggu alur berbelanja pengguna. 
-4.  **Responsivitas:** Berjalan baik di desktop maupun perangkat mobile.
+## Functional Requirements
+- [ ] Hanya user yang memiliki riwayat pembelian produk tersebut
+        (status order = 'selesai') yang bisa submit testimoni
+- [ ] Satu user hanya boleh memiliki satu testimoni per produk;
+        form tidak ditampilkan jika sudah pernah memberi testimoni
+- [ ] Form testimoni berisi: rating bintang (1–5) dan komentar teks
+- [ ] Tanggal pembelian diambil otomatis dari data order, bukan diisi user
+- [ ] Testimoni langsung tampil tanpa perlu persetujuan admin
+- [ ] User bisa mengedit testimoninya sendiri
+- [ ] User bisa menghapus testimoninya sendiri
+- [ ] Testimoni ditampilkan sebagai carousel auto-scroll kanan ke kiri
+
+---
+
+## Technical Specification
+
+### Database
+Buat migration tabel baru `testimonials`:
+- id               (bigint, primary key)
+- user_id          (FK → users.id)
+- product_id       (FK → products.id)
+- order_id         (FK → orders.id)
+- rating           (tinyint, 1–5)
+- comment          (text)
+- created_at, updated_at
+
+Unique constraint: (user_id, product_id) — mencegah duplikasi
+
+### Model
+- Buat Model `Testimonial`
+- Relasi: belongsTo User, belongsTo Product, belongsTo Order
+
+### Routes
+- POST   /testimonials              → store
+- PUT    /testimonials/{id}         → update
+- DELETE /testimonials/{id}         → destroy
+Semua route pakai middleware `auth`
+
+### Controller
+Buat `TestimonialController` dengan method:
+- store()   → validasi + cek kepemilikan order + cek duplikasi
+- update()  → validasi + cek ownership (hanya milik sendiri)
+- destroy() → cek ownership lalu hapus
+
+### View
+Di `products/show.blade.php`, tambahkan seksi baru:
+1. Komponen carousel (HTML + CSS Tailwind + JS vanilla)
+   menggunakan auto-scroll marquee dari kanan ke kiri
+2. Form testimoni (tampil hanya jika user login DAN pernah beli
+   DAN belum pernah beri testimoni)
+3. Tombol Edit dan Hapus (tampil hanya pada testimoni milik
+   user yang sedang login)
+
+---
+
+## Constraints
+- Jangan ubah struktur tabel orders, products, atau users
+- Jangan install package JS/CSS baru; gunakan Tailwind + vanilla JS
+- Semua view extend layout yang sudah ada (`layouts.app`)
+- Validasi server-side wajib ada di Controller
+- Cek kepemilikan order wajib dilakukan sebelum izinkan submit
+
+---
+
+## Definition of Done
+- [ ] Migration berhasil dijalankan tanpa error
+- [ ] User yang belum beli tidak bisa submit (form tidak muncul)
+- [ ] User yang sudah beri testimoni tidak bisa submit lagi
+- [ ] Edit dan hapus hanya bisa dilakukan pada testimoni milik sendiri
+- [ ] Carousel berjalan otomatis geser kanan ke kiri
+- [ ] Tidak ada error di console browser maupun Laravel log
+
+---
+
+## Tugasmu
+Implementasi SELURUH planning di atas secara lengkap dan berurutan.
+
+Sebelum mulai coding, tampilkan dulu checklist file yang akan
+kamu buat/ubah beserta urutannya, lalu minta konfirmasiku.
+Setelah aku konfirmasi, baru mulai implementasi satu per satu.
+
+---
+
+## Aturan Wajib
+- Tampilkan satu file per respons, tunggu konfirmasi "lanjut" dariku
+- Jika ada yang ambigu di planning, TANYAKAN SEKARANG sebelum mulai
+- Jangan install package baru
+- Jangan ubah file yang tidak disebutkan di planning
+- Jangan skip langkah meskipun terlihat sederhana
+
+---
+
+## Struktur Proyek Saat Ini
