@@ -64,20 +64,16 @@
 
         /* KATEGORI */
         .category-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
-        .category-card { border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); transition: transform 0.2s, box-shadow 0.2s; display: block; }
-        .category-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
-        .category-card img { width: 100%; height: 200px; object-fit: cover; display: block; transition: transform 0.3s; }
-        .category-card:hover img { transform: scale(1.05); }
+        .category-card { border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); display: block; }
+        .category-card img { width: 100%; height: 200px; object-fit: cover; display: block; }
         .category-info { background-color: var(--cream-dark); padding: 16px; }
         .category-info h3 { font-size: 15px; font-weight: 600; color: var(--text-dark); margin-bottom: 2px; }
         .category-info p { font-size: 13px; color: var(--gray); }
 
         /* PRODUK */
         .product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-        .product-card { background: var(--white); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); transition: transform 0.2s, box-shadow 0.2s; }
-        .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
-        .product-card img { width: 100%; height: 200px; object-fit: cover; display: block; transition: transform 0.3s; }
-        .product-card:hover img { transform: scale(1.05); }
+        .product-card { background: var(--white); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+        .product-card img { width: 100%; height: 200px; object-fit: cover; display: block; }
         .product-info { padding: 20px; }
         .product-info h3 { font-size: 16px; font-weight: 700; color: var(--text-dark); margin-bottom: 6px; }
         .product-info p { font-size: 13px; color: var(--gray); line-height: 1.6; margin-bottom: 16px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
@@ -125,27 +121,21 @@
     </style>
 </head>
 <body class="bg-white">
-    {{-- 1. Loader --}}
-    <div id="page-loader">
-        <div class="loader-spinner"></div>
-    </div>
-
-    <div class="fade-in-content">
         {{-- NAVBAR --}}
         <nav class="navbar">
             <div class="navbar-inner">
                 <a href="/" class="navbar-logo">Jagoan Kue</a>
                 <ul class="navbar-links">
-                    <li><a href="/" class="nav-link-anim">Beranda</a></li>
-                    <li><a href="/products" class="nav-link-anim">Katalog</a></li>
-                    <li><a href="/orders" class="nav-link-anim">Pemesanan</a></li>
+                    <li><a href="/">Beranda</a></li>
+                    <li><a href="/products">Katalog</a></li>
+                    <li><a href="/orders">Pemesanan</a></li>
                 </ul>
                 <div class="navbar-actions">
-                    <a href="/cart" class="btn-cart hover-scale">🛒 Keranjang</a>
+                    <a href="/cart" class="btn-cart">🛒 Keranjang</a>
                     @auth
-                        <a href="/profile" class="btn-login hover-scale">{{ auth()->user()->name }}</a>
+                        <a href="/profile" class="btn-login">{{ auth()->user()->name }}</a>
                     @else
-                        <a href="/login" class="btn-login hover-scale">Login</a>
+                        <a href="/login" class="btn-login">Login</a>
                     @endauth
                 </div>
             </div>
@@ -154,7 +144,7 @@
         {{-- HERO --}}
         <section class="hero">
             <div class="hero-inner">
-                <div class="hero-text scroll-reveal">
+                <div class="hero-text">
                     <h1 class="hero-title">
                         Kue Lezat, Dikirim<br>
                         Hangat ke <span>Pintumu</span>
@@ -163,11 +153,11 @@
                         Menyediakan Bermacam-macam kue yang<br>dibuat oleh cinta
                     </p>
                     <div class="hero-buttons">
-                        <a href="/orders" class="btn-primary hover-scale">Pemesanan</a>
-                        <a href="/products" class="btn-secondary hover-scale">Katalog</a>
+                        <a href="/orders" class="btn-primary">Pemesanan</a>
+                        <a href="/products" class="btn-secondary">Katalog</a>
                     </div>
                 </div>
-                <div class="hero-image scroll-reveal" style="transition-delay: 0.2s;">
+                <div class="hero-image">
                     <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&q=80" alt="Kue Lezat">
                 </div>
             </div>
@@ -176,10 +166,10 @@
         {{-- KATEGORI --}}
         <section class="section section-white">
             <div class="section-inner">
-                <h2 class="section-title scroll-reveal">Jelajahi Kategori</h2>
+                <h2 class="section-title">Jelajahi Kategori</h2>
                 <div class="category-grid" style="margin-top: 40px;">
                     @forelse($categories as $category)
-                    <a href="/products?category={{ $category->slug }}" class="category-card stagger-item hover-scale">
+                    <a href="/products?category={{ $category->slug }}" class="category-card">
                         <img src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=600&q=80" alt="{{ $category->name }}">
                         <div class="category-info">
                             <h3>{{ $category->name }}</h3>
@@ -196,10 +186,10 @@
         {{-- PRODUK UNGGULAN --}}
         <section class="section section-cream">
             <div class="section-inner">
-                <h2 class="section-title scroll-reveal">Produk Unggulan</h2>
+                <h2 class="section-title">Produk Unggulan</h2>
                 <div class="product-grid" style="margin-top: 40px;">
                     @forelse($featuredProducts as $product)
-                    <div class="product-card stagger-item hover-scale">
+                    <div class="product-card">
                         <img src="{{ $product->image ? asset('storage/' . $product->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=600&q=80' }}"
                              alt="{{ $product->name }}">
                         <div class="product-info">
@@ -221,17 +211,19 @@
         {{-- TESTIMONI --}}
         <section class="section section-white">
             <div class="section-inner">
-                <h2 class="section-title scroll-reveal">Testimoni</h2>
-                <p class="section-subtitle scroll-reveal">Yang orang-orang rasakan.</p>
+                <h2 class="section-title">Testimoni</h2>
+                <p class="section-subtitle">Yang orang-orang rasakan.</p>
                 <div class="testimoni-grid">
                     @forelse($testimonials as $t)
-                    <div class="testimoni-card stagger-item">
-                        <p class="testimoni-text">"{{ $t->text }}"</p>
+                    <div class="testimoni-card">
+                        <p class="testimoni-text">"{{ $t->comment ?? '-' }}"</p>
                         <div class="testimoni-author">
-                            <div class="testimoni-avatar">{{ strtoupper(substr($t->name, 0, 1)) }}</div>
+                            <div class="testimoni-avatar">{{ strtoupper(substr($t->user->name ?? 'U', 0, 1)) }}</div>
                             <div>
-                                <p class="testimoni-name">{{ $t->name }}</p>
-                                <p class="testimoni-role">{{ $t->role }}</p>
+                                <p class="testimoni-name">{{ $t->user->name ?? 'Pelanggan' }}</p>
+                                <p class="testimoni-role">
+                                    {{ $t->product ? 'Ulasan untuk ' . $t->product->name : 'Ulasan Produk' }}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -241,7 +233,6 @@
                 </div>
             </div>
         </section>
-    </div>
 
 
 {{-- FOOTER --}}
