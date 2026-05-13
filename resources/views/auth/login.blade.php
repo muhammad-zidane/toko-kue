@@ -126,8 +126,17 @@
             margin-top: 4px;
         }
     </style>
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @endif
 </head>
 <body>
+    {{-- 1. Loader --}}
+    <div id="page-loader">
+        <div class="loader-spinner"></div>
+    </div>
+
+    <div class="fade-in-content">
 
 <div class="card">
     <p class="card-title">Login</p>
@@ -178,5 +187,6 @@
     </form>
 </div>
 
+    </div>
 </body>
 </html>

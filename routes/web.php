@@ -63,6 +63,7 @@ Route::middleware(['auth'])->group(function () {
         $order->load('orderItems.product', 'payment');
         return view('orders.success', compact('order'));
     })->name('orders.success');
+    Route::post('/orders/{order}/upload-proof', [OrderController::class, 'uploadProof'])->name('orders.uploadProof');
 });
 
 // Routes khusus Admin

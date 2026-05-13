@@ -33,8 +33,17 @@
         .form-actions { display: flex; gap: 12px; justify-content: space-between; margin-top: 24px; }
         .form-actions-right { display: flex; gap: 12px; }
     </style>
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @endif
 </head>
 <body>
+    {{-- 1. Loader --}}
+    <div id="page-loader">
+        <div class="loader-spinner"></div>
+    </div>
+
+    <div class="fade-in-content">
 <nav class="navbar"><div class="navbar-inner"><a href="{{ route('admin.dashboard') }}" class="navbar-logo">Jagoan Kue — Admin</a><a href="{{ route('admin.dashboard') }}" class="btn-back">← Dashboard</a></div></nav>
 <div class="page">
     <h1 class="page-title">Edit Produk: {{ $product->name }}</h1>
@@ -61,5 +70,6 @@
         </form>
     </div>
 </div>
+    </div>
 </body>
 </html>
