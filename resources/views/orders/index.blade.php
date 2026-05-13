@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jagoan Kue - Riwayat Pesanan</title>
@@ -44,8 +45,17 @@
 
         @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } .navbar-links { display: none; } }
     </style>
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @endif
 </head>
 <body>
+    {{-- 1. Loader --}}
+    <div id="page-loader">
+        <div class="loader-spinner"></div>
+    </div>
+
+    <div class="fade-in-content">
 <nav class="navbar">
     <div class="navbar-inner">
         <a href="/" class="navbar-logo">Jagoan Kue</a>
@@ -92,7 +102,7 @@
             <div class="card">
                 <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
                     <div>
-                        <p class="meta">{{ $order->created_at?->format('d M Y, H:i') }}</p>
+                        <p class="meta">{{ $order->created_at?->format('d M Y, H:i') }} WIB</p>
                         <p class="code">{{ $order->order_code }}</p>
                         <p class="total">Total: <strong>Rp {{ number_format((int) $order->total_price, 0, ',', '.') }}</strong></p>
                     </div>
@@ -123,5 +133,6 @@
         {{ $orders->links() }}
     </div>
 </div>
+    </div>
 </body>
 </html>

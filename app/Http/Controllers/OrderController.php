@@ -63,15 +63,29 @@ class OrderController extends Controller
             $product->decrement('stock', $item['quantity']);
         }
 
+        $paymentMethod = $request->payment_method ?? 'transfer';
+        $isCod = $paymentMethod === 'cod';
+
         Payment::create([
             'order_id'       => $order->id,
-            'payment_method' => $request->payment_method ?? 'transfer',
-            'status'         => 'unpaid',
+            'payment_method' => $paymentMethod,
+            'status'         => $isCod ? 'paid' : 'unpaid',
             'amount'         => $totalPrice,
+            'paid_at'        => $isCod ? now() : null,
         ]);
+
+        // COD: langsung konfirmasi pesanan
+        if ($isCod) {
+            $order->update(['status' => 'confirmed']);
+        }
 
         // Bersihkan cart setelah order berhasil
         session()->forget('cart');
+
+        // COD langsung ke halaman sukses, lainnya ke halaman pembayaran
+        if ($isCod) {
+            return redirect()->route('orders.success', $order)->with('success', 'Pesanan COD berhasil dikonfirmasi!');
+        }
 
         return redirect()->route('orders.payment', $order)->with('success', 'Pesanan berhasil dibuat!');
     }
@@ -85,5 +99,31 @@ class OrderController extends Controller
 
         $order->load('orderItems.product', 'payment');
         return view('orders.show', compact('order'));
+    }
+
+    /**
+     * Upload bukti pembayaran dan update status.
+     */
+    public function uploadProof(Request $request, Order $order)
+    {
+        if ($order->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $request->validate([
+            'proof_image' => 'required|image|mimes:jpg,jpeg,png|max:5120',
+        ]);
+
+        $path = $request->file('proof_image')->store('payment_proofs', 'public');
+
+        $order->payment->update([
+            'status'      => 'paid',
+            'proof_image' => $path,
+            'paid_at'     => now(),
+        ]);
+
+        $order->update(['status' => 'processing']);
+
+        return redirect()->route('orders.success', $order)->with('success', 'Bukti pembayaran berhasil diupload!');
     }
 }

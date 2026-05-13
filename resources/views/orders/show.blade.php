@@ -56,8 +56,17 @@
 
         @media (max-width: 768px) { .navbar-links { display: none; } .detail-grid { grid-template-columns: 1fr; } }
     </style>
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @endif
 </head>
 <body>
+    {{-- 1. Loader --}}
+    <div id="page-loader">
+        <div class="loader-spinner"></div>
+    </div>
+
+    <div class="fade-in-content">
 <nav class="navbar"><div class="navbar-inner"><a href="/" class="navbar-logo">Jagoan Kue</a><ul class="navbar-links"><li><a href="/">Beranda</a></li><li><a href="/products">Katalog</a></li><li><a href="/orders">Pemesanan</a></li></ul><div class="navbar-actions"><a href="/cart" class="btn-cart">🛒 Keranjang</a>@auth<a href="/profile" class="btn-login">{{ auth()->user()->name }}</a>@else<a href="/login" class="btn-login">Login</a>@endauth</div></div></nav>
 
 <div class="page">
@@ -104,5 +113,6 @@
 
     <a href="{{ route('orders.index') }}" class="btn-back-page">← Kembali ke Daftar Pesanan</a>
 </div>
+    </div>
 </body>
 </html>
