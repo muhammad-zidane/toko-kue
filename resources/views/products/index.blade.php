@@ -65,6 +65,8 @@
             overflow: hidden;
             box-shadow: 0 2px 12px rgba(0,0,0,0.07);
             transition: transform 0.2s, box-shadow 0.2s;
+            display: block;
+            color: inherit;
         }
 
         .product-card:hover {
@@ -113,6 +115,7 @@
         }
 
         .product-order:hover { color: var(--pink); }
+        .product-price { font-size: 15px; font-weight: 700; color: var(--pink); margin-bottom: 10px; display: block; }
 
         /* EMPTY STATE */
         .empty-state {
@@ -150,13 +153,6 @@
     @endif
 </head>
 <body>
-    {{-- 1. Loader --}}
-    <div id="page-loader">
-        <div class="loader-spinner"></div>
-    </div>
-
-    <div class="fade-in-content">
-
 {{-- NAVBAR --}}
 <nav class="navbar">
     <div class="navbar-inner">
@@ -190,17 +186,16 @@
 
         <div class="product-grid">
             @forelse($category->products as $product)
-            <div class="product-card">
+            <a href="{{ route('products.show', $product) }}" class="product-card">
                 <img src="{{ $product->image ? asset('storage/' . $product->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=600&q=80' }}"
                      alt="{{ $product->name }}">
                 <div class="product-info">
                     <h3>{{ $product->name }}</h3>
                     <p>{{ $product->description }}</p>
-                    <a href="/products/{{ $product->slug }}" class="product-order">
-                        Pesan Sekarang →
-                    </a>
+                    <span class="product-price">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                    <span class="product-order">Lihat Detail →</span>
                 </div>
-            </div>
+            </a>
             @empty
             <p class="empty-state">Belum ada produk di kategori ini.</p>
             @endforelse
@@ -254,6 +249,5 @@
     </div>
 </footer>
 
-    </div>
 </body>
 </html>

@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ProductReviewController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CartController;
 
@@ -11,7 +12,7 @@ use App\Http\Controllers\CartController;
 Route::get('/', function() {
     $categories = \App\Models\Category::withCount('products')->get();
     $featuredProducts = \App\Models\Product::where('is_available', true)->take(3)->get();
-    $testimonials = \App\Models\Testimonial::latest()->take(3)->get();
+    $testimonials = \App\Models\ProductReview::with(['user', 'product'])->latest()->take(3)->get();
     return view('home.index', compact('categories', 'featuredProducts', 'testimonials'));
 })->name('home');
 
@@ -38,8 +39,10 @@ Route::middleware(['auth'])->group(function () {
 
     // Pesanan
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-    Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::get('/orders/{order}/reviews', [ProductReviewController::class, 'index'])->name('orders.reviews.index');
+    Route::delete('/orders/{order}/reviews/{review}', [ProductReviewController::class, 'destroy'])->name('orders.reviews.destroy');
+    Route::delete('/orders/{order}/reviews/{review}/images/{image}', [ProductReviewController::class, 'destroyImage'])->name('orders.reviews.images.destroy');
     Route::get('/checkout/{product_id}', function($product_id) {
         $product = \App\Models\Product::findOrFail($product_id);
         return view('orders.create', compact('product'));
@@ -47,7 +50,6 @@ Route::middleware(['auth'])->group(function () {
 
     // Keranjang
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
     Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
     Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
     Route::get('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
@@ -63,11 +65,20 @@ Route::middleware(['auth'])->group(function () {
         $order->load('orderItems.product', 'payment');
         return view('orders.success', compact('order'));
     })->name('orders.success');
-    Route::post('/orders/{order}/upload-proof', [OrderController::class, 'uploadProof'])->name('orders.uploadProof');
+
+    // Rate-limited: operasi yang menulis data sensitif
+    Route::middleware('throttle:20,1')->group(function () {
+        Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+        Route::post('/orders/{order}/upload-proof', [OrderController::class, 'uploadProof'])->name('orders.uploadProof');
+        Route::post('/orders/{order}/reviews/{product}', [ProductReviewController::class, 'store'])->name('orders.reviews.store');
+        Route::patch('/orders/{order}/reviews/{review}', [ProductReviewController::class, 'update'])->name('orders.reviews.update');
+        Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+        Route::post('/cart/update-item', [CartController::class, 'updateItem'])->name('cart.updateItem');
+    });
 });
 
 // Routes khusus Admin
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
     Route::get('/orders/{order}', [AdminController::class, 'orderDetail'])->name('orders.detail');

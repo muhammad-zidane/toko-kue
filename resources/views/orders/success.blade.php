@@ -35,6 +35,7 @@
         .order-item-info { flex: 1; }
         .order-item-info p { font-size: 14px; font-weight: 700; }
         .order-item-info small { font-size: 12px; color: var(--gray); }
+        .item-note { margin-top: 6px; font-size: 12px; color: var(--brown-dark); line-height: 1.5; background: #FFF4E6; border-radius: 6px; padding: 6px 8px; }
         .order-item-price { font-size: 14px; font-weight: 600; }
         .price-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; }
         .price-row span:first-child { color: var(--gray); }
@@ -86,13 +87,6 @@
     @endif
 </head>
 <body>
-    {{-- 1. Loader --}}
-    <div id="page-loader">
-        <div class="loader-spinner"></div>
-    </div>
-
-    <div class="fade-in-content">
-
 <nav class="navbar"><div class="navbar-inner"><a href="/" class="navbar-logo">Jagoan Kue</a><ul class="navbar-links"><li><a href="/">Beranda</a></li><li><a href="/products">Katalog</a></li><li><a href="/orders">Pemesanan</a></li></ul><div class="navbar-actions"><a href="/cart" class="btn-cart">🛒 Keranjang</a>@auth<a href="/profile" class="btn-login">{{ auth()->user()->name }}</a>@else<a href="/login" class="btn-login">Login</a>@endauth</div></div></nav>
 
 <div class="page">
@@ -112,6 +106,9 @@
                 <div class="order-item-info">
                     <p>{{ $item->product->name ?? 'Produk' }}</p>
                     <small>{{ $item->quantity }}x</small>
+                    @if(!empty($item->note))
+                        <p class="item-note">Catatan: {{ $item->note }}</p>
+                    @endif
                 </div>
                 <span class="order-item-price">Rp {{ number_format($item->price * $item->quantity, 0, ',', '.') }}</span>
             </div>
@@ -171,6 +168,5 @@
 </div>
 
 <footer class="footer"><div class="footer-inner"><div><p class="footer-logo">Jagoan Kue</p><p class="footer-desc">Menyediakan kue dengan cinta sejak 2023</p></div><div><p class="footer-heading">Layanan</p><ul class="footer-links"><li><a href="#">Katalog Kue</a></li><li><a href="#">Kue Custom</a></li></ul></div><div><p class="footer-heading">Selengkapnya</p><ul class="footer-links"><li><a href="#">Tentang Kami</a></li><li><a href="#">Blog</a></li></ul></div><div><p class="footer-heading">Kontak</p><ul class="footer-contact"><li>0822-8320-3385</li><li>muhammadzidane253@gmail.com</li><li>Payakumbuh, Sumatera Barat</li></ul></div></div></footer>
-    </div>
 </body>
 </html>

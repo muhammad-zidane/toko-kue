@@ -75,13 +75,6 @@
     @endif
 </head>
 <body>
-    {{-- 1. Loader --}}
-    <div id="page-loader">
-        <div class="loader-spinner"></div>
-    </div>
-
-    <div class="fade-in-content">
-
 @php
     // Support both single product and multi-product (from cart)
     $items = [];
@@ -128,6 +121,7 @@
             </div>
             <input type="hidden" name="items[{{ $idx }}][product_id]" value="{{ $item['product']->id }}">
             <input type="hidden" name="items[{{ $idx }}][quantity]" value="{{ $item['quantity'] }}">
+            <input type="hidden" name="items[{{ $idx }}][note]" value="{{ $item['note'] ?? '' }}">
             @endforeach
         </div>
 
@@ -174,6 +168,5 @@
     </div>
 </div>
 </form>
-    </div>
 </body>
 </html>
