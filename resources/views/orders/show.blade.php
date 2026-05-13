@@ -33,6 +33,7 @@
         .order-item-info { flex: 1; }
         .order-item-info p { font-size: 14px; font-weight: 700; }
         .order-item-info small { font-size: 12px; color: var(--gray); }
+        .item-note { margin-top: 6px; font-size: 12px; color: var(--brown-dark); line-height: 1.5; background: #FFF4E6; border-radius: 6px; padding: 6px 8px; }
         .order-item-price { font-size: 14px; font-weight: 600; }
 
         .info-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #F0E8E0; font-size: 13px; }
@@ -51,6 +52,11 @@
         .price-total { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--cream); border-radius: 10px; margin-top: 12px; }
         .price-total span:first-child { font-size: 14px; font-weight: 600; }
         .price-total span:last-child { font-size: 18px; font-weight: 800; }
+        .review-box { margin-top: 14px; border: 1px solid #EDE0D4; border-radius: 10px; padding: 12px; }
+        .review-stars { color: #F59E0B; font-size: 18px; margin-bottom: 6px; }
+        .review-comment { font-size: 13px; line-height: 1.6; margin-bottom: 10px; }
+        .review-images { display: flex; gap: 8px; flex-wrap: wrap; }
+        .review-images img { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; border: 1px solid #EDE0D4; }
 
         .btn-back-page { display: inline-block; background: var(--brown-dark); color: white; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 700; }
 
@@ -61,12 +67,6 @@
     @endif
 </head>
 <body>
-    {{-- 1. Loader --}}
-    <div id="page-loader">
-        <div class="loader-spinner"></div>
-    </div>
-
-    <div class="fade-in-content">
 <nav class="navbar"><div class="navbar-inner"><a href="/" class="navbar-logo">Jagoan Kue</a><ul class="navbar-links"><li><a href="/">Beranda</a></li><li><a href="/products">Katalog</a></li><li><a href="/orders">Pemesanan</a></li></ul><div class="navbar-actions"><a href="/cart" class="btn-cart">🛒 Keranjang</a>@auth<a href="/profile" class="btn-login">{{ auth()->user()->name }}</a>@else<a href="/login" class="btn-login">Login</a>@endauth</div></div></nav>
 
 <div class="page">
@@ -82,6 +82,9 @@
                 <div class="order-item-info">
                     <p>{{ $item->product->name ?? 'Produk dihapus' }}</p>
                     <small>{{ $item->quantity }}x · Rp {{ number_format($item->price, 0, ',', '.') }}</small>
+                    @if(!empty($item->note))
+                        <p class="item-note">Catatan: {{ $item->note }}</p>
+                    @endif
                 </div>
                 <span class="order-item-price">Rp {{ number_format($item->price * $item->quantity, 0, ',', '.') }}</span>
             </div>
@@ -91,6 +94,30 @@
                 <span>Total</span>
                 <span>Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
             </div>
+
+            @php
+                $reviewByProduct = $order->productReviews->keyBy('product_id');
+            @endphp
+
+            @foreach($order->orderItems as $item)
+                @php
+                    $review = $item->product ? ($reviewByProduct[$item->product->id] ?? null) : null;
+                @endphp
+                @if($review)
+                    <div class="review-box">
+                        <p style="font-size:13px;font-weight:700;margin-bottom:6px;">Ulasan: {{ $item->product->name }}</p>
+                        <div class="review-stars">{{ str_repeat('★', (int) $review->rating) }}{{ str_repeat('☆', 5 - (int) $review->rating) }}</div>
+                        <p class="review-comment">{{ $review->comment }}</p>
+                        @if($review->images->isNotEmpty())
+                            <div class="review-images">
+                                @foreach($review->images as $image)
+                                    <img src="{{ asset('storage/' . $image->path) }}" alt="Gambar ulasan">
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                @endif
+            @endforeach
         </div>
 
         <div>
@@ -113,6 +140,5 @@
 
     <a href="{{ route('orders.index') }}" class="btn-back-page">← Kembali ke Daftar Pesanan</a>
 </div>
-    </div>
 </body>
 </html>

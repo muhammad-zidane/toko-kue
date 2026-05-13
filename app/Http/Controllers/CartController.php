@@ -14,7 +14,11 @@ class CartController extends Controller
         foreach ($cart as $id => $item) {
             $product = Product::find($id);
             if ($product) {
-                $cartItems[] = ['product' => $product, 'quantity' => $item['quantity']];
+                $cartItems[] = [
+                    'product' => $product,
+                    'quantity' => $item['quantity'],
+                    'note' => $item['note'] ?? null,
+                ];
             }
         }
         return view('cart.index', compact('cartItems'));
@@ -25,20 +29,56 @@ class CartController extends Controller
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'quantity'   => 'nullable|integer|min:1',
+            'note'       => 'nullable|string',
         ]);
 
         $cart = session()->get('cart', []);
         $productId = $request->product_id;
         $quantity = $request->quantity ?? 1;
+        $note = $request->note;
 
         if (isset($cart[$productId])) {
             $cart[$productId]['quantity'] += $quantity;
+            if ($request->has('note')) {
+                $cart[$productId]['note'] = $note;
+            }
         } else {
-            $cart[$productId] = ['quantity' => $quantity];
+            $cart[$productId] = [
+                'quantity' => $quantity,
+                'note' => $note,
+            ];
         }
 
         session()->put('cart', $cart);
         return redirect()->route('cart.index')->with('success', 'Produk ditambahkan ke keranjang!');
+    }
+
+    public function updateItem(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|integer',
+            'quantity' => 'nullable|integer|min:1',
+            'note' => 'nullable|string',
+        ]);
+
+        $cart = session()->get('cart', []);
+        $productId = (string) $request->product_id;
+
+        if (!isset($cart[$productId])) {
+            return response()->json(['success' => false, 'message' => 'Item tidak ditemukan di keranjang.'], 404);
+        }
+
+        if ($request->filled('quantity')) {
+            $cart[$productId]['quantity'] = (int) $request->quantity;
+        }
+
+        if ($request->has('note')) {
+            $cart[$productId]['note'] = $request->note;
+        }
+
+        session()->put('cart', $cart);
+
+        return response()->json(['success' => true]);
     }
 
     public function remove(Request $request)
@@ -69,13 +109,28 @@ class CartController extends Controller
             return redirect()->route('cart.index')->with('error', 'Keranjang kosong!');
         }
 
-        // Ambil semua produk di keranjang
         $cartItems = [];
+        $stockWarnings = [];
+
         foreach ($cart as $id => $item) {
             $product = Product::find($id);
-            if ($product) {
-                $cartItems[] = ['product' => $product, 'quantity' => $item['quantity']];
+            if (!$product) {
+                continue;
             }
+
+            if (!$product->is_available || $product->stock < $item['quantity']) {
+                $stockWarnings[] = "Stok \"{$product->name}\" tidak mencukupi (tersedia: {$product->stock}).";
+            }
+
+            $cartItems[] = [
+                'product'  => $product,
+                'quantity' => $item['quantity'],
+                'note'     => $item['note'] ?? null,
+            ];
+        }
+
+        if (!empty($stockWarnings)) {
+            return redirect()->route('cart.index')->withErrors($stockWarnings);
         }
 
         return view('orders.create', compact('cartItems'));

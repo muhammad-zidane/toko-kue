@@ -38,6 +38,8 @@
         .item-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
         .item-price { font-size: 15px; font-weight: 700; }
         .item-actions { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+        .item-note-label { font-size: 12px; color: var(--gray); margin-top: 8px; margin-bottom: 4px; display: block; }
+        .item-note-input { width: 100%; border: 1px solid #D1C0B8; border-radius: 8px; padding: 8px 10px; font-size: 12px; font-family: 'Plus Jakarta Sans', sans-serif; background: #FFFDF9; }
         .action-btn { background: none; border: none; cursor: pointer; font-size: 16px; padding: 4px; color: var(--gray); transition: color 0.2s; }
         .action-btn:hover { color: var(--pink); }
         .qty-control { display: flex; align-items: center; border: 1.5px solid #D1C0B8; border-radius: 6px; overflow: hidden; }
@@ -70,13 +72,6 @@
     @endif
 </head>
 <body>
-    {{-- 1. Loader --}}
-    <div id="page-loader">
-        <div class="loader-spinner"></div>
-    </div>
-
-    <div class="fade-in-content">
-
 <nav class="navbar"><div class="navbar-inner"><a href="/" class="navbar-logo">Jagoan Kue</a><ul class="navbar-links"><li><a href="/">Beranda</a></li><li><a href="/products">Katalog</a></li><li><a href="/orders">Pemesanan</a></li></ul><div class="navbar-actions"><a href="/cart" class="btn-cart">🛒 Keranjang</a>@auth<a href="/profile" class="btn-login">{{ auth()->user()->name }}</a>@else<a href="/login" class="btn-login">Login</a>@endauth</div></div></nav>
 
 <div class="page">
@@ -100,6 +95,8 @@
                 <div class="item-info">
                     <p class="item-name">{{ $item['product']->name }}</p>
                     <p class="item-price" id="price-{{ $item['product']->id }}">Rp{{ number_format($item['product']->price * $item['quantity'], 0, ',', '.') }}</p>
+                    <label class="item-note-label">Catatan Produk</label>
+                    <textarea class="item-note-input" id="note-{{ $item['product']->id }}" rows="2" placeholder="Contoh: tulisan ucapan, warna, request khusus..." oninput="queueNoteSave({{ $item['product']->id }})">{{ $item['note'] ?? '' }}</textarea>
                     <div class="item-actions">
                         <button class="action-btn" title="Hapus" onclick="hapusItem({{ $item['product']->id }})">🗑</button>
                         <div class="qty-control">
@@ -167,7 +164,33 @@
     function updateItemPrice(id, price) {
         const qty = parseInt(document.getElementById('qty-' + id).value);
         document.getElementById('price-' + id).textContent = 'Rp' + (price * qty).toLocaleString('id-ID');
+        syncCartItem(id);
         updateTotal();
+    }
+
+    let noteSaveTimers = {};
+
+    function queueNoteSave(id) {
+        if (noteSaveTimers[id]) {
+            clearTimeout(noteSaveTimers[id]);
+        }
+        noteSaveTimers[id] = setTimeout(() => {
+            syncCartItem(id);
+            delete noteSaveTimers[id];
+        }, 400);
+    }
+
+    function syncCartItem(id) {
+        const qtyEl = document.getElementById('qty-' + id);
+        const noteEl = document.getElementById('note-' + id);
+        const qty = qtyEl ? parseInt(qtyEl.value || 1) : 1;
+        const note = noteEl ? noteEl.value : '';
+
+        return fetch('/cart/update-item', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+            body: JSON.stringify({ product_id: id, quantity: qty, note: note })
+        });
     }
 
     function hapusItem(id) {
@@ -201,12 +224,18 @@
     function beliSekarang() {
         const checked = document.querySelectorAll('.item-check:checked');
         if (checked.length === 0) { alert('Pilih produk terlebih dahulu!'); return; }
-        // Checkout semua item di keranjang
-        window.location.href = '/cart/checkout';
+
+        const ids = [];
+        checked.forEach(check => ids.push(check.dataset.id));
+
+        Promise.all(ids.map(id => syncCartItem(id)))
+            .catch(() => null)
+            .finally(() => {
+                window.location.href = '/cart/checkout';
+            });
     }
 
     updateTotal();
 </script>
-    </div>
 </body>
 </html>

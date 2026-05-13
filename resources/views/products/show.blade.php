@@ -214,6 +214,17 @@
 
         .btn-add-cart:hover { opacity: 0.85; }
 
+        .reviews-section { max-width: 1100px; margin: 26px auto 0; }
+        .reviews-title { font-family: 'Playfair Display', serif; font-size: 28px; margin-bottom: 14px; }
+        .review-card { background: var(--white); border: 1px solid #EDE0D4; border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+        .review-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 12px; }
+        .review-user { font-size: 14px; font-weight: 700; }
+        .review-date { font-size: 12px; color: var(--gray); }
+        .review-stars { color: #F59E0B; font-size: 18px; }
+        .review-comment { font-size: 14px; line-height: 1.7; margin-bottom: 10px; }
+        .review-images { display: flex; flex-wrap: wrap; gap: 8px; }
+        .review-images img { width: 82px; height: 82px; object-fit: cover; border-radius: 8px; border: 1px solid #EDE0D4; }
+
         /* FOOTER */
         .footer { background-color: var(--brown-dark); color: white; padding: 56px 24px; }
         .footer-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 40px; }
@@ -241,13 +252,6 @@
     @endif
 </head>
 <body>
-    {{-- 1. Loader --}}
-    <div id="page-loader">
-        <div class="loader-spinner"></div>
-    </div>
-
-    <div class="fade-in-content">
-
 {{-- NAVBAR --}}
 <nav class="navbar">
     <div class="navbar-inner">
@@ -301,7 +305,7 @@
             </div>
 
             <label class="catatan-label">Catatan (opsional)</label>
-            <textarea class="catatan-input" rows="3" placeholder="Contoh: Tulisan di kue, warna, ukuran..."></textarea>
+            <textarea id="note-input" class="catatan-input" rows="3" placeholder="Contoh: Tulisan di kue, warna, ukuran..."></textarea>
 
             <div class="subtotal-row">
                 <span class="subtotal-label">Subtotal</span>
@@ -309,10 +313,11 @@
             </div>
 
         @auth
-            <form action="/cart/add" method="POST">
+            <form id="add-to-cart-form" action="/cart/add" method="POST">
                 @csrf
                     <input type="hidden" name="product_id" value="{{ $product->id }}">
                     <input type="hidden" name="quantity" id="qty-hidden" value="1">
+                    <input type="hidden" name="note" id="note-hidden" value="">
                     <button type="submit" class="btn-add-cart">+ Keranjang</button>
                 </form>
         @else
@@ -322,6 +327,31 @@
         @endauth
         </div>
 
+    </div>
+
+    <div class="reviews-section">
+        <h2 class="reviews-title">Ulasan</h2>
+        @forelse($product->reviews as $review)
+            <div class="review-card">
+                <div class="review-top">
+                    <div>
+                        <p class="review-user">{{ $review->user->name ?? 'Pelanggan' }}</p>
+                        <p class="review-date">{{ $review->created_at?->format('d M Y, H:i') }}</p>
+                    </div>
+                    <div class="review-stars">{{ str_repeat('★', (int) $review->rating) }}{{ str_repeat('☆', 5 - (int) $review->rating) }}</div>
+                </div>
+                <p class="review-comment">{{ $review->comment }}</p>
+                @if($review->images->isNotEmpty())
+                    <div class="review-images">
+                        @foreach($review->images as $image)
+                            <img src="{{ asset('storage/' . $image->path) }}" alt="Gambar ulasan produk">
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+        @empty
+            <p style="font-size:14px; color:var(--gray);">Belum ada ulasan untuk produk ini.</p>
+        @endforelse
     </div>
 </section>
 
@@ -396,9 +426,16 @@
         updateSubtotal(val);
     });
 
+    const noteInput = document.getElementById('note-input');
+    const noteHidden = document.getElementById('note-hidden');
+    if (noteInput && noteHidden) {
+        noteInput.addEventListener('input', function() {
+            noteHidden.value = this.value;
+        });
+    }
+
 
 </script>
 
-    </div>
 </body>
 </html>

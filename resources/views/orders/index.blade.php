@@ -31,13 +31,19 @@
 
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 20px; }
         .card { background: var(--white); border-radius: 16px; border: 1px solid #EDE0D4; padding: 20px; }
+        .card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+        .card-left { display:flex; align-items:flex-start; gap:12px; min-width: 0; }
+        .thumb { width: 56px; height: 56px; border-radius: 12px; background: var(--cream-dark); overflow: hidden; flex-shrink: 0; border: 1px solid #EDE0D4; }
+        .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .left-info { min-width: 0; }
         .meta { font-size: 12px; color: var(--gray); font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; }
         .code { margin-top: 6px; font-size: 16px; font-weight: 800; }
         .total { margin-top: 10px; font-size: 13px; color: var(--gray); }
         .total strong { color: var(--brown-dark); }
-        .badges { text-align: right; display: flex; flex-direction: column; gap: 8px; }
+        .badges { width: 120px; display: flex; flex-direction: column; gap: 8px; align-items: center; text-align: center; flex-shrink: 0; }
         .badge { display: inline-block; padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #F3F4F6; color: #111827; }
         .badge-warn { background: #FEF3C7; color: #92400E; }
+        .badge-success { background: #DCFCE7; color: #166534; }
         .actions { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; }
         .btn-outline { border: 1.5px solid #D1C0B8; color: var(--brown-dark); padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; display: inline-block; }
 
@@ -50,12 +56,6 @@
     @endif
 </head>
 <body>
-    {{-- 1. Loader --}}
-    <div id="page-loader">
-        <div class="loader-spinner"></div>
-    </div>
-
-    <div class="fade-in-content">
 <nav class="navbar">
     <div class="navbar-inner">
         <a href="/" class="navbar-logo">Jagoan Kue</a>
@@ -97,23 +97,34 @@
             @php
                 $paymentStatus = $order->payment->status ?? 'unpaid';
                 $status = $order->status ?? 'pending';
+                $firstItem = $order->orderItems->first();
+                $thumbPath = $firstItem?->product?->image ? asset('storage/' . $firstItem->product->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=200&q=80';
             @endphp
 
             <div class="card">
-                <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
-                    <div>
-                        <p class="meta">{{ $order->created_at?->format('d M Y, H:i') }} WIB</p>
-                        <p class="code">{{ $order->order_code }}</p>
-                        <p class="total">Total: <strong>Rp {{ number_format((int) $order->total_price, 0, ',', '.') }}</strong></p>
+                <div class="card-top">
+                    <div class="card-left">
+                        <div class="thumb">
+                            <img src="{{ $thumbPath }}" alt="Produk">
+                        </div>
+                        <div class="left-info">
+                            <p class="meta">{{ $order->created_at?->format('d M Y, H:i') }} WIB</p>
+                            <p class="code">{{ $order->order_code }}</p>
+                            <p class="total">Total: <strong>Rp {{ number_format((int) $order->total_price, 0, ',', '.') }}</strong></p>
+                        </div>
                     </div>
                     <div class="badges">
                         <span class="badge">{{ ucfirst($status) }}</span>
-                        <span class="badge badge-warn">{{ ucfirst($paymentStatus) }}</span>
+                        <span class="badge {{ $paymentStatus === 'paid' ? 'badge-success' : 'badge-warn' }}">{{ ucfirst($paymentStatus) }}</span>
                     </div>
                 </div>
 
                 <div class="actions">
                     <a class="btn-outline" href="{{ route('orders.show', $order) }}">Detail</a>
+
+                    @if ($status === 'completed' && $paymentStatus === 'paid')
+                        <a class="btn-outline" href="{{ route('orders.reviews.index', $order) }}">Ulasan</a>
+                    @endif
 
                     @if ($status === 'pending' && $paymentStatus === 'unpaid')
                         <a class="btn-primary" href="{{ route('orders.payment', $order) }}">Bayar Sekarang</a>
@@ -133,6 +144,5 @@
         {{ $orders->links() }}
     </div>
 </div>
-    </div>
 </body>
 </html>

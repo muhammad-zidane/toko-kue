@@ -19,13 +19,13 @@
         }
 
         .card {
-            background: #FFFDF4;
+            background: #FFFDF4; 
             border-radius: 12px;
             border: 1.5px solid #2C1810;
             box-shadow: 0 8px 32px rgba(0,0,0,0.35);
             padding: 36px 40px 40px;
             width: 100%;
-            max-width: 340px;
+            max-width: 400px !important;
         }
 
         .card-title {
@@ -117,13 +117,6 @@
     @endif
 </head>
 <body>
-    {{-- 1. Loader --}}
-    <div id="page-loader">
-        <div class="loader-spinner"></div>
-    </div>
-
-    <div class="fade-in-content">
-
 <div class="card">
     <p class="card-title">Daftar</p>
 
@@ -172,7 +165,5 @@
         </p>
     </form>
 </div>
-
-    </div>
 </body>
 </html>

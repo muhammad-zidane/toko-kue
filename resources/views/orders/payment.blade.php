@@ -109,13 +109,6 @@
     @endif
 </head>
 <body>
-    {{-- 1. Loader --}}
-    <div id="page-loader">
-        <div class="loader-spinner"></div>
-    </div>
-
-    <div class="fade-in-content">
-
 @php
     $paymentMethod = $order->payment->payment_method ?? 'transfer';
     $totalAmount = $order->total_price;
@@ -232,13 +225,28 @@
         {{-- UPLOAD BUKTI --}}
         <div class="card">
             <p class="upload-label">UPLOAD BUKTI PEMBAYARAN</p>
+
+            @if ($errors->has('proof_image'))
+                <div class="alert-box" style="margin-bottom:12px;">
+                    {{ $errors->first('proof_image') }}
+                </div>
+            @endif
+
+            <input
+                type="file"
+                id="file-input"
+                name="proof_image"
+                style="display:none"
+                accept=".jpg,.jpeg,.png,.webp,.heic,.heif"
+                onchange="handleFile(this)"
+            >
+
             <div class="upload-zone" onclick="document.getElementById('file-input').click()" ondragover="event.preventDefault()" ondrop="handleDrop(event)">
-                <div class="upload-icon">📤</div>
-                <p class="upload-text">Seret & letakkan file di sini</p>
-                <p class="upload-sub">atau klik untuk memilih file</p>
+                <div class="upload-icon" id="upload-icon">📤</div>
+                <p class="upload-text" id="upload-text">Seret & letakkan file di sini</p>
+                <p class="upload-sub" id="upload-sub">atau klik untuk memilih file</p>
                 <button class="btn-pilih" type="button">Pilih File</button>
-                <input type="file" id="file-input" name="proof_image" style="display:none" accept=".jpg,.jpeg,.png" onchange="handleFile(this)">
-                <p class="upload-format" style="margin-top:10px;">Format: JPG, PNG • Maks. 5MB</p>
+                <p class="upload-format" id="upload-format" style="margin-top:10px;">Format: JPG, PNG, WEBP, HEIC • Maks. 5MB</p>
             </div>
             <div class="upload-info">Bukti pembayaran akan diverifikasi oleh tim kami dalam 5-10 menit.</div>
         </div>
@@ -314,8 +322,16 @@
     function handleFile(input) {
         if (input.files && input.files[0]) {
             const file = input.files[0];
-            const zone = document.querySelector('.upload-zone');
-            zone.innerHTML = '<div style="font-size:32px;">✅</div><p style="font-size:13px;font-weight:600;margin-top:8px;">' + file.name + '</p><p style="font-size:12px;color:var(--gray);">File siap diupload</p>';
+            const icon = document.getElementById('upload-icon');
+            const text = document.getElementById('upload-text');
+            const sub = document.getElementById('upload-sub');
+            const format = document.getElementById('upload-format');
+
+            if (icon) icon.textContent = '✅';
+            if (text) text.textContent = file.name;
+            if (sub) sub.textContent = 'File siap diupload';
+            if (format) format.textContent = '';
+
             const btn = document.getElementById('btn-submit');
             btn.style.background = 'var(--pink)';
             btn.textContent = '✓ Kirim Bukti Pembayaran';
@@ -330,6 +346,5 @@
         btn.disabled = true;
     });
 </script>
-    </div>
 </body>
 </html>
