@@ -91,8 +91,17 @@
             .form-grid { grid-template-columns: 1fr; }
         }
     </style>
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @endif
 </head>
 <body>
+    {{-- 1. Loader --}}
+    <div id="page-loader">
+        <div class="loader-spinner"></div>
+    </div>
+
+    <div class="fade-in-content">
 
 {{-- NAVBAR --}}
 <nav class="navbar">
@@ -206,5 +215,6 @@
     </div>
 </div>
 
+    </div>
 </body>
 </html>

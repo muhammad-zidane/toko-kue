@@ -30,8 +30,17 @@
         .btn-cancel { background: #F5EDD8; color: var(--text-dark); border: 1.5px solid #D1C0B8; border-radius: 10px; padding: 14px 24px; font-size: 15px; font-weight: 600; }
         .form-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
     </style>
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @endif
 </head>
 <body>
+    {{-- 1. Loader --}}
+    <div id="page-loader">
+        <div class="loader-spinner"></div>
+    </div>
+
+    <div class="fade-in-content">
 <nav class="navbar"><div class="navbar-inner"><a href="{{ route('admin.dashboard') }}" class="navbar-logo">Jagoan Kue — Admin</a><a href="{{ route('admin.dashboard') }}" class="btn-back">← Dashboard</a></div></nav>
 <div class="page">
     <h1 class="page-title">Tambah Produk Baru</h1>
@@ -51,5 +60,6 @@
         </form>
     </div>
 </div>
+    </div>
 </body>
 </html>
