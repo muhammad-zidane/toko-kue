@@ -28,6 +28,7 @@ class OrderController extends Controller
             'items'            => 'required|array',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity'   => 'required|integer|min:1',
+            'items.*.note'       => 'nullable|string',
         ]);
 
         $totalPrice = 0;
@@ -57,6 +58,7 @@ class OrderController extends Controller
                 'product_id' => $product->id,
                 'quantity'   => $item['quantity'],
                 'price'      => $product->price,
+                'note'       => $item['note'] ?? null,
             ]);
 
             // Kurangi stok produk
@@ -76,7 +78,7 @@ class OrderController extends Controller
 
         // COD: langsung konfirmasi pesanan
         if ($isCod) {
-            $order->update(['status' => 'confirmed']);
+            $order->update(['status' => 'processing']);
         }
 
         // Bersihkan cart setelah order berhasil
@@ -97,7 +99,7 @@ class OrderController extends Controller
             abort(403);
         }
 
-        $order->load('orderItems.product', 'payment');
+        $order->load('orderItems.product', 'payment', 'productReviews.product', 'productReviews.images');
         return view('orders.show', compact('order'));
     }
 
@@ -111,12 +113,22 @@ class OrderController extends Controller
         }
 
         $request->validate([
-            'proof_image' => 'required|image|mimes:jpg,jpeg,png|max:5120',
+            'proof_image' => 'required|image|mimes:jpg,jpeg,png,webp,heic,heif|max:5120',
         ]);
 
         $path = $request->file('proof_image')->store('payment_proofs', 'public');
 
-        $order->payment->update([
+        $payment = $order->payment;
+        if (!$payment) {
+            $payment = Payment::create([
+                'order_id'       => $order->id,
+                'payment_method' => 'transfer',
+                'status'         => 'unpaid',
+                'amount'         => $order->total_price,
+            ]);
+        }
+
+        $payment->update([
             'status'      => 'paid',
             'proof_image' => $path,
             'paid_at'     => now(),

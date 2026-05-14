@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jagoan Kue - Katalog Produk</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -153,25 +154,7 @@
     @endif
 </head>
 <body>
-{{-- NAVBAR --}}
-<nav class="navbar">
-    <div class="navbar-inner">
-        <a href="/" class="navbar-logo">Jagoan Kue</a>
-        <ul class="navbar-links">
-            <li><a href="/">Beranda</a></li>
-            <li><a href="/products" class="active">Katalog</a></li>
-            <li><a href="/orders">Pemesanan</a></li>
-        </ul>
-        <div class="navbar-actions">
-            <a href="/cart" class="btn-cart">🛒 Keranjang</a>
-            @auth
-                <a href="/profile" class="btn-login">{{ auth()->user()->name }}</a>
-            @else
-                <a href="/login" class="btn-login">Login</a>
-            @endauth
-        </div>
-    </div>
-</nav>
+@include('partials.navbar')
 
 {{-- PAGE HEADER --}}
 <div class="page-header">
@@ -208,46 +191,7 @@
 </section>
 @endforelse
 
-{{-- FOOTER --}}
-<footer class="footer">
-    <div class="footer-inner">
-        <div>
-            <p class="footer-logo">Jagoan Kue</p>
-            <p class="footer-desc">Menyediakan kue dengan cinta sejak 2023</p>
-            <div class="footer-socials">
-                <a href="#">📸</a>
-                <a href="#">🎵</a>
-                <a href="#">💬</a>
-                <a href="#">👤</a>
-            </div>
-        </div>
-        <div>
-            <p class="footer-heading">Layanan</p>
-            <ul class="footer-links">
-                <li><a href="#">Katalog Kue</a></li>
-                <li><a href="#">Kue Custom</a></li>
-                <li><a href="#">Hampers</a></li>
-                <li><a href="#">Catering</a></li>
-            </ul>
-        </div>
-        <div>
-            <p class="footer-heading">Selengkapnya</p>
-            <ul class="footer-links">
-                <li><a href="#">Tentang Kami</a></li>
-                <li><a href="#">Blog</a></li>
-                <li><a href="#">Karir</a></li>
-            </ul>
-        </div>
-        <div>
-            <p class="footer-heading">Kontak Kami</p>
-            <ul class="footer-contact">
-                <li>0822-8320-3385</li>
-                <li>muhammadzidane253@gmail.com</li>
-                <li>Payakumbuh, Sumatera Barat</li>
-            </ul>
-        </div>
-    </div>
-</footer>
+@include('partials.footer')
 
 </body>
 </html>

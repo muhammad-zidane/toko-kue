@@ -32,17 +32,17 @@
 {{-- STATS --}}
 <div class="stats-grid">
     <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(240,80,122,0.1);">👤</div>
+        <div class="stat-icon" style="background:rgba(240,80,122,0.1);"><i class="fas fa-user" style="color:var(--pink)"></i></div>
         <div class="stat-value">{{ $totalCustomers }}</div>
         <div class="stat-label">Total Pelanggan</div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(34,197,94,0.1);">🆕</div>
+        <div class="stat-icon" style="background:rgba(34,197,94,0.1);"><i class="fas fa-user-plus" style="color:var(--pink)"></i></div>
         <div class="stat-value">{{ $newCustomers }}</div>
         <div class="stat-label">Pelanggan Baru (Bulan Ini)</div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(59,130,246,0.1);">📦</div>
+        <div class="stat-icon" style="background:rgba(59,130,246,0.1);"><i class="fas fa-box" style="color:var(--pink)"></i></div>
         <div class="stat-value">{{ $totalOrders }}</div>
         <div class="stat-label">Total Pesanan</div>
     </div>
@@ -84,7 +84,7 @@
                 @empty
                 <tr>
                     <td colspan="5" style="text-align:center;padding:64px;">
-                        <div style="font-size:48px;margin-bottom:12px;">👤</div>
+                        <div style="font-size:48px;margin-bottom:12px;"><i class="fas fa-user"></i></div>
                         <h3 style="font-weight:700;color:var(--brown-dark);">Belum Ada Pelanggan</h3>
                         <p style="font-size:14px;color:var(--gray);">Pelanggan akan muncul di sini.</p>
                     </td>
