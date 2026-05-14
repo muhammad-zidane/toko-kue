@@ -37,12 +37,12 @@
         .item-note { margin-top: 6px; font-size: 12px; color: var(--brown-dark); line-height: 1.5; background: #FFF4E6; border-radius: 6px; padding: 6px 8px; }
         .order-item-price { font-size: 14px; font-weight: 600; }
 
-        .info-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #F0E8E0; font-size: 13px; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #F0E8E0; font-size: 13px; }
         .info-row:last-child { border-bottom: none; }
-        .info-row span:first-child { color: var(--gray); }
-        .info-row span:last-child { font-weight: 600; text-align: right; max-width: 60%; }
+        .info-row span:first-child { color: var(--gray); flex-shrink: 0; }
+        .info-row span:last-child { font-weight: 600; text-align: right; }
 
-        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; }
         .badge-pending { background: #FEF3C7; color: #D97706; }
         .badge-processing { background: #DBEAFE; color: #2563EB; }
         .badge-completed { background: #DCFCE7; color: #16A34A; }
