@@ -93,7 +93,7 @@
         .price-total span:first-child { font-size: 14px; font-weight: 600; color: var(--gray); }
         .price-total span:last-child { font-size: 18px; font-weight: 800; color: var(--brown-dark); }
 
-        .info-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #F0E8E0; font-size: 13px; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #F0E8E0; font-size: 13px; }
         .info-row:last-child { border-bottom: none; }
         .info-row .info-label { color: var(--gray); flex-shrink: 0; margin-right: 12px; }
         .info-row .info-value { font-weight: 600; text-align: right; }
@@ -165,7 +165,7 @@
                 @foreach($steps as [$key, $icon, $label])
                     <div class="timeline-step cancelled">
                         <div class="timeline-icon"><i class="fa-solid fa-{{ $icon === 'fa-clock' ? 'clock' : 'xmark' }}"></i></div>
-                        <div class="timeline-label">{{ str_replace('\n', '<br>', $label) }}</div>
+                        <div class="timeline-label">{!! nl2br(e(str_replace('\n', "\n", $label))) !!}</div>
                     </div>
                 @endforeach
             </div>

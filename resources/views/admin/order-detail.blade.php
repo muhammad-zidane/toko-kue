@@ -8,10 +8,10 @@
     .detail-grid { display: grid; grid-template-columns: 1fr 360px; gap: 20px; }
     .card { background: white; border-radius: 16px; border: 1px solid #EDE0D4; padding: 24px; margin-bottom: 20px; }
     .card-title { font-size: 14px; font-weight: 700; color: var(--text-dark); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #F0E8E0; }
-    .info-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 13px; }
-    .info-label { color: var(--gray); }
-    .info-value { font-weight: 600; color: var(--text-dark); }
-    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .info-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 13px; }
+    .info-label { color: var(--gray); flex-shrink: 0; }
+    .info-value { font-weight: 600; color: var(--text-dark); text-align: right; }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; }
     .badge-pending { background: #FEF3C7; color: #D97706; }
     .badge-processing { background: #DBEAFE; color: #2563EB; }
     .badge-completed { background: #DCFCE7; color: #16A34A; }
