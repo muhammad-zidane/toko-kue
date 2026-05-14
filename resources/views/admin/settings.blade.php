@@ -35,7 +35,7 @@
     {{-- PROFIL ADMIN --}}
     <div class="card">
         <div class="card-header">
-            <div class="card-header-icon">👤</div>
+            <div class="card-header-icon"><i class="fas fa-user" style="color:var(--pink)"></i></div>
             <div>
                 <div class="card-header-title">Profil Admin</div>
                 <div class="card-header-desc">Perbarui informasi akun admin</div>
@@ -56,7 +56,7 @@
     {{-- GANTI PASSWORD --}}
     <div class="card">
         <div class="card-header">
-            <div class="card-header-icon">🔒</div>
+            <div class="card-header-icon"><i class="fas fa-lock" style="color:var(--pink)"></i></div>
             <div>
                 <div class="card-header-title">Ganti Password</div>
                 <div class="card-header-desc">Kosongkan jika tidak ingin mengubah password</div>
@@ -78,7 +78,7 @@
     {{-- INFO TOKO --}}
     <div class="card">
         <div class="card-header">
-            <div class="card-header-icon">🏪</div>
+            <div class="card-header-icon"><i class="fas fa-store" style="color:var(--pink)"></i></div>
             <div>
                 <div class="card-header-title">Informasi Toko</div>
                 <div class="card-header-desc">Detail informasi toko</div>
@@ -105,7 +105,7 @@
     </div>
 
     <div style="display:flex;justify-content:flex-end;">
-        <button type="submit" class="btn-save">💾 Simpan Pengaturan</button>
+        <button type="submit" class="btn-save"><i class="fas fa-save" style="color:white"></i> Simpan Pengaturan</button>
     </div>
 </form>
 @endsection

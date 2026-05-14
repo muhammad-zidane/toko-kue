@@ -9,6 +9,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @endif
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root {
             --pink:       #F0507A;
@@ -21,94 +22,40 @@
             --gray-light: #F3F4F6;
         }
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .font-display { font-family: 'Playfair Display', serif; }
+        a { text-decoration: none; }
+        .navbar { background-color: var(--brown-dark); padding: 16px 24px; position: sticky; top: 0; z-index: 100; }
+        .navbar-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+        .navbar-logo { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; color: var(--pink); }
+        .navbar-links { display: flex; gap: 32px; list-style: none; }
+        .navbar-links a { color: white; font-size: 14px; font-weight: 500; opacity: 0.9; }
+        .navbar-links a:hover, .navbar-links a.active { opacity: 1; }
+        .navbar-actions { display: flex; align-items: center; gap: 12px; }
+        .btn-cart { background-color: var(--pink); color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; }
+        .btn-cart:hover { opacity: 0.85; }
+        .btn-login { border: 1.5px solid white; color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; transition: all 0.2s; }
+        .btn-login:hover { background: white; color: var(--brown-dark); }
+        .footer { background-color: var(--brown-dark); color: white; padding: 56px 24px; }
+        .footer-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 40px; }
+        .footer-logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 800; color: var(--pink); margin-bottom: 8px; }
+        .footer-desc { font-size: 13px; opacity: 0.6; margin-bottom: 20px; line-height: 1.6; }
+        .footer-socials { display: flex; gap: 16px; font-size: 18px; }
+        .footer-socials a { opacity: 0.6; transition: opacity 0.2s; }
+        .footer-socials a:hover { opacity: 1; }
+        .footer-heading { font-size: 14px; font-weight: 700; margin-bottom: 16px; }
+        .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+        .footer-links a { color: white; font-size: 13px; opacity: 0.6; transition: opacity 0.2s; }
+        .footer-links a:hover { opacity: 1; }
+        .footer-contact { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+        .footer-contact li { font-size: 13px; opacity: 0.6; line-height: 1.5; }
+        @media (max-width: 768px) { .navbar-links { display: none; } .footer-inner { grid-template-columns: 1fr 1fr; } }
     </style>
 </head>
-<body class="bg-white">
-    {{-- NAVBAR --}}
-    <nav style="background-color: var(--brown-dark);" class="sticky top-0 z-50 px-6 py-4">
-        <div class="max-w-6xl mx-auto flex items-center justify-between">
-            {{-- Logo --}}
-            <a href="/" class="text-2xl font-bold" style="color: var(--pink); font-family: 'Playfair Display', serif;">
-                Jagoan Kue
-            </a>
-
-            {{-- Nav Links --}}
-            <div class="hidden md:flex items-center gap-8">
-                <a href="/" class="text-white hover:opacity-80 text-sm font-medium">Beranda</a>
-                <a href="/products" class="text-white hover:opacity-80 text-sm font-medium">Katalog</a>
-                <a href="/orders" class="text-white hover:opacity-80 text-sm font-medium">Pemesanan</a>
-            </div>
-
-            {{-- Actions --}}
-            <div class="flex items-center gap-3">
-                <a href="/cart" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white" style="background-color: var(--pink);">
-                    🛒 Keranjang
-                </a>
-                @auth
-                    <a href="/profile" class="px-4 py-2 rounded-lg border text-sm font-semibold text-white border-white hover:bg-white hover:text-gray-900 transition">
-                        {{ auth()->user()->name }}
-                    </a>
-                @else
-                    <a href="/login" class="px-4 py-2 rounded-lg border text-sm font-semibold text-white border-white hover:bg-white hover:text-gray-900 transition">
-                        Login
-                    </a>
-                @endauth
-            </div>
-        </div>
-    </nav>
+<body>
+    @include('partials.navbar')
 
     {{-- MAIN CONTENT --}}
     @yield('content')
 
-
-    {{-- FOOTER --}}
-    <footer style="background-color: var(--brown-dark);" class="text-white py-14 px-6 mt-0">
-        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
-            {{-- Brand --}}
-            <div>
-                <h3 class="text-xl font-bold mb-2" style="color: var(--pink); font-family: 'Playfair Display', serif;">Jagoan Kue</h3>
-                <p class="text-sm opacity-70 mb-4">Menyediakan kue dengan cinta sejak 2023</p>
-                <div class="flex gap-4 text-lg">
-                    <a href="#" class="opacity-70 hover:opacity-100">📸</a>
-                    <a href="#" class="opacity-70 hover:opacity-100">🎵</a>
-                    <a href="#" class="opacity-70 hover:opacity-100">💬</a>
-                    <a href="#" class="opacity-70 hover:opacity-100">👤</a>
-                </div>
-            </div>
-
-            {{-- Layanan --}}
-            <div>
-                <h4 class="font-semibold mb-4">Layanan</h4>
-                <ul class="space-y-2 text-sm opacity-70">
-                    <li><a href="#" class="hover:opacity-100">Katalog Kue</a></li>
-                    <li><a href="#" class="hover:opacity-100">Kue Custom</a></li>
-                    <li><a href="#" class="hover:opacity-100">Hampers</a></li>
-                    <li><a href="#" class="hover:opacity-100">Catering</a></li>
-                </ul>
-            </div>
-
-            {{-- Selengkapnya --}}
-            <div>
-                <h4 class="font-semibold mb-4">Selengkapnya</h4>
-                <ul class="space-y-2 text-sm opacity-70">
-                    <li><a href="#" class="hover:opacity-100">Tentang Kami</a></li>
-                    <li><a href="#" class="hover:opacity-100">Blog</a></li>
-                    <li><a href="#" class="hover:opacity-100">Karir</a></li>
-                </ul>
-            </div>
-
-            {{-- Kontak --}}
-            <div>
-                <h4 class="font-semibold mb-4">Kontak Kami</h4>
-                <ul class="space-y-2 text-sm opacity-70">
-                    <li>0822-8320-3385</li>
-                    <li>muhammadzidane253@gmail.com</li>
-                    <li>Payakumbuh, Sumatera Barat</li>
-                </ul>
-            </div>
-        </div>
-    </footer>
-
+    @include('partials.footer')
 </body>
 </html>
