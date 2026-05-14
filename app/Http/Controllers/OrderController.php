@@ -22,7 +22,29 @@ class OrderController extends Controller
             ->where('user_id', auth()->id())
             ->latest()
             ->paginate(10);
+
         return view('orders.index', compact('orders'));
+    }
+
+    public function singleProductCheckout(Product $product)
+    {
+        return view('orders.create', compact('product'));
+    }
+
+    public function payment(Order $order)
+    {
+        $this->authorizeOwner($order);
+        $order->load('orderItems.product', 'payment');
+
+        return view('orders.payment', compact('order'));
+    }
+
+    public function success(Order $order)
+    {
+        $this->authorizeOwner($order);
+        $order->load('orderItems.product', 'payment');
+
+        return view('orders.success', compact('order'));
     }
 
     /**
@@ -38,17 +60,19 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'shipping_address' => 'required|string',
-            'notes'            => 'nullable|string',
-            'items'            => 'required|array',
+            'shipping_address'   => 'required|string',
+            'notes'              => 'nullable|string',
+            'items'              => 'required|array',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity'   => 'required|integer|min:1',
+            'items.*.note'       => 'nullable|string',
         ]);
 
+        $products = Product::findMany(array_column($request->items, 'product_id'))->keyBy('id');
+
         $totalPrice = 0;
-        // Validasi stok terlebih dahulu
         foreach ($request->items as $item) {
-            $product = Product::findOrFail($item['product_id']);
+            $product = $products->get($item['product_id']);
             if ($product->stock < $item['quantity']) {
                 return back()->withErrors(['stock' => "Stok {$product->name} tidak mencukupi. Tersisa {$product->stock}."]);
             }
@@ -65,20 +89,20 @@ class OrderController extends Controller
         ]);
 
         foreach ($request->items as $item) {
-            $product = Product::findOrFail($item['product_id']);
+            $product = $products->get($item['product_id']);
 
             OrderItem::create([
                 'order_id'   => $order->id,
                 'product_id' => $product->id,
                 'quantity'   => $item['quantity'],
                 'price'      => $product->price,
+                'note'       => $item['note'] ?? null,
             ]);
 
-            // Kurangi stok produk
             $product->decrement('stock', $item['quantity']);
         }
 
-        $paymentMethod = $request->payment_method ?? 'transfer';
+        $paymentMethod = $request->payment_method ?? 'transfer_bank';
         $isCod = $paymentMethod === 'cod';
 
         Payment::create([
@@ -89,20 +113,25 @@ class OrderController extends Controller
             'paid_at'        => $isCod ? now() : null,
         ]);
 
-        // COD: langsung konfirmasi pesanan
         if ($isCod) {
-            $order->update(['status' => 'confirmed']);
+            $order->update(['status' => 'processing']);
         }
 
-        // Bersihkan cart setelah order berhasil
         session()->forget('cart');
 
-        // COD langsung ke halaman sukses, lainnya ke halaman pembayaran
         if ($isCod) {
             return redirect()->route('orders.success', $order)->with('success', 'Pesanan COD berhasil dikonfirmasi!');
         }
 
         return redirect()->route('orders.payment', $order)->with('success', 'Pesanan berhasil dibuat!');
+    }
+
+    public function showStatus(Order $order)
+    {
+        $this->authorizeOwner($order);
+        $order->load('orderItems.product', 'payment');
+
+        return view('orders.status', compact('order'));
     }
 
     /**
@@ -114,31 +143,33 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
-        // Ownership check
-        if ($order->user_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->authorizeOwner($order);
+        $order->load('orderItems.product', 'payment', 'productReviews.product', 'productReviews.images');
 
-        $order->load('orderItems.product', 'payment');
         return view('orders.show', compact('order'));
     }
 
-    /**
-     * Upload bukti pembayaran dan update status.
-     */
     public function uploadProof(Request $request, Order $order)
     {
-        if ($order->user_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->authorizeOwner($order);
 
         $request->validate([
-            'proof_image' => 'required|image|mimes:jpg,jpeg,png|max:5120',
+            'proof_image' => 'required|image|mimes:jpg,jpeg,png,webp,heic,heif|max:5120',
         ]);
 
         $path = $request->file('proof_image')->store('payment_proofs', 'public');
 
-        $order->payment->update([
+        $payment = $order->payment;
+        if (!$payment) {
+            $payment = Payment::create([
+                'order_id'       => $order->id,
+                'payment_method' => 'transfer_bank',
+                'status'         => 'unpaid',
+                'amount'         => $order->total_price,
+            ]);
+        }
+
+        $payment->update([
             'status'      => 'paid',
             'proof_image' => $path,
             'paid_at'     => now(),
@@ -147,5 +178,12 @@ class OrderController extends Controller
         $order->update(['status' => 'processing']);
 
         return redirect()->route('orders.success', $order)->with('success', 'Bukti pembayaran berhasil diupload!');
+    }
+
+    private function authorizeOwner(Order $order): void
+    {
+        if ($order->user_id !== auth()->id()) {
+            abort(403);
+        }
     }
 }
