@@ -15,6 +15,11 @@ class Payment extends Model
         'paid_at' => 'datetime',
     ];
 
+    /**
+     * Pesanan yang terkait dengan pembayaran ini.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function order()
     {
         return $this->belongsTo(Order::class);

@@ -7,6 +7,11 @@ use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
+    /**
+     * Tampilkan isi keranjang belanja dari session.
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
         $cart = session()->get('cart', []);
@@ -24,6 +29,13 @@ class CartController extends Controller
         return view('cart.index', compact('cartItems'));
     }
 
+    /**
+     * Tambah produk ke keranjang (disimpan di session).
+     * Jika produk sudah ada, jumlahnya ditambahkan.
+     *
+     * @param  Request $request  Input: product_id (wajib), quantity (default 1)
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function add(Request $request)
     {
         $request->validate([
@@ -53,6 +65,12 @@ class CartController extends Controller
         return redirect()->route('cart.index')->with('success', 'Produk ditambahkan ke keranjang!');
     }
 
+    /**
+     * Perbarui jumlah atau catatan item di keranjang.
+     *
+     * @param  Request $request  Input: product_id (wajib), quantity (opsional), note (opsional)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updateItem(Request $request)
     {
         $request->validate([
@@ -81,6 +99,12 @@ class CartController extends Controller
         return response()->json(['success' => true]);
     }
 
+    /**
+     * Hapus satu atau beberapa item dari keranjang berdasarkan product ID.
+     *
+     * @param  Request $request  Input: ids[] array product ID yang dihapus
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function remove(Request $request)
     {
         $cart = session()->get('cart', []);
@@ -96,12 +120,24 @@ class CartController extends Controller
         return response()->json(['success' => true]);
     }
 
+    /**
+     * Kosongkan seluruh isi keranjang belanja dari session.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function clear()
     {
         session()->forget('cart');
         return redirect()->route('cart.index');
     }
 
+    /**
+     * Tampilkan form checkout dengan item-item dari keranjang session.
+     * Redirect ke keranjang jika keranjang kosong.
+     *
+     * @param  Request $request
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\View\View
+     */
     public function checkout(Request $request)
     {
         $cart = session()->get('cart', []);
