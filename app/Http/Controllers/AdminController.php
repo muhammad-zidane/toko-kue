@@ -10,6 +10,7 @@ use App\Models\Category;
 use App\Models\Testimonial;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
 class AdminController extends Controller
@@ -121,6 +122,26 @@ class AdminController extends Controller
     {
         $order->load(['user', 'orderItems.product', 'payment']);
         return view('admin.order-detail', compact('order'));
+    }
+
+    public function downloadProof(Order $order)
+    {
+        $order->load('payment');
+
+        if (!$order->payment || !$order->payment->proof_image) {
+            abort(404, 'Bukti pembayaran tidak ditemukan.');
+        }
+
+        $path = $order->payment->proof_image;
+
+        if (!Storage::disk('public')->exists($path)) {
+            abort(404, 'File bukti pembayaran tidak ditemukan.');
+        }
+
+        $extension = pathinfo($path, PATHINFO_EXTENSION);
+        $filename  = 'bukti-' . $order->order_code . '.' . $extension;
+
+        return Storage::disk('public')->download($path, $filename);
     }
 
     public function updateOrderStatus(Order $order, $status)
@@ -251,7 +272,6 @@ $payments = Payment::with('order.user')->latest()->get();
 
     public function settings()
     {
-        $this->checkAdmin();
         return view('admin.settings');
     }
 

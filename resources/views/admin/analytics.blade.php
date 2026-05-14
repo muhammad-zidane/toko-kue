@@ -54,23 +54,23 @@
 {{-- STATS --}}
 <div class="stats-grid">
     <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(240,80,122,0.1);">💰</div>
+        <div class="stat-icon" style="background:rgba(240,80,122,0.1);"><i class="fas fa-money-bill-wave" style="color:var(--pink)"></i></div>
         <div class="stat-value">Rp {{ number_format($revenueThisMonth/1000, 0, ',', '.') }}rb</div>
         <div class="stat-label">Pendapatan Bulan Ini</div>
         <div class="stat-growth" style="color:{{ $growthPercent >= 0 ? '#22C55E' : '#EF4444' }};">{{ $growthPercent >= 0 ? '+' : '' }}{{ $growthPercent }}% dari bulan lalu</div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(59,130,246,0.1);">📦</div>
+        <div class="stat-icon" style="background:rgba(59,130,246,0.1);"><i class="fas fa-box" style="color:var(--pink)"></i></div>
         <div class="stat-value">{{ $ordersThisMonth }}</div>
         <div class="stat-label">Pesanan Bulan Ini</div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(245,158,11,0.1);">📊</div>
+        <div class="stat-icon" style="background:rgba(245,158,11,0.1);"><i class="fas fa-chart-bar" style="color:var(--pink)"></i></div>
         <div class="stat-value">Rp {{ number_format($avgOrderValue/1000, 0, ',', '.') }}rb</div>
         <div class="stat-label">Rata-rata Per Pesanan</div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(34,197,94,0.1);">📈</div>
+        <div class="stat-icon" style="background:rgba(34,197,94,0.1);"><i class="fas fa-chart-line" style="color:var(--pink)"></i></div>
         <div class="stat-value">Rp {{ number_format($revenueLastMonth/1000, 0, ',', '.') }}rb</div>
         <div class="stat-label">Pendapatan Bulan Lalu</div>
     </div>
@@ -79,7 +79,7 @@
 {{-- CHART & TOP PRODUCTS --}}
 <div class="two-grid">
     <div class="card">
-        <div class="card-title">📊 Pendapatan 7 Hari Terakhir</div>
+        <div class="card-title"><i class="fas fa-chart-bar" style="color:var(--pink)"></i> Pendapatan 7 Hari Terakhir</div>
         <div class="chart-bars">
             @foreach($dailyRevenue as $d)
             @php
@@ -95,7 +95,7 @@
         </div>
     </div>
     <div class="card">
-        <div class="card-title">🏆 Produk Terlaris</div>
+        <div class="card-title"><i class="fas fa-trophy" style="color:var(--pink)"></i> Produk Terlaris</div>
         @forelse($topProducts as $i => $p)
         <div class="top-item">
             <span class="top-rank" style="color:{{ $i === 0 ? '#F59E0B' : ($i === 1 ? '#9CA3AF' : ($i === 2 ? '#B45309' : '#D1D5DB')) }};">{{ $i + 1 }}</span>
@@ -117,7 +117,7 @@
 {{-- STATUS & CATEGORIES --}}
 <div class="two-grid">
     <div class="card">
-        <div class="card-title">📋 Distribusi Status Pesanan</div>
+        <div class="card-title"><i class="fas fa-clipboard-list" style="color:var(--pink)"></i> Distribusi Status Pesanan</div>
         @php
             $pending = $statusCounts['pending'] ?? 0;
             $processing = $statusCounts['processing'] ?? 0;
@@ -143,7 +143,7 @@
         </div>
     </div>
     <div class="card">
-        <div class="card-title">📂 Performa Kategori</div>
+        <div class="card-title"><i class="fas fa-folder-open" style="color:var(--pink)"></i> Performa Kategori</div>
         @forelse($categories as $cat)
         <div class="cat-item">
             <span style="font-size:14px;font-weight:600;">{{ $cat->name }}</span>

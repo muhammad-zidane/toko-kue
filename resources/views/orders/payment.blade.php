@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jagoan Kue - Konfirmasi Pembayaran</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root { --pink: #F0507A; --brown-dark: #2C1810; --cream: #FFF8EE; --cream-dark: #F5EDD8; --white: #FFFFFF; --gray: #6B7280; --text-dark: #1A1A1A; --green: #22C55E; }
@@ -16,9 +17,12 @@
         .navbar-logo { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; color: var(--pink); }
         .navbar-links { display: flex; gap: 32px; list-style: none; }
         .navbar-links a { color: white; font-size: 14px; font-weight: 500; opacity: 0.9; }
+        .navbar-links a:hover { opacity: 1; }
         .navbar-actions { display: flex; align-items: center; gap: 12px; }
         .btn-cart { background-color: var(--pink); color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; }
-        .btn-login { border: 1.5px solid white; color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; }
+        .btn-cart:hover { opacity: 0.85; }
+        .btn-login { border: 1.5px solid white; color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; transition: all 0.2s; }
+        .btn-login:hover { background: white; color: var(--brown-dark); }
         .breadcrumb { max-width: 1100px; margin: 0 auto; padding: 20px 24px 0; font-size: 13px; color: var(--gray); }
         .breadcrumb a { color: var(--gray); } .breadcrumb span { color: var(--text-dark); font-weight: 600; }
         .stepper-wrap { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
@@ -97,6 +101,9 @@
         .footer-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 40px; }
         .footer-logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 800; color: var(--pink); margin-bottom: 8px; }
         .footer-desc { font-size: 13px; opacity: 0.6; margin-bottom: 20px; line-height: 1.6; }
+        .footer-socials { display: flex; gap: 16px; font-size: 18px; }
+        .footer-socials a { opacity: 0.6; transition: opacity 0.2s; }
+        .footer-socials a:hover { opacity: 1; }
         .footer-heading { font-size: 14px; font-weight: 700; margin-bottom: 16px; }
         .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
         .footer-links a { color: white; font-size: 13px; opacity: 0.6; }
@@ -118,7 +125,7 @@
     $remainingSeconds = max(0, now()->diffInSeconds($deadline, false));
 @endphp
 
-<nav class="navbar"><div class="navbar-inner"><a href="/" class="navbar-logo">Jagoan Kue</a><ul class="navbar-links"><li><a href="/">Beranda</a></li><li><a href="/products">Katalog</a></li><li><a href="/orders">Pemesanan</a></li></ul><div class="navbar-actions"><a href="/cart" class="btn-cart">🛒 Keranjang</a>@auth<a href="/profile" class="btn-login">{{ auth()->user()->name }}</a>@else<a href="/login" class="btn-login">Login</a>@endauth</div></div></nav>
+@include('partials.navbar')
 
 <div class="breadcrumb"><a href="/">Beranda</a> / <a href="/products">Katalog</a> / <span>Konfirmasi Pembayaran</span></div>
 
@@ -242,7 +249,7 @@
             >
 
             <div class="upload-zone" onclick="document.getElementById('file-input').click()" ondragover="event.preventDefault()" ondrop="handleDrop(event)">
-                <div class="upload-icon" id="upload-icon">📤</div>
+                <div class="upload-icon" id="upload-icon"><i class="fas fa-file-upload" style="color:var(--pink)"></i></div>
                 <p class="upload-text" id="upload-text">Seret & letakkan file di sini</p>
                 <p class="upload-sub" id="upload-sub">atau klik untuk memilih file</p>
                 <button class="btn-pilih" type="button">Pilih File</button>
@@ -294,16 +301,16 @@
 
             <div class="aman-box">
                 <p class="aman-title">Pesanan Aman Bersama Kami</p>
-                <div class="aman-item"><span class="aman-check">✅</span> Verifikasi pembayaran otomatis</div>
-                <div class="aman-item"><span class="aman-check">✅</span> Uang kembali jika pesanan gagal</div>
-                <div class="aman-item"><span class="aman-check">✅</span> Data transaksi terenkripsi & aman</div>
+                <div class="aman-item"><span class="aman-check"><i class="fas fa-check-circle" style="color:#22C55E"></i></span> Verifikasi pembayaran otomatis</div>
+                <div class="aman-item"><span class="aman-check"><i class="fas fa-check-circle" style="color:#22C55E"></i></span> Uang kembali jika pesanan gagal</div>
+                <div class="aman-item"><span class="aman-check"><i class="fas fa-check-circle" style="color:#22C55E"></i></span> Data transaksi terenkripsi & aman</div>
             </div>
         </div>
     </div>
 </div>
 </form>
 
-<footer class="footer"><div class="footer-inner"><div><p class="footer-logo">Jagoan Kue</p><p class="footer-desc">Menyediakan kue dengan cinta sejak 2023</p></div><div><p class="footer-heading">Layanan</p><ul class="footer-links"><li><a href="#">Katalog Kue</a></li><li><a href="#">Kue Custom</a></li></ul></div><div><p class="footer-heading">Selengkapnya</p><ul class="footer-links"><li><a href="#">Tentang Kami</a></li><li><a href="#">Blog</a></li></ul></div><div><p class="footer-heading">Kontak</p><ul class="footer-contact"><li>0822-8320-3385</li><li>muhammadzidane253@gmail.com</li><li>Payakumbuh, Sumatera Barat</li></ul></div></div></footer>
+@include('partials.footer')
 
 <script>
     let totalSeconds = {{ (int)$remainingSeconds }};
@@ -327,7 +334,7 @@
             const sub = document.getElementById('upload-sub');
             const format = document.getElementById('upload-format');
 
-            if (icon) icon.textContent = '✅';
+            if (icon) icon.innerHTML = '<i class="fas fa-check-circle" style="color:#22C55E;"></i>';
             if (text) text.textContent = file.name;
             if (sub) sub.textContent = 'File siap diupload';
             if (format) format.textContent = '';
