@@ -40,6 +40,7 @@ Route::middleware(['auth'])->group(function () {
     // Pesanan
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::get('/pesanan/{order}/status', [OrderController::class, 'showStatus'])->name('pesanan.status');
     Route::get('/orders/{order}/reviews', [ProductReviewController::class, 'index'])->name('orders.reviews.index');
     Route::delete('/orders/{order}/reviews/{review}', [ProductReviewController::class, 'destroy'])->name('orders.reviews.destroy');
     Route::delete('/orders/{order}/reviews/{review}/images/{image}', [ProductReviewController::class, 'destroyImage'])->name('orders.reviews.images.destroy');
