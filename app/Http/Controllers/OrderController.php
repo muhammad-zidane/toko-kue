@@ -65,7 +65,7 @@ class OrderController extends Controller
             $product->decrement('stock', $item['quantity']);
         }
 
-        $paymentMethod = $request->payment_method ?? 'transfer';
+        $paymentMethod = $request->payment_method ?? 'transfer_bank';
         $isCod = $paymentMethod === 'cod';
 
         Payment::create([
@@ -122,7 +122,7 @@ class OrderController extends Controller
         if (!$payment) {
             $payment = Payment::create([
                 'order_id'       => $order->id,
-                'payment_method' => 'transfer',
+                'payment_method' => 'transfer_bank',
                 'status'         => 'unpaid',
                 'amount'         => $order->total_price,
             ]);

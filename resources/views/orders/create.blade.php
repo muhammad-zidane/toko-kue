@@ -156,10 +156,10 @@
         <div class="card">
             <div class="card-title"><div class="card-num">3</div><span>Metode Pembayaran</span></div>
             <div class="payment-grid">
-                <label class="payment-option"><input type="radio" name="payment_method" value="bca" checked><div class="payment-logo" style="background:#006CB0;">BCA</div><div class="payment-info"><p>Transfer BCA</p><small>Konfirmasi otomatis</small></div></label>
-                <label class="payment-option"><input type="radio" name="payment_method" value="bni"><div class="payment-logo" style="background:#F26522;">BNI</div><div class="payment-info"><p>Transfer BNI</p><small>Konfirmasi otomatis</small></div></label>
-                <label class="payment-option"><input type="radio" name="payment_method" value="gopay"><div class="payment-logo" style="background:#00B14F;">GoPay</div><div class="payment-info"><p>GoPay</p><small>E-wallet</small></div></label>
-                <label class="payment-option"><input type="radio" name="payment_method" value="cod"><div class="payment-logo" style="background:#6B7280;">COD</div><div class="payment-info"><p>COD</p><small>Bayar di tempat</small></div></label>
+                <label class="payment-option"><input type="radio" name="payment_method" value="transfer_bank" checked><div class="payment-logo" style="background:#006CB0;"><i class="fas fa-university"></i></div><div class="payment-info"><p>Transfer Bank</p><small>BCA / BNI / dll</small></div></label>
+                <label class="payment-option"><input type="radio" name="payment_method" value="ewallet"><div class="payment-logo" style="background:#00B14F;"><i class="fas fa-wallet"></i></div><div class="payment-info"><p>E-wallet</p><small>GoPay / OVO / dll</small></div></label>
+                <label class="payment-option"><input type="radio" name="payment_method" value="qris"><div class="payment-logo" style="background:#7C3AED;"><i class="fas fa-qrcode"></i></div><div class="payment-info"><p>QRIS</p><small>Scan & bayar</small></div></label>
+                <label class="payment-option"><input type="radio" name="payment_method" value="cod"><div class="payment-logo" style="background:#6B7280;"><i class="fas fa-motorcycle"></i></div><div class="payment-info"><p>COD</p><small>Bayar di tempat</small></div></label>
             </div>
         </div>
     </div>
