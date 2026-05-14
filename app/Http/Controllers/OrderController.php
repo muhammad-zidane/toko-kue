@@ -17,24 +17,47 @@ class OrderController extends Controller
             ->where('user_id', auth()->id())
             ->latest()
             ->paginate(10);
+
         return view('orders.index', compact('orders'));
+    }
+
+    public function singleProductCheckout(Product $product)
+    {
+        return view('orders.create', compact('product'));
+    }
+
+    public function payment(Order $order)
+    {
+        $this->authorizeOwner($order);
+        $order->load('orderItems.product', 'payment');
+
+        return view('orders.payment', compact('order'));
+    }
+
+    public function success(Order $order)
+    {
+        $this->authorizeOwner($order);
+        $order->load('orderItems.product', 'payment');
+
+        return view('orders.success', compact('order'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'shipping_address' => 'required|string',
-            'notes'            => 'nullable|string',
-            'items'            => 'required|array',
+            'shipping_address'   => 'required|string',
+            'notes'              => 'nullable|string',
+            'items'              => 'required|array',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity'   => 'required|integer|min:1',
             'items.*.note'       => 'nullable|string',
         ]);
 
+        $products = Product::findMany(array_column($request->items, 'product_id'))->keyBy('id');
+
         $totalPrice = 0;
-        // Validasi stok terlebih dahulu
         foreach ($request->items as $item) {
-            $product = Product::findOrFail($item['product_id']);
+            $product = $products->get($item['product_id']);
             if ($product->stock < $item['quantity']) {
                 return back()->withErrors(['stock' => "Stok {$product->name} tidak mencukupi. Tersisa {$product->stock}."]);
             }
@@ -51,7 +74,7 @@ class OrderController extends Controller
         ]);
 
         foreach ($request->items as $item) {
-            $product = Product::findOrFail($item['product_id']);
+            $product = $products->get($item['product_id']);
 
             OrderItem::create([
                 'order_id'   => $order->id,
@@ -61,7 +84,6 @@ class OrderController extends Controller
                 'note'       => $item['note'] ?? null,
             ]);
 
-            // Kurangi stok produk
             $product->decrement('stock', $item['quantity']);
         }
 
@@ -76,15 +98,12 @@ class OrderController extends Controller
             'paid_at'        => $isCod ? now() : null,
         ]);
 
-        // COD: langsung konfirmasi pesanan
         if ($isCod) {
             $order->update(['status' => 'processing']);
         }
 
-        // Bersihkan cart setelah order berhasil
         session()->forget('cart');
 
-        // COD langsung ke halaman sukses, lainnya ke halaman pembayaran
         if ($isCod) {
             return redirect()->route('orders.success', $order)->with('success', 'Pesanan COD berhasil dikonfirmasi!');
         }
@@ -94,33 +113,23 @@ class OrderController extends Controller
 
     public function showStatus(Order $order)
     {
-        if ($order->user_id !== auth()->id()) {
-            abort(403);
-        }
-
+        $this->authorizeOwner($order);
         $order->load('orderItems.product', 'payment');
+
         return view('orders.status', compact('order'));
     }
 
     public function show(Order $order)
     {
-        // Ownership check
-        if ($order->user_id !== auth()->id()) {
-            abort(403);
-        }
-
+        $this->authorizeOwner($order);
         $order->load('orderItems.product', 'payment', 'productReviews.product', 'productReviews.images');
+
         return view('orders.show', compact('order'));
     }
 
-    /**
-     * Upload bukti pembayaran dan update status.
-     */
     public function uploadProof(Request $request, Order $order)
     {
-        if ($order->user_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->authorizeOwner($order);
 
         $request->validate([
             'proof_image' => 'required|image|mimes:jpg,jpeg,png,webp,heic,heif|max:5120',
@@ -147,5 +156,12 @@ class OrderController extends Controller
         $order->update(['status' => 'processing']);
 
         return redirect()->route('orders.success', $order)->with('success', 'Bukti pembayaran berhasil diupload!');
+    }
+
+    private function authorizeOwner(Order $order): void
+    {
+        if ($order->user_id !== auth()->id()) {
+            abort(403);
+        }
     }
 }
