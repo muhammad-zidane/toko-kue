@@ -71,7 +71,7 @@
                     <td style="font-weight:600;color:var(--gray);">{{ $i + 1 }}</td>
                     <td style="font-weight:700;">#{{ $payment->order->order_code ?? '-' }}</td>
                     <td>{{ $payment->order->user->name ?? '-' }}</td>
-                    <td><span class="method-badge">{{ $payment->payment_method ?? '-' }}</span></td>
+                    <td><span class="method-badge">{{ ['transfer_bank'=>'Transfer Bank','ewallet'=>'E-Wallet','qris'=>'QRIS','cod'=>'COD'][$payment->payment_method ?? ''] ?? ($payment->payment_method ?? '-') }}</span></td>
                     <td style="font-weight:700;color:var(--brown-dark);">Rp {{ number_format($payment->amount, 0, ',', '.') }}</td>
                     <td>
                         @if($payment->status === 'paid')

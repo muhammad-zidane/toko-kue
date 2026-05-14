@@ -130,7 +130,7 @@
                 <p class="card-label">INFO PENGIRIMAN</p>
                 <div class="info-row"><span>Penerima</span><span>{{ auth()->user()->name }}</span></div>
                 <div class="info-row"><span>Alamat</span><span>{{ $order->shipping_address }}</span></div>
-                <div class="info-row"><span>Pembayaran</span><span>{{ ucfirst($order->payment->payment_method ?? '-') }}</span></div>
+                <div class="info-row"><span>Pembayaran</span><span>{{ ['transfer_bank'=>'Transfer Bank','ewallet'=>'E-Wallet','qris'=>'QRIS','cod'=>'COD'][$order->payment->payment_method ?? ''] ?? ucfirst($order->payment->payment_method ?? '-') }}</span></div>
                 <div class="info-row"><span>Status bayar</span><span><span class="badge-status badge-{{ $order->payment->status ?? 'pending' }}">{{ ucfirst($order->payment->status ?? 'unpaid') }}</span></span></div>
                 @if($order->notes)
                 <div class="info-row"><span>Catatan</span><span>{{ $order->notes }}</span></div>
