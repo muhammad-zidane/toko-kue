@@ -31,7 +31,11 @@
     .btn-processing { background: #DBEAFE; color: #2563EB; }
     .btn-completed { background: #DCFCE7; color: #16A34A; }
     .btn-cancelled { background: #FEE2E2; color: #DC2626; }
-    .proof-img { max-width: 100%; border-radius: 12px; margin-top: 12px; border: 1px solid #EDE0D4; }
+    .proof-img { max-width: 100%; border-radius: 12px; margin-top: 12px; border: 1px solid #EDE0D4; display: block; }
+    .btn-download { display: inline-flex; align-items: center; gap: 8px; margin-top: 10px; background: var(--brown-dark); color: white; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; transition: opacity 0.2s; }
+    .btn-download:hover { opacity: 0.85; }
+    .proof-img.expanded { max-width: 100%; width: 100%; cursor: zoom-out; }
+    .proof-img:not(.expanded) { max-height: 200px; object-fit: cover; cursor: zoom-in; }
     @media (max-width: 768px) { .detail-grid { grid-template-columns: 1fr; } }
 </style>
 @endsection
@@ -159,7 +163,14 @@
             @if($order->payment->proof_image)
             <div style="margin-top:12px;">
                 <p style="font-size:12px;font-weight:600;color:var(--gray);margin-bottom:8px;">Bukti Pembayaran:</p>
-                <img src="{{ asset('storage/' . $order->payment->proof_image) }}" alt="Bukti Pembayaran" class="proof-img">
+                <img src="{{ asset('storage/' . $order->payment->proof_image) }}"
+                     alt="Bukti Pembayaran"
+                     class="proof-img"
+                     onclick="this.classList.toggle('expanded')"
+                     style="cursor:zoom-in;">
+                <a href="{{ route('admin.orders.downloadProof', $order) }}" class="btn-download">
+                    <i class="fas fa-download" style="color:white;"></i> Unduh Bukti
+                </a>
             </div>
             @endif
             @else

@@ -36,7 +36,7 @@
 <div class="card">
     <div class="card-header">
         <h2>Daftar Produk ({{ $products->total() }})</h2>
-        <a href="{{ route('admin.products.create') }}" class="btn-add">➕ Tambah Produk</a>
+        <a href="{{ route('admin.products.create') }}" class="btn-add"><i class="fas fa-plus" style="color:white"></i> Tambah Produk</a>
     </div>
     <div style="overflow-x:auto;">
         <table>
@@ -59,7 +59,7 @@
                                 @if($product->image)
                                     <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}">
                                 @else
-                                    <span style="font-size:20px;">🎂</span>
+                                    <span style="font-size:20px;"><i class="fas fa-birthday-cake" style="color:var(--pink)"></i></span>
                                 @endif
                             </div>
                             <div>
@@ -88,10 +88,10 @@
                     </td>
                     <td>
                         <div class="actions">
-                            <a href="{{ route('admin.products.edit', $product) }}" class="btn-edit">✏️ Edit</a>
+                            <a href="{{ route('admin.products.edit', $product) }}" class="btn-edit"><i class="fas fa-pen"></i> Edit</a>
                             <form method="POST" action="{{ route('admin.products.destroy', $product) }}" onsubmit="return confirm('Hapus produk {{ $product->name }}?')">
                                 @csrf @method('DELETE')
-                                <button class="btn-delete">🗑️</button>
+                                <button class="btn-delete"><i class="fas fa-trash"></i></button>
                             </form>
                         </div>
                     </td>
@@ -99,10 +99,10 @@
                 @empty
                 <tr>
                     <td colspan="6" style="text-align:center;padding:48px;">
-                        <div style="font-size:48px;margin-bottom:12px;">🎂</div>
+                        <div style="font-size:48px;margin-bottom:12px;"><i class="fas fa-birthday-cake" style="color:var(--pink)"></i></div>
                         <h3 style="font-weight:700;color:var(--brown-dark);">Belum Ada Produk</h3>
                         <p style="font-size:14px;color:var(--gray);margin-bottom:16px;">Mulai tambahkan produk kue pertama Anda.</p>
-                        <a href="{{ route('admin.products.create') }}" class="btn-add">➕ Tambah Produk</a>
+                        <a href="{{ route('admin.products.create') }}" class="btn-add"><i class="fas fa-plus" style="color:white"></i> Tambah Produk</a>
                     </td>
                 </tr>
                 @endforelse

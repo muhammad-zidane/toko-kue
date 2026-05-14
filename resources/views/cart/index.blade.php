@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jagoan Kue - Keranjang</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -17,8 +18,10 @@
         .navbar-logo { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; color: var(--pink); }
         .navbar-links { display: flex; gap: 32px; list-style: none; }
         .navbar-links a { color: white; font-size: 14px; font-weight: 500; opacity: 0.9; }
+        .navbar-links a:hover { opacity: 1; }
         .navbar-actions { display: flex; align-items: center; gap: 12px; }
         .btn-cart { background-color: var(--pink); color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; }
+        .btn-cart:hover { opacity: 0.85; }
         .btn-login { border: 1.5px solid white; color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; transition: all 0.2s; }
         .btn-login:hover { background: white; color: var(--brown-dark); }
         .page { max-width: 1100px; margin: 0 auto; padding: 32px 24px 60px; }
@@ -60,6 +63,9 @@
         .footer-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 40px; }
         .footer-logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 800; color: var(--pink); margin-bottom: 8px; }
         .footer-desc { font-size: 13px; opacity: 0.6; margin-bottom: 20px; line-height: 1.6; }
+        .footer-socials { display: flex; gap: 16px; font-size: 18px; }
+        .footer-socials a { opacity: 0.6; transition: opacity 0.2s; }
+        .footer-socials a:hover { opacity: 1; }
         .footer-heading { font-size: 14px; font-weight: 700; margin-bottom: 16px; }
         .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
         .footer-links a { color: white; font-size: 13px; opacity: 0.6; }
@@ -72,7 +78,7 @@
     @endif
 </head>
 <body>
-<nav class="navbar"><div class="navbar-inner"><a href="/" class="navbar-logo">Jagoan Kue</a><ul class="navbar-links"><li><a href="/">Beranda</a></li><li><a href="/products">Katalog</a></li><li><a href="/orders">Pemesanan</a></li></ul><div class="navbar-actions"><a href="/cart" class="btn-cart">🛒 Keranjang</a>@auth<a href="/profile" class="btn-login">{{ auth()->user()->name }}</a>@else<a href="/login" class="btn-login">Login</a>@endauth</div></div></nav>
+@include('partials.navbar')
 
 <div class="page">
     <p class="page-title">Keranjang</p>
@@ -98,7 +104,7 @@
                     <label class="item-note-label">Catatan Produk</label>
                     <textarea class="item-note-input" id="note-{{ $item['product']->id }}" rows="2" placeholder="Contoh: tulisan ucapan, warna, request khusus..." oninput="queueNoteSave({{ $item['product']->id }})">{{ $item['note'] ?? '' }}</textarea>
                     <div class="item-actions">
-                        <button class="action-btn" title="Hapus" onclick="hapusItem({{ $item['product']->id }})">🗑</button>
+                        <button class="action-btn" title="Hapus" onclick="hapusItem({{ $item['product']->id }})"><i class="fas fa-trash" style="color:var(--pink)"></i></button>
                         <div class="qty-control">
                             <button class="qty-btn" onclick="changeItemQty({{ $item['product']->id }}, -1)">−</button>
                             <input type="number" class="qty-num" id="qty-{{ $item['product']->id }}" value="{{ $item['quantity'] }}" min="1" onchange="updateItemPrice({{ $item['product']->id }}, {{ $item['product']->price }})">
@@ -110,7 +116,7 @@
             @endforeach
             @else
             <div class="empty-cart">
-                <p>Keranjang kamu masih kosong 🛒</p>
+                <p>Keranjang kamu masih kosong <i class="fas fa-shopping-cart" style="color:var(--pink)"></i></p>
                 <a href="/products" class="btn-shop">Belanja Sekarang</a>
             </div>
             @endif
@@ -127,7 +133,7 @@
     </div>
 </div>
 
-<footer class="footer"><div class="footer-inner"><div><p class="footer-logo">Jagoan Kue</p><p class="footer-desc">Menyediakan kue dengan cinta sejak 2023</p></div><div><p class="footer-heading">Layanan</p><ul class="footer-links"><li><a href="#">Katalog Kue</a></li><li><a href="#">Kue Custom</a></li></ul></div><div><p class="footer-heading">Selengkapnya</p><ul class="footer-links"><li><a href="#">Tentang Kami</a></li><li><a href="#">Blog</a></li></ul></div><div><p class="footer-heading">Kontak</p><ul class="footer-contact"><li>0822-8320-3385</li><li>muhammadzidane253@gmail.com</li><li>Payakumbuh, Sumatera Barat</li></ul></div></div></footer>
+@include('partials.footer')
 
 <script>
     const products = @json(isset($cartItems) ? collect($cartItems)->mapWithKeys(fn($i) => [$i['product']->id => $i['product']->price]) : []);

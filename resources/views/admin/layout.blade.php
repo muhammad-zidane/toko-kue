@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jagoan Kue — @yield('title', 'Admin')</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -237,38 +238,38 @@
             <div class="sidebar-logo">Jagoan Kue</div>
             <div class="sidebar-subtitle">admin panel</div>
         </div>
-        <button class="sidebar-close" onclick="closeSidebar()">✕</button>
+        <button class="sidebar-close" onclick="closeSidebar()"><i class="fas fa-times"></i></button>
     </div>
 
     <nav class="sidebar-nav">
         <div class="sidebar-section">Utama</div>
         <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-            <span class="sidebar-link-icon">⊞</span> Dashboard
+            <span class="sidebar-link-icon"><i class="fas fa-th-large"></i></span> Dashboard
         </a>
         <a href="{{ route('admin.orders') }}" class="sidebar-link {{ request()->routeIs('admin.orders') ? 'active' : '' }}">
-            <span class="sidebar-link-icon">📋</span> Pesanan
+            <span class="sidebar-link-icon"><i class="fas fa-clipboard-list"></i></span> Pesanan
         </a>
         <a href="{{ route('admin.products.index') }}" class="sidebar-link {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
-            <span class="sidebar-link-icon">🎂</span> Produk
+            <span class="sidebar-link-icon"><i class="fas fa-birthday-cake"></i></span> Produk
         </a>
         <a href="{{ route('admin.categories') }}" class="sidebar-link {{ request()->routeIs('admin.categories') ? 'active' : '' }}">
-            <span class="sidebar-link-icon">🏷️</span> Kategori
+            <span class="sidebar-link-icon"><i class="fas fa-tag"></i></span> Kategori
         </a>
         <a href="{{ route('admin.customers') }}" class="sidebar-link {{ request()->routeIs('admin.customers') ? 'active' : '' }}">
-            <span class="sidebar-link-icon">👤</span> Pelanggan
+            <span class="sidebar-link-icon"><i class="fas fa-user"></i></span> Pelanggan
         </a>
 
         <div class="sidebar-section">Laporan</div>
         <a href="{{ route('admin.analytics') }}" class="sidebar-link {{ request()->routeIs('admin.analytics') ? 'active' : '' }}">
-            <span class="sidebar-link-icon">📈</span> Analisis
+            <span class="sidebar-link-icon"><i class="fas fa-chart-line"></i></span> Analisis
         </a>
         <a href="{{ route('admin.finance') }}" class="sidebar-link {{ request()->routeIs('admin.finance') ? 'active' : '' }}">
-            <span class="sidebar-link-icon">💰</span> Keuangan
+            <span class="sidebar-link-icon"><i class="fas fa-money-bill-wave"></i></span> Keuangan
         </a>
 
         <div class="sidebar-section">Sistem</div>
         <a href="{{ route('admin.settings') }}" class="sidebar-link {{ request()->routeIs('admin.settings') ? 'active' : '' }}">
-            <span class="sidebar-link-icon">⚙</span> Pengaturan
+            <span class="sidebar-link-icon"><i class="fas fa-cog"></i></span> Pengaturan
         </a>
     </nav>
 
@@ -280,7 +281,7 @@
         </div>
         <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <button type="submit" class="sidebar-logout" title="Logout">🚪</button>
+            <button type="submit" class="sidebar-logout" title="Logout"><i class="fas fa-sign-out-alt" style="color:white"></i></button>
         </form>
     </div>
 </aside>
@@ -289,7 +290,7 @@
 <div class="main-content">
     <div class="topbar">
         <div class="topbar-left">
-            <button class="topbar-hamburger" onclick="openSidebar()">☰</button>
+            <button class="topbar-hamburger" onclick="openSidebar()"><i class="fas fa-bars" style="color:var(--brown-dark)"></i></button>
             <div>
                 <div class="topbar-title">@yield('page-title', 'Dashboard')</div>
                 <div class="topbar-subtitle">@yield('page-subtitle', '')</div>
