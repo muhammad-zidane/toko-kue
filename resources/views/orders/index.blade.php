@@ -118,6 +118,7 @@
 
                 <div class="actions">
                     <a class="btn-outline" href="{{ route('orders.show', $order) }}">Detail</a>
+                    <a class="btn-primary" href="{{ route('pesanan.status', $order) }}"><i class="fa-solid fa-location-dot" style="margin-right:5px;"></i>Lacak</a>
 
                     @if ($status === 'completed' && $paymentStatus === 'paid')
                         <a class="btn-outline" href="{{ route('orders.reviews.index', $order) }}">Ulasan</a>
