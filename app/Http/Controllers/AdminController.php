@@ -2,16 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Order;
+use App\Models\Payment;
 use App\Models\Product;
 use App\Models\User;
-use App\Models\Payment;
-use App\Models\Category;
-use App\Models\Testimonial;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
@@ -20,84 +19,60 @@ class AdminController extends Controller
         $now = Carbon::now();
         $startOfThisMonth = $now->copy()->startOfMonth();
         $startOfLastMonth = $now->copy()->subMonth()->startOfMonth();
-        $endOfLastMonth = $now->copy()->subMonth()->endOfMonth();
+        $endOfLastMonth   = $now->copy()->subMonth()->endOfMonth();
 
-        // Stats with growth
         $ordersThisMonth = Order::where('created_at', '>=', $startOfThisMonth)->count();
         $ordersLastMonth = Order::whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])->count();
-        $orderGrowth = $ordersLastMonth > 0 ? round(($ordersThisMonth - $ordersLastMonth) / $ordersLastMonth * 100) : 0;
+        $orderGrowth     = $this->calculateGrowthPercent($ordersThisMonth, $ordersLastMonth);
 
         $revenueThisMonth = Payment::where('status', 'paid')->where('created_at', '>=', $startOfThisMonth)->sum('amount');
         $revenueLastMonth = Payment::where('status', 'paid')->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])->sum('amount');
-        $revenueGrowth = $revenueLastMonth > 0 ? round(($revenueThisMonth - $revenueLastMonth) / $revenueLastMonth * 100) : 0;
+        $revenueGrowth    = $this->calculateGrowthPercent($revenueThisMonth, $revenueLastMonth);
 
         $customersThisMonth = User::where('role', 'customer')->where('created_at', '>=', $startOfThisMonth)->count();
         $customersLastMonth = User::where('role', 'customer')->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])->count();
-        $customerGrowth = $customersLastMonth > 0 ? round(($customersThisMonth - $customersLastMonth) / $customersLastMonth * 100) : 0;
+        $customerGrowth     = $this->calculateGrowthPercent($customersThisMonth, $customersLastMonth);
 
         $pendingOrdersCount = Order::where('status', 'pending')->count();
+        $latestOrders       = Order::with('user', 'orderItems.product')->latest()->take(5)->get();
 
-        // Recent Orders
-        $latestOrders = Order::with('user', 'orderItems.product')->latest()->take(5)->get();
-
-        // Daily Revenue (7 days)
-        $dailyRevenue = [];
-        $dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-        for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i);
-            $dayStart = $date->copy()->startOfDay();
-            $dayEnd = $date->copy()->endOfDay();
-            $amount = Payment::where('status', 'paid')->whereBetween('created_at', [$dayStart, $dayEnd])->sum('amount');
-            $dailyRevenue[] = [
-                'day' => $dayNames[$date->dayOfWeek],
-                'amount' => (float) $amount,
-            ];
-        }
-        $maxDaily = max(array_column($dailyRevenue, 'amount') ?: [1]);
-        if ($maxDaily == 0) $maxDaily = 1;
+        $dailyRevenue    = $this->buildDailyRevenue();
+        $maxDaily        = max(array_column($dailyRevenue, 'amount') ?: [1]) ?: 1;
         $revenueThisWeek = array_sum(array_column($dailyRevenue, 'amount'));
 
-        // Top Products
-        $topProducts = Product::withCount('orderItems')
-            ->with('category')
-            ->orderByDesc('order_items_count')
-            ->take(3)
-            ->get();
-        $maxSold = $topProducts->first()->order_items_count ?? 1;
-        if ($maxSold == 0) $maxSold = 1;
+        $topProducts = Product::withCount('orderItems')->with('category')->orderByDesc('order_items_count')->take(3)->get();
+        $maxSold     = max($topProducts->first()->order_items_count ?? 0, 1);
 
-        // Recent Activities (from recent orders)
         $recentActivities = $latestOrders->map(function ($order) use ($now) {
-            // Selisih dari created_at → now (selalu ≥ 0). $now->diffInMinutes($created_at) bisa negatif di Carbon 3.
             $minsAgo = max(0, (int) round($order->created_at->diffInMinutes($now)));
-            if ($minsAgo < 60) $timeLabel = $minsAgo . ' menit yang lalu';
-            elseif ($minsAgo < 1440) $timeLabel = floor($minsAgo / 60) . ' jam yang lalu';
-            else $timeLabel = floor($minsAgo / 1440) . ' hari yang lalu';
 
-            switch ($order->status) {
-                case 'pending':
-                    $message = 'Pesanan baru <strong>' . $order->order_code . '</strong> masuk dari ' . ($order->user->name ?? '-') . '.';
-                    $colorClass = 'bg-pink';
-                    break;
-                case 'processing':
-                    $message = 'Pesanan <strong>' . $order->order_code . '</strong> sedang diproses.';
-                    $colorClass = 'bg-blue';
-                    break;
-                case 'completed':
-                    $message = 'Pesanan <strong>' . $order->order_code . '</strong> telah selesai.';
-                    $colorClass = 'bg-green';
-                    break;
-                default:
-                    $message = 'Pesanan <strong>' . $order->order_code . '</strong> dibatalkan.';
-                    $colorClass = 'bg-red';
+            if ($minsAgo < 60) {
+                $timeLabel = $minsAgo . ' menit yang lalu';
+            } elseif ($minsAgo < 1440) {
+                $timeLabel = floor($minsAgo / 60) . ' jam yang lalu';
+            } else {
+                $timeLabel = floor($minsAgo / 1440) . ' hari yang lalu';
             }
-            return compact('message', 'timeLabel', 'colorClass');
+
+            $colorMap = [
+                'pending'    => 'bg-pink',
+                'processing' => 'bg-blue',
+                'completed'  => 'bg-green',
+            ];
+
+            return [
+                'order_code' => $order->order_code,
+                'user_name'  => $order->user->name ?? '-',
+                'status'     => $order->status,
+                'color'      => $colorMap[$order->status] ?? 'bg-red',
+                'time_label' => $timeLabel,
+            ];
         });
 
-        $totalOrders = Order::count();
-        $totalProducts = Product::count();
+        $totalOrders    = Order::count();
+        $totalProducts  = Product::count();
         $totalCustomers = User::where('role', 'customer')->count();
-        $totalRevenue = Payment::where('status', 'paid')->sum('amount');
+        $totalRevenue   = Payment::where('status', 'paid')->sum('amount');
 
         return view('admin.dashboard', compact(
             'totalOrders', 'totalProducts', 'totalCustomers', 'totalRevenue',
@@ -115,12 +90,14 @@ class AdminController extends Controller
     public function orders()
     {
         $orders = Order::with(['user', 'payment', 'orderItems'])->latest()->paginate(10);
+
         return view('admin.orders', compact('orders'));
     }
 
     public function orderDetail(Order $order)
     {
         $order->load(['user', 'orderItems.product', 'payment']);
+
         return view('admin.order-detail', compact('order'));
     }
 
@@ -128,32 +105,32 @@ class AdminController extends Controller
     {
         $order->load('payment');
 
-        if (!$order->payment || !$order->payment->proof_image) {
+        if (!$order->payment?->proof_image) {
             abort(404, 'Bukti pembayaran tidak ditemukan.');
         }
 
         $path = $order->payment->proof_image;
 
-        if (!Storage::disk('public')->exists($path)) {
+        if (!\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
             abort(404, 'File bukti pembayaran tidak ditemukan.');
         }
 
         $extension = pathinfo($path, PATHINFO_EXTENSION);
         $filename  = 'bukti-' . $order->order_code . '.' . $extension;
 
-        return Storage::disk('public')->download($path, $filename);
+        return \Illuminate\Support\Facades\Storage::disk('public')->download($path, $filename);
     }
 
-    public function updateOrderStatus(Order $order, $status)
+    public function updateOrderStatus(Order $order, string $status)
     {
-$validStatuses = ['pending', 'processing', 'completed', 'cancelled'];
+        $validStatuses = ['pending', 'processing', 'shipped', 'completed', 'cancelled'];
+
         if (!in_array($status, $validStatuses)) {
             return back()->withErrors(['status' => 'Status tidak valid.']);
         }
 
         $order->update(['status' => $status]);
 
-        // Jika order dikonfirmasi bayar, update payment juga
         if ($status === 'completed' && $order->payment) {
             $order->payment->update(['status' => 'paid', 'paid_at' => now()]);
         }
@@ -163,20 +140,21 @@ $validStatuses = ['pending', 'processing', 'completed', 'cancelled'];
 
     public function categories()
     {
-$categories = Category::withCount('products')->latest()->get();
+        $categories = Category::withCount('products')->latest()->get();
+
         return view('admin.categories', compact('categories'));
     }
 
     public function storeCategory(Request $request)
     {
-$request->validate([
-            'name' => 'required|string|max:255',
+        $request->validate([
+            'name'        => 'required|string|max:255',
             'description' => 'nullable|string',
         ]);
 
         Category::create([
-            'name' => $request->name,
-            'slug' => Str::slug($request->name),
+            'name'        => $request->name,
+            'slug'        => Str::slug($request->name),
             'description' => $request->description,
         ]);
 
@@ -185,7 +163,8 @@ $request->validate([
 
     public function destroyCategory(Category $category)
     {
-$category->delete();
+        $category->delete();
+
         return back()->with('success', 'Kategori berhasil dihapus!');
     }
 
@@ -193,60 +172,44 @@ $category->delete();
     {
         $customers = User::where('role', '!=', 'admin')
             ->withCount('orders')
-            ->with(['orders' => fn($q) => $q->select('id', 'user_id', 'status', 'created_at')])
+            ->with(['orders' => fn ($q) => $q->select('id', 'user_id', 'status', 'created_at')])
             ->latest()
             ->get();
 
         $totalCustomers = $customers->count();
-        $newCustomers = $customers->filter(fn($c) => $c->created_at->month === now()->month && $c->created_at->year === now()->year)->count();
-        $totalOrders = $customers->sum(fn($c) => $c->orders->count());
+        $newCustomers   = $customers->filter(
+            fn ($c) => $c->created_at->month === now()->month && $c->created_at->year === now()->year
+        )->count();
+        $totalOrders = $customers->sum('orders_count');
 
         return view('admin.customers', compact('customers', 'totalCustomers', 'newCustomers', 'totalOrders'));
     }
 
     public function analytics()
     {
-$now = Carbon::now();
+        $now              = Carbon::now();
         $startOfThisMonth = $now->copy()->startOfMonth();
         $startOfLastMonth = $now->copy()->subMonth()->startOfMonth();
-        $endOfLastMonth = $now->copy()->subMonth()->endOfMonth();
+        $endOfLastMonth   = $now->copy()->subMonth()->endOfMonth();
 
         $revenueThisMonth = (float) Payment::where('status', 'paid')->where('created_at', '>=', $startOfThisMonth)->sum('amount');
         $revenueLastMonth = (float) Payment::where('status', 'paid')->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])->sum('amount');
-        $growthPercent = $revenueLastMonth > 0 ? round(($revenueThisMonth - $revenueLastMonth) / $revenueLastMonth * 100, 1) : 0;
+        $growthPercent    = $this->calculateGrowthPercent($revenueThisMonth, $revenueLastMonth, 1);
 
         $ordersThisMonth = Order::where('created_at', '>=', $startOfThisMonth)->count();
-        $avgOrderValue = $ordersThisMonth > 0 ? round($revenueThisMonth / $ordersThisMonth) : 0;
+        $avgOrderValue   = $ordersThisMonth > 0 ? round($revenueThisMonth / $ordersThisMonth) : 0;
 
-        // Daily revenue (7 days)
-        $dailyRevenue = [];
-        $dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-        for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i);
-            $amount = (float) Payment::where('status', 'paid')
-                ->whereBetween('created_at', [$date->copy()->startOfDay(), $date->copy()->endOfDay()])
-                ->sum('amount');
-            $dailyRevenue[] = ['day' => $dayNames[$date->dayOfWeek], 'amount' => $amount];
-        }
-        $maxDaily = max(array_column($dailyRevenue, 'amount') ?: [1]);
-        if ($maxDaily == 0) $maxDaily = 1;
+        $dailyRevenue = $this->buildDailyRevenue();
+        $maxDaily     = max(array_column($dailyRevenue, 'amount') ?: [1]) ?: 1;
 
-        // Top products
-        $topProducts = Product::withCount('orderItems')
-            ->with('category')
-            ->orderByDesc('order_items_count')
-            ->take(5)
-            ->get();
-        $maxSold = $topProducts->first()->order_items_count ?? 1;
-        if ($maxSold == 0) $maxSold = 1;
+        $topProducts = Product::withCount('orderItems')->with('category')->orderByDesc('order_items_count')->take(5)->get();
+        $maxSold     = max($topProducts->first()->order_items_count ?? 0, 1);
 
-        // Order status distribution
-        $statusCounts = Order::selectRaw('status, count(*) as count')->groupBy('status')->pluck('count', 'status')->toArray();
+        $statusCounts  = Order::selectRaw('status, count(*) as count')->groupBy('status')->pluck('count', 'status')->toArray();
         $totalOrdersAll = array_sum($statusCounts) ?: 1;
 
-        // Category stats
         $categories = Category::withCount('products')->get();
-        $maxProd = $categories->max('products_count') ?: 1;
+        $maxProd    = $categories->max('products_count') ?: 1;
 
         return view('admin.analytics', compact(
             'revenueThisMonth', 'revenueLastMonth', 'growthPercent',
@@ -260,12 +223,12 @@ $now = Carbon::now();
 
     public function finance()
     {
-$payments = Payment::with('order.user')->latest()->get();
+        $payments = Payment::with('order.user')->latest()->get();
 
-        $totalRevenue = $payments->where('status', 'paid')->sum('amount');
+        $totalRevenue    = $payments->where('status', 'paid')->sum('amount');
         $pendingPayments = $payments->where('status', 'unpaid')->sum('amount');
-        $paidCount = $payments->where('status', 'paid')->count();
-        $pendingCount = $payments->where('status', 'unpaid')->count();
+        $paidCount       = $payments->where('status', 'paid')->count();
+        $pendingCount    = $payments->where('status', 'unpaid')->count();
 
         return view('admin.finance', compact('payments', 'totalRevenue', 'pendingPayments', 'paidCount', 'pendingCount'));
     }
@@ -277,18 +240,18 @@ $payments = Payment::with('order.user')->latest()->get();
 
     public function updateSettings(Request $request)
     {
-$request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email',
+        $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email',
             'password' => 'nullable|min:8|confirmed',
         ]);
 
         $user = auth()->user();
-        $user->name = $request->name;
+        $user->name  = $request->name;
         $user->email = $request->email;
 
         if ($request->filled('password')) {
-            $user->password = bcrypt($request->password);
+            $user->password = Hash::make($request->password);
         }
 
         $user->save();
@@ -298,7 +261,34 @@ $request->validate([
 
     public function adminProducts()
     {
-$products = Product::with('category')->latest()->paginate(15);
+        $products = Product::with('category')->latest()->paginate(15);
+
         return view('admin.products', compact('products'));
+    }
+
+    private function buildDailyRevenue(): array
+    {
+        $dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+        $result   = [];
+
+        for ($i = 6; $i >= 0; $i--) {
+            $date   = Carbon::now()->subDays($i);
+            $amount = (float) Payment::where('status', 'paid')
+                ->whereBetween('created_at', [$date->copy()->startOfDay(), $date->copy()->endOfDay()])
+                ->sum('amount');
+
+            $result[] = ['day' => $dayNames[$date->dayOfWeek], 'amount' => $amount];
+        }
+
+        return $result;
+    }
+
+    private function calculateGrowthPercent(float|int $current, float|int $previous, int $decimals = 0): float|int
+    {
+        if ($previous <= 0) {
+            return 0;
+        }
+
+        return round(($current - $previous) / $previous * 100, $decimals);
     }
 }

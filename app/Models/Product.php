@@ -11,10 +11,10 @@ class Product extends Model
         'price', 'stock', 'image', 'is_available'
     ];
 
-    public function getRouteKeyName()
-{
-    return 'slug';
-}
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 
     public function category()
     {
