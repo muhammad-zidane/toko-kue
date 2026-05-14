@@ -11,6 +11,11 @@ use Illuminate\Support\Str;
 
 class OrderController extends Controller
 {
+    /**
+     * Tampilkan daftar pesanan milik pengguna yang sedang login (paginated 10).
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
         $orders = Order::with('orderItems.product', 'payment')
@@ -20,6 +25,16 @@ class OrderController extends Controller
         return view('orders.index', compact('orders'));
     }
 
+    /**
+     * Buat pesanan baru dari form checkout.
+     *
+     * Memvalidasi stok, membuat record Order, OrderItem, dan Payment.
+     * Stok produk dikurangi otomatis. COD langsung dikonfirmasi;
+     * metode lain diarahkan ke halaman upload bukti bayar.
+     *
+     * @param  Request $request  Input: shipping_address, notes, items[]{product_id, quantity}, payment_method
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -90,6 +105,13 @@ class OrderController extends Controller
         return redirect()->route('orders.payment', $order)->with('success', 'Pesanan berhasil dibuat!');
     }
 
+    /**
+     * Tampilkan detail satu pesanan milik pengguna.
+     * Akses ditolak (403) jika pesanan bukan milik pengguna yang login.
+     *
+     * @param  Order $order  Pesanan yang akan ditampilkan
+     * @return \Illuminate\View\View
+     */
     public function show(Order $order)
     {
         // Ownership check
