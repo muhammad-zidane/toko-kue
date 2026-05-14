@@ -6,19 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jagoan Kue - Detail Pesanan {{ $order->order_code }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --pink: #F0507A; --brown-dark: #2C1810; --cream: #FFF8EE; --cream-dark: #F5EDD8; --white: #FFFFFF; --gray: #6B7280; --text-dark: #1A1A1A; --green: #22C55E; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text-dark); background: var(--cream); }
-        a { text-decoration: none; }
-        .navbar { background-color: var(--brown-dark); padding: 16px 24px; position: sticky; top: 0; z-index: 100; }
-        .navbar-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
-        .navbar-logo { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; color: var(--pink); }
-        .navbar-links { display: flex; gap: 32px; list-style: none; }
-        .navbar-links a { color: white; font-size: 14px; font-weight: 500; opacity: 0.9; }
-        .navbar-actions { display: flex; align-items: center; gap: 12px; }
-        .btn-cart { background-color: var(--pink); color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; }
-        .btn-login { border: 1.5px solid white; color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; }
 
         .page { max-width: 900px; margin: 0 auto; padding: 32px 24px 60px; }
         .page-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; margin-bottom: 8px; }
@@ -36,12 +26,12 @@
         .item-note { margin-top: 6px; font-size: 12px; color: var(--brown-dark); line-height: 1.5; background: #FFF4E6; border-radius: 6px; padding: 6px 8px; }
         .order-item-price { font-size: 14px; font-weight: 600; }
 
-        .info-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #F0E8E0; font-size: 13px; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #F0E8E0; font-size: 13px; }
         .info-row:last-child { border-bottom: none; }
-        .info-row span:first-child { color: var(--gray); }
-        .info-row span:last-child { font-weight: 600; text-align: right; max-width: 60%; }
+        .info-row span:first-child { color: var(--gray); flex-shrink: 0; }
+        .info-row span:last-child { font-weight: 600; text-align: right; }
 
-        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; }
         .badge-pending { background: #FEF3C7; color: #D97706; }
         .badge-processing { background: #DBEAFE; color: #2563EB; }
         .badge-completed { background: #DCFCE7; color: #16A34A; }
@@ -60,14 +50,12 @@
 
         .btn-back-page { display: inline-block; background: var(--brown-dark); color: white; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 700; }
 
-        @media (max-width: 768px) { .navbar-links { display: none; } .detail-grid { grid-template-columns: 1fr; } }
-    </style>
-    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @endif
-</head>
+        @media (max-width: 768px) {
+ .detail-grid { grid-template-columns: 1fr; }
+ }
+    </style></head>
 <body>
-<nav class="navbar"><div class="navbar-inner"><a href="/" class="navbar-logo">Jagoan Kue</a><ul class="navbar-links"><li><a href="/">Beranda</a></li><li><a href="/products">Katalog</a></li><li><a href="/orders">Pemesanan</a></li></ul><div class="navbar-actions"><a href="/cart" class="btn-cart">🛒 Keranjang</a>@auth<a href="/profile" class="btn-login">{{ auth()->user()->name }}</a>@else<a href="/login" class="btn-login">Login</a>@endauth</div></div></nav>
+@include('partials.navbar')
 
 <div class="page">
     <h1 class="page-title">Detail Pesanan</h1>
@@ -125,7 +113,7 @@
                 <p class="card-label">INFO PESANAN</p>
                 <div class="info-row"><span>Status</span><span><span class="badge badge-{{ $order->status }}">{{ ucfirst($order->status) }}</span></span></div>
                 <div class="info-row"><span>Pembayaran</span><span><span class="badge badge-{{ $order->payment->status ?? 'unpaid' }}">{{ ucfirst($order->payment->status ?? 'unpaid') }}</span></span></div>
-                <div class="info-row"><span>Metode</span><span>{{ ucfirst($order->payment->payment_method ?? '-') }}</span></div>
+                <div class="info-row"><span>Metode</span><span>{{ ['transfer_bank'=>'Transfer Bank','ewallet'=>'E-Wallet','qris'=>'QRIS','cod'=>'COD'][$order->payment->payment_method ?? ''] ?? ucfirst($order->payment->payment_method ?? '-') }}</span></div>
                 <div class="info-row"><span>Alamat</span><span>{{ $order->shipping_address }}</span></div>
                 @if($order->notes)
                 <div class="info-row"><span>Catatan</span><span>{{ $order->notes }}</span></div>
@@ -140,5 +128,7 @@
 
     <a href="{{ route('orders.index') }}" class="btn-back-page">← Kembali ke Daftar Pesanan</a>
 </div>
+@include('partials.footer')
+<script src="{{ asset('js/app.js') }}" defer></script>
 </body>
 </html>

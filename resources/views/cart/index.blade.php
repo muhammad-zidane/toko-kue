@@ -6,25 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jagoan Kue - Keranjang</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --pink: #F0507A; --brown-dark: #2C1810; --cream: #FFF8EE; --cream-dark: #F5EDD8; --white: #FFFFFF; --gray: #6B7280; --text-dark: #1A1A1A; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text-dark); background: var(--cream); }
-        a { text-decoration: none; }
-        .navbar { background-color: var(--brown-dark); padding: 16px 24px; position: sticky; top: 0; z-index: 100; }
-        .navbar-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
-        .navbar-logo { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; color: var(--pink); }
-        .navbar-links { display: flex; gap: 32px; list-style: none; }
-        .navbar-links a { color: white; font-size: 14px; font-weight: 500; opacity: 0.9; }
-        .navbar-actions { display: flex; align-items: center; gap: 12px; }
-        .btn-cart { background-color: var(--pink); color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; }
-        .btn-login { border: 1.5px solid white; color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; transition: all 0.2s; }
-        .btn-login:hover { background: white; color: var(--brown-dark); }
+        body { background: var(--cream); }
         .page { max-width: 1100px; margin: 0 auto; padding: 32px 24px 60px; }
         .page-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
         .cart-layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
-        .cart-box { background: var(--white); border-radius: 16px; border: 1px solid #EDE0D4; overflow: hidden; }
+        .cart-box { background: var(--white); border-radius: 16px; border: 1px solid #EDE0D4; overflow: hidden; height: 290px;}
         .select-all-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #F0E8E0; }
         .select-all-left { display: flex; align-items: center; gap: 12px; }
         .custom-check { width: 20px; height: 20px; accent-color: var(--brown-dark); cursor: pointer; }
@@ -56,23 +46,12 @@
         .summary-row span:last-child { font-size: 16px; font-weight: 700; }
         .btn-beli { width: 100%; background: var(--pink); color: white; border: none; border-radius: 10px; padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: opacity 0.2s; }
         .btn-beli:hover { opacity: 0.85; }
-        .footer { background-color: var(--brown-dark); color: white; padding: 56px 24px; }
-        .footer-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 40px; }
-        .footer-logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 800; color: var(--pink); margin-bottom: 8px; }
-        .footer-desc { font-size: 13px; opacity: 0.6; margin-bottom: 20px; line-height: 1.6; }
-        .footer-heading { font-size: 14px; font-weight: 700; margin-bottom: 16px; }
-        .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-        .footer-links a { color: white; font-size: 13px; opacity: 0.6; }
-        .footer-contact { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-        .footer-contact li { font-size: 13px; opacity: 0.6; line-height: 1.5; }
-        @media (max-width: 768px) { .navbar-links { display: none; } .cart-layout { grid-template-columns: 1fr; } .footer-inner { grid-template-columns: 1fr 1fr; } }
-    </style>
-    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @endif
-</head>
+        @media (max-width: 768px) {
+ .cart-layout { grid-template-columns: 1fr; }
+ }
+    </style></head>
 <body>
-<nav class="navbar"><div class="navbar-inner"><a href="/" class="navbar-logo">Jagoan Kue</a><ul class="navbar-links"><li><a href="/">Beranda</a></li><li><a href="/products">Katalog</a></li><li><a href="/orders">Pemesanan</a></li></ul><div class="navbar-actions"><a href="/cart" class="btn-cart">🛒 Keranjang</a>@auth<a href="/profile" class="btn-login">{{ auth()->user()->name }}</a>@else<a href="/login" class="btn-login">Login</a>@endauth</div></div></nav>
+@include('partials.navbar')
 
 <div class="page">
     <p class="page-title">Keranjang</p>
@@ -98,7 +77,7 @@
                     <label class="item-note-label">Catatan Produk</label>
                     <textarea class="item-note-input" id="note-{{ $item['product']->id }}" rows="2" placeholder="Contoh: tulisan ucapan, warna, request khusus..." oninput="queueNoteSave({{ $item['product']->id }})">{{ $item['note'] ?? '' }}</textarea>
                     <div class="item-actions">
-                        <button class="action-btn" title="Hapus" onclick="hapusItem({{ $item['product']->id }})">🗑</button>
+                        <button class="action-btn" title="Hapus" onclick="hapusItem({{ $item['product']->id }})"><i class="fas fa-trash" style="color:var(--pink)"></i></button>
                         <div class="qty-control">
                             <button class="qty-btn" onclick="changeItemQty({{ $item['product']->id }}, -1)">−</button>
                             <input type="number" class="qty-num" id="qty-{{ $item['product']->id }}" value="{{ $item['quantity'] }}" min="1" onchange="updateItemPrice({{ $item['product']->id }}, {{ $item['product']->price }})">
@@ -110,7 +89,7 @@
             @endforeach
             @else
             <div class="empty-cart">
-                <p>Keranjang kamu masih kosong 🛒</p>
+                <p>Keranjang kamu masih kosong <i class="fas fa-shopping-cart" style="color:var(--pink)"></i></p>
                 <a href="/products" class="btn-shop">Belanja Sekarang</a>
             </div>
             @endif
@@ -127,7 +106,7 @@
     </div>
 </div>
 
-<footer class="footer"><div class="footer-inner"><div><p class="footer-logo">Jagoan Kue</p><p class="footer-desc">Menyediakan kue dengan cinta sejak 2023</p></div><div><p class="footer-heading">Layanan</p><ul class="footer-links"><li><a href="#">Katalog Kue</a></li><li><a href="#">Kue Custom</a></li></ul></div><div><p class="footer-heading">Selengkapnya</p><ul class="footer-links"><li><a href="#">Tentang Kami</a></li><li><a href="#">Blog</a></li></ul></div><div><p class="footer-heading">Kontak</p><ul class="footer-contact"><li>0822-8320-3385</li><li>muhammadzidane253@gmail.com</li><li>Payakumbuh, Sumatera Barat</li></ul></div></div></footer>
+@include('partials.footer')
 
 <script>
     const products = @json(isset($cartItems) ? collect($cartItems)->mapWithKeys(fn($i) => [$i['product']->id => $i['product']->price]) : []);
@@ -237,5 +216,6 @@
 
     updateTotal();
 </script>
+<script src="{{ asset('js/app.js') }}" defer></script>
 </body>
 </html>

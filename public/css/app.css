@@ -1,0 +1,224 @@
+/* ============================================================
+   JAGOAN KUE — Global Stylesheet
+   CSS variables, reset, typography, navbar, footer
+   ============================================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --pink:       #F0507A;
+    --pink-hover: #D64A6C;
+    --brown-dark: #2C1810;
+    --brown-mid:  #5C3D2E;
+    --cream:      #FFF8EE;
+    --cream-dark: #F5EDD8;
+    --white:      #FFFFFF;
+    --gray:       #6B7280;
+    --gray-light: #F3F4F6;
+    --text-dark:  #1A1A1A;
+    --green:      #22C55E;
+    --blue:       #3B82F6;
+    --orange:     #F59E0B;
+    --red:        #EF4444;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--text-dark);
+    background: var(--white);
+}
+
+a { text-decoration: none; }
+
+/* ============================================================
+   NAVBAR
+   ============================================================ */
+.navbar {
+    background-color: var(--brown-dark);
+    padding: 16px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.navbar-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.navbar-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--pink);
+}
+
+.navbar-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+}
+
+.navbar-links a {
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.navbar-links a:hover,
+.navbar-links a.active {
+    opacity: 1;
+    font-weight: 700;
+}
+
+.navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-cart {
+    background-color: var(--pink);
+    color: white;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.btn-cart:hover { opacity: 0.85; }
+
+.btn-login {
+    border: 1.5px solid white;
+    color: white;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-login:hover {
+    background: white;
+    color: var(--brown-dark);
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.footer {
+    background-color: var(--brown-dark);
+    color: white;
+    padding: 56px 24px;
+}
+
+.footer-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.5fr;
+    gap: 40px;
+}
+
+.footer-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--pink);
+    margin-bottom: 8px;
+}
+
+.footer-desc {
+    font-size: 13px;
+    opacity: 0.6;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.footer-socials {
+    display: flex;
+    gap: 16px;
+    font-size: 18px;
+}
+
+.footer-socials a {
+    color: white;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.footer-socials a:hover { opacity: 1; }
+
+.footer-heading {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.footer-links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footer-links a {
+    color: white;
+    font-size: 13px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.footer-links a:hover { opacity: 1; }
+
+.footer-contact {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footer-contact li {
+    font-size: 13px;
+    opacity: 0.6;
+    line-height: 1.5;
+}
+
+/* ============================================================
+   FLASH MESSAGES (dipakai di admin/layout dan halaman lain)
+   ============================================================ */
+.alert-success {
+    background: #ECFDF5;
+    border: 1px solid #A7F3D0;
+    color: #065F46;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    margin-bottom: 16px;
+}
+
+.alert-error {
+    background: #FFF1F2;
+    border: 1px solid #FECDD3;
+    color: #9F1239;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    margin-bottom: 16px;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+    .navbar-links { display: none; }
+    .footer-inner { grid-template-columns: 1fr 1fr; }
+}

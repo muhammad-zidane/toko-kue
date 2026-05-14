@@ -6,19 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jagoan Kue - Konfirmasi Pembayaran</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --pink: #F0507A; --brown-dark: #2C1810; --cream: #FFF8EE; --cream-dark: #F5EDD8; --white: #FFFFFF; --gray: #6B7280; --text-dark: #1A1A1A; --green: #22C55E; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text-dark); background: var(--cream); }
-        a { text-decoration: none; }
-        .navbar { background-color: var(--brown-dark); padding: 16px 24px; position: sticky; top: 0; z-index: 100; }
-        .navbar-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
-        .navbar-logo { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; color: var(--pink); }
-        .navbar-links { display: flex; gap: 32px; list-style: none; }
-        .navbar-links a { color: white; font-size: 14px; font-weight: 500; opacity: 0.9; }
-        .navbar-actions { display: flex; align-items: center; gap: 12px; }
-        .btn-cart { background-color: var(--pink); color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; }
-        .btn-login { border: 1.5px solid white; color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; }
         .breadcrumb { max-width: 1100px; margin: 0 auto; padding: 20px 24px 0; font-size: 13px; color: var(--gray); }
         .breadcrumb a { color: var(--gray); } .breadcrumb span { color: var(--text-dark); font-weight: 600; }
         .stepper-wrap { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
@@ -97,16 +87,11 @@
         .footer-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 40px; }
         .footer-logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 800; color: var(--pink); margin-bottom: 8px; }
         .footer-desc { font-size: 13px; opacity: 0.6; margin-bottom: 20px; line-height: 1.6; }
-        .footer-heading { font-size: 14px; font-weight: 700; margin-bottom: 16px; }
-        .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-        .footer-links a { color: white; font-size: 13px; opacity: 0.6; }
-        .footer-contact { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-        .footer-contact li { font-size: 13px; opacity: 0.6; line-height: 1.5; }
-        @media (max-width: 768px) { .navbar-links { display: none; } .main { grid-template-columns: 1fr; } .footer-inner { grid-template-columns: 1fr 1fr; } .timer-box { flex-direction: column; gap: 12px; } }
+        .footer-socials { display: flex; gap: 16px; font-size: 18px; }
+        .footer-socials a { opacity: 0.6; transition: opacity 0.2s; }
+        .footer-socials a:hover { opacity: 1; }
+        @media (max-width: 768px) { .main { grid-template-columns: 1fr; } .timer-box { flex-direction: column; gap: 12px; } }
     </style>
-    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @endif
 </head>
 <body>
 @php
@@ -118,7 +103,7 @@
     $remainingSeconds = max(0, now()->diffInSeconds($deadline, false));
 @endphp
 
-<nav class="navbar"><div class="navbar-inner"><a href="/" class="navbar-logo">Jagoan Kue</a><ul class="navbar-links"><li><a href="/">Beranda</a></li><li><a href="/products">Katalog</a></li><li><a href="/orders">Pemesanan</a></li></ul><div class="navbar-actions"><a href="/cart" class="btn-cart">🛒 Keranjang</a>@auth<a href="/profile" class="btn-login">{{ auth()->user()->name }}</a>@else<a href="/login" class="btn-login">Login</a>@endauth</div></div></nav>
+@include('partials.navbar')
 
 <div class="breadcrumb"><a href="/">Beranda</a> / <a href="/products">Katalog</a> / <span>Konfirmasi Pembayaran</span></div>
 
@@ -158,16 +143,11 @@
             <p class="metode-label">Metode Pembayaran</p>
             <div class="status-badge"><div class="status-dot"></div> Menunggu Pembayaran</div>
 
-            @if(in_array($paymentMethod, ['bca', 'bni']))
-            {{-- BANK TRANSFER UI --}}
+            @if($paymentMethod === 'transfer_bank')
+            {{-- TRANSFER BANK UI --}}
             <div class="bank-header">
-                @if($paymentMethod === 'bca')
-                <div class="bank-logo" style="background:#006CB0;">BCA</div>
-                <div><p class="bank-name">Bank BCA</p><p class="bank-desc">Transfer Manual</p></div>
-                @else
-                <div class="bank-logo" style="background:#F26522;">BNI</div>
-                <div><p class="bank-name">Bank BNI</p><p class="bank-desc">Transfer Manual</p></div>
-                @endif
+                <div class="bank-logo" style="background:#006CB0;"><i class="fas fa-university"></i></div>
+                <div><p class="bank-name">Transfer Bank</p><p class="bank-desc">Transfer Manual</p></div>
             </div>
 
             <div class="bank-row"><span class="bank-row-label">Nama Rekening</span><span class="bank-row-value">Jagoan Kue Official</span></div>
@@ -182,24 +162,50 @@
             </div>
             <p class="kode-unik-note">Nominal transfer berbeda {{ $uniqueCode }} rupiah dari total pesanan — ini adalah kode unik untuk verifikasi.</p>
 
-            @elseif($paymentMethod === 'gopay')
-            {{-- GOPAY UI --}}
+            @elseif($paymentMethod === 'ewallet')
+            {{-- E-WALLET UI --}}
             <div class="bank-header">
-                <div class="bank-logo" style="background:#00B14F;">GP</div>
-                <div><p class="bank-name">GoPay</p><p class="bank-desc">E-Wallet</p></div>
+                <div class="bank-logo" style="background:#00B14F;"><i class="fas fa-wallet"></i></div>
+                <div><p class="bank-name">E-Wallet</p><p class="bank-desc">GoPay / OVO / dll</p></div>
             </div>
 
             <div class="jumlah-box">
-                <div class="jumlah-left"><p>Jumlah Pembayaran</p><small>Bayar via GoPay</small></div>
+                <div class="jumlah-left"><p>Jumlah Pembayaran</p><small>Bayar via E-Wallet</small></div>
                 <div class="jumlah-right">
                     <span class="jumlah-amount">Rp {{ number_format($totalAmount, 0, ',', '.') }}</span>
                 </div>
             </div>
+
+            @elseif($paymentMethod === 'qris')
+            {{-- QRIS UI --}}
+            <div class="bank-header">
+                <div class="bank-logo" style="background:#7C3AED;"><i class="fas fa-qrcode"></i></div>
+                <div><p class="bank-name">QRIS</p><p class="bank-desc">Scan & Bayar</p></div>
+            </div>
+
+            <div class="jumlah-box">
+                <div class="jumlah-left"><p>Jumlah Pembayaran</p><small>Scan QR Code di bawah</small></div>
+                <div class="jumlah-right">
+                    <span class="jumlah-amount">Rp {{ number_format($totalAmount, 0, ',', '.') }}</span>
+                </div>
+            </div>
+
+            <div style="text-align:center;margin-top:16px;">
+                @if(file_exists(public_path('images/qris.png')))
+                <img src="{{ asset('images/qris.png') }}" alt="QR Code QRIS" style="width:220px;height:220px;object-fit:contain;border:1px solid #e5e7eb;border-radius:12px;padding:8px;">
+                @else
+                <div style="width:220px;height:220px;margin:0 auto;border:2px dashed #7C3AED;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#7C3AED;background:#f5f3ff;">
+                    <i class="fas fa-qrcode" style="font-size:64px;opacity:0.4;"></i>
+                    <small style="font-size:11px;opacity:0.7;">QR Code belum tersedia</small>
+                </div>
+                @endif
+                <p style="margin-top:10px;font-size:12px;color:#6B7280;">Scan QR Code ini menggunakan aplikasi apapun yang mendukung QRIS</p>
+            </div>
             @endif
         </div>
 
-        @if(in_array($paymentMethod, ['bca', 'bni']))
-        {{-- CARA TRANSFER --}}
+        @if($paymentMethod === 'transfer_bank')
+        {{-- CARA TRANSFER BANK --}}
         <div class="card">
             <p class="cara-label">CARA MELAKUKAN TRANSFER</p>
             <ul class="cara-list">
@@ -210,14 +216,25 @@
                 <li class="cara-item"><div class="cara-num">5</div><div>Selesaikan transfer, lalu upload bukti pembayaran di bawah</div></li>
             </ul>
         </div>
-        @elseif($paymentMethod === 'gopay')
+        @elseif($paymentMethod === 'ewallet')
         <div class="card">
-            <p class="cara-label">CARA PEMBAYARAN GOPAY</p>
+            <p class="cara-label">CARA PEMBAYARAN E-WALLET</p>
             <ul class="cara-list">
-                <li class="cara-item"><div class="cara-num">1</div><div>Buka aplikasi Gojek atau GoPay di HP kamu</div></li>
-                <li class="cara-item"><div class="cara-num">2</div><div>Transfer ke nomor GoPay: <strong>0822-8320-3385</strong> a.n. Jagoan Kue</div></li>
+                <li class="cara-item"><div class="cara-num">1</div><div>Buka aplikasi E-Wallet kamu (GoPay, OVO, Dana, dll)</div></li>
+                <li class="cara-item"><div class="cara-num">2</div><div>Transfer ke nomor: <strong>0822-8320-3385</strong> a.n. Jagoan Kue</div></li>
                 <li class="cara-item"><div class="cara-num">3</div><div>Masukkan nominal Rp {{ number_format($totalAmount, 0, ',', '.') }}</div></li>
                 <li class="cara-item"><div class="cara-num">4</div><div>Selesaikan pembayaran, lalu screenshot dan upload bukti di bawah</div></li>
+            </ul>
+        </div>
+        @elseif($paymentMethod === 'qris')
+        <div class="card">
+            <p class="cara-label">CARA PEMBAYARAN QRIS</p>
+            <ul class="cara-list">
+                <li class="cara-item"><div class="cara-num">1</div><div>Buka aplikasi apapun yang mendukung QRIS (GoPay, OVO, Dana, m-Banking, dll)</div></li>
+                <li class="cara-item"><div class="cara-num">2</div><div>Pilih menu Scan QR atau Bayar dengan QR</div></li>
+                <li class="cara-item"><div class="cara-num">3</div><div>Scan QR Code yang ditampilkan</div></li>
+                <li class="cara-item"><div class="cara-num">4</div><div>Pastikan nominal Rp {{ number_format($totalAmount, 0, ',', '.') }} sudah sesuai</div></li>
+                <li class="cara-item"><div class="cara-num">5</div><div>Selesaikan pembayaran, lalu screenshot dan upload bukti di bawah</div></li>
             </ul>
         </div>
         @endif
@@ -242,7 +259,7 @@
             >
 
             <div class="upload-zone" onclick="document.getElementById('file-input').click()" ondragover="event.preventDefault()" ondrop="handleDrop(event)">
-                <div class="upload-icon" id="upload-icon">📤</div>
+                <div class="upload-icon" id="upload-icon"><i class="fas fa-file-upload" style="color:var(--pink)"></i></div>
                 <p class="upload-text" id="upload-text">Seret & letakkan file di sini</p>
                 <p class="upload-sub" id="upload-sub">atau klik untuk memilih file</p>
                 <button class="btn-pilih" type="button">Pilih File</button>
@@ -294,16 +311,16 @@
 
             <div class="aman-box">
                 <p class="aman-title">Pesanan Aman Bersama Kami</p>
-                <div class="aman-item"><span class="aman-check">✅</span> Verifikasi pembayaran otomatis</div>
-                <div class="aman-item"><span class="aman-check">✅</span> Uang kembali jika pesanan gagal</div>
-                <div class="aman-item"><span class="aman-check">✅</span> Data transaksi terenkripsi & aman</div>
+                <div class="aman-item"><span class="aman-check"><i class="fas fa-check-circle" style="color:#22C55E"></i></span> Verifikasi pembayaran otomatis</div>
+                <div class="aman-item"><span class="aman-check"><i class="fas fa-check-circle" style="color:#22C55E"></i></span> Uang kembali jika pesanan gagal</div>
+                <div class="aman-item"><span class="aman-check"><i class="fas fa-check-circle" style="color:#22C55E"></i></span> Data transaksi terenkripsi & aman</div>
             </div>
         </div>
     </div>
 </div>
 </form>
 
-<footer class="footer"><div class="footer-inner"><div><p class="footer-logo">Jagoan Kue</p><p class="footer-desc">Menyediakan kue dengan cinta sejak 2023</p></div><div><p class="footer-heading">Layanan</p><ul class="footer-links"><li><a href="#">Katalog Kue</a></li><li><a href="#">Kue Custom</a></li></ul></div><div><p class="footer-heading">Selengkapnya</p><ul class="footer-links"><li><a href="#">Tentang Kami</a></li><li><a href="#">Blog</a></li></ul></div><div><p class="footer-heading">Kontak</p><ul class="footer-contact"><li>0822-8320-3385</li><li>muhammadzidane253@gmail.com</li><li>Payakumbuh, Sumatera Barat</li></ul></div></div></footer>
+@include('partials.footer')
 
 <script>
     let totalSeconds = {{ (int)$remainingSeconds }};
@@ -327,7 +344,7 @@
             const sub = document.getElementById('upload-sub');
             const format = document.getElementById('upload-format');
 
-            if (icon) icon.textContent = '✅';
+            if (icon) icon.innerHTML = '<i class="fas fa-check-circle" style="color:#22C55E;"></i>';
             if (text) text.textContent = file.name;
             if (sub) sub.textContent = 'File siap diupload';
             if (format) format.textContent = '';
@@ -346,5 +363,6 @@
         btn.disabled = true;
     });
 </script>
+<script src="{{ asset('js/app.js') }}" defer></script>
 </body>
 </html>

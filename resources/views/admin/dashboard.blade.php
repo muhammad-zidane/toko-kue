@@ -1,4 +1,4 @@
-@extends('admin.layout')
+﻿@extends('admin.layout')
 @section('title', 'Dashboard')
 @section('page-title', 'Dashboard Admin')
 @section('page-subtitle', 'Selamat datang, ' . auth()->user()->name . '!')
@@ -91,7 +91,7 @@
 {{-- STATS --}}
 <div class="stats-grid">
     <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(240,80,122,0.1);">📋</div>
+        <div class="stat-icon" style="background:rgba(240,80,122,0.1);"><i class="fas fa-clipboard-list" style="color:var(--pink)"></i></div>
         <div class="stat-value">{{ $ordersThisMonth }}</div>
         <div class="stat-label">Total Pesanan Bulan Ini</div>
         <div class="stat-growth {{ $orderGrowth >= 0 ? 'growth-up' : 'growth-down' }}">
@@ -99,7 +99,7 @@
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(20,184,166,0.1);">💰</div>
+        <div class="stat-icon" style="background:rgba(20,184,166,0.1);"><i class="fas fa-money-bill-wave" style="color:var(--pink)"></i></div>
         <div class="stat-value" style="color:#0D9488;">Rp {{ number_format($revenueThisMonth/1000, 0, ',', '.') }}k</div>
         <div class="stat-label">Pendapatan Bulan Ini</div>
         <div class="stat-growth {{ $revenueGrowth >= 0 ? 'growth-up' : 'growth-down' }}">
@@ -107,7 +107,7 @@
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(59,130,246,0.1);">👤</div>
+        <div class="stat-icon" style="background:rgba(59,130,246,0.1);"><i class="fas fa-user" style="color:var(--pink)"></i></div>
         <div class="stat-value">{{ $customersThisMonth }}</div>
         <div class="stat-label">Pelanggan Baru</div>
         <div class="stat-growth {{ $customerGrowth >= 0 ? 'growth-up' : 'growth-down' }}">
@@ -115,7 +115,7 @@
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon" style="background:var(--cream);">🏠</div>
+        <div class="stat-icon" style="background:var(--cream);"><i class="fas fa-home" style="color:var(--pink)"></i></div>
         <div class="stat-value">{{ $pendingOrdersCount }}</div>
         <div class="stat-label">Pesanan Perlu Diproses</div>
         @if($pendingOrdersCount > 0)
@@ -132,7 +132,7 @@
     <div class="card">
         <div class="card-header">
             <h3>Pesanan Terbaru</h3>
-            <a href="{{ route('admin.orders') }}">Lihat Semua →</a>
+            <a href="{{ route('admin.orders.index') }}">Lihat Semua →</a>
         </div>
         <div style="overflow-x:auto;">
             <table style="min-width:700px;">
@@ -175,7 +175,7 @@
                             </span>
                         </td>
                         <td>
-                            <a href="{{ route('admin.orders.detail', $order) }}" class="btn-detail">Detail</a>
+                            <a href="{{ route('admin.orders.show', $order) }}" class="btn-detail">Detail</a>
                         </td>
                     </tr>
                     @empty
@@ -193,10 +193,24 @@
             <h3 style="font-size:14px;font-weight:700;color:var(--text-dark);margin-bottom:14px;">Aktivitas Terkini</h3>
             @forelse($recentActivities as $act)
             <div class="activity-item">
-                <div class="activity-dot {{ $act['colorClass'] }}"></div>
+                <div class="activity-dot {{ $act['color'] }}"></div>
                 <div>
-                    <p class="activity-text">{!! $act['message'] !!}</p>
-                    <span class="activity-time">{{ $act['timeLabel'] }}</span>
+                    <p class="activity-text">
+                        @switch($act['status'])
+                            @case('pending')
+                                Pesanan baru <strong>{{ $act['order_code'] }}</strong> masuk dari {{ $act['user_name'] }}.
+                                @break
+                            @case('processing')
+                                Pesanan <strong>{{ $act['order_code'] }}</strong> sedang diproses.
+                                @break
+                            @case('completed')
+                                Pesanan <strong>{{ $act['order_code'] }}</strong> telah selesai.
+                                @break
+                            @default
+                                Pesanan <strong>{{ $act['order_code'] }}</strong> dibatalkan.
+                        @endswitch
+                    </p>
+                    <span class="activity-time">{{ $act['time_label'] }}</span>
                 </div>
             </div>
             @empty
@@ -209,28 +223,28 @@
             <h3 style="font-size:14px;font-weight:700;color:var(--text-dark);margin-bottom:14px;">Aksi Cepat</h3>
             <div class="quick-grid">
                 <a href="{{ route('admin.products.create') }}" class="quick-link">
-                    <span class="quick-link-icon">➕</span>
+                    <span class="quick-link-icon"><i class="fas fa-plus" style="color:var(--pink)"></i></span>
                     <div>
                         <div class="quick-link-title">Tambah Produk</div>
                         <div class="quick-link-desc">Daftarkan kue baru</div>
                     </div>
                 </a>
-                <a href="{{ route('admin.analytics') }}" class="quick-link">
-                    <span class="quick-link-icon">📊</span>
+                <a href="{{ route('admin.analytics.index') }}" class="quick-link">
+                    <span class="quick-link-icon"><i class="fas fa-chart-bar" style="color:var(--pink)"></i></span>
                     <div>
                         <div class="quick-link-title">Lihat Laporan</div>
                         <div class="quick-link-desc">Analisis penjualan</div>
                     </div>
                 </a>
-                <a href="{{ route('admin.orders') }}" class="quick-link">
-                    <span class="quick-link-icon">📋</span>
+                <a href="{{ route('admin.orders.index') }}" class="quick-link">
+                    <span class="quick-link-icon"><i class="fas fa-clipboard-list" style="color:var(--pink)"></i></span>
                     <div>
                         <div class="quick-link-title">Kelola Pesanan</div>
                         <div class="quick-link-desc">Lihat semua pesanan</div>
                     </div>
                 </a>
-                <a href="{{ route('admin.customers') }}" class="quick-link">
-                    <span class="quick-link-icon">👥</span>
+                <a href="{{ route('admin.customers.index') }}" class="quick-link">
+                    <span class="quick-link-icon"><i class="fas fa-users" style="color:var(--pink)"></i></span>
                     <div>
                         <div class="quick-link-title">Data Pelanggan</div>
                         <div class="quick-link-desc">Lihat Semua User</div>
