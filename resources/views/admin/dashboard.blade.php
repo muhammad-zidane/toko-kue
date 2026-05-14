@@ -1,4 +1,4 @@
-@extends('admin.layout')
+﻿@extends('admin.layout')
 @section('title', 'Dashboard')
 @section('page-title', 'Dashboard Admin')
 @section('page-subtitle', 'Selamat datang, ' . auth()->user()->name . '!')
@@ -132,7 +132,7 @@
     <div class="card">
         <div class="card-header">
             <h3>Pesanan Terbaru</h3>
-            <a href="{{ route('admin.orders') }}">Lihat Semua →</a>
+            <a href="{{ route('admin.orders.index') }}">Lihat Semua →</a>
         </div>
         <div style="overflow-x:auto;">
             <table style="min-width:700px;">
@@ -175,7 +175,7 @@
                             </span>
                         </td>
                         <td>
-                            <a href="{{ route('admin.orders.detail', $order) }}" class="btn-detail">Detail</a>
+                            <a href="{{ route('admin.orders.show', $order) }}" class="btn-detail">Detail</a>
                         </td>
                     </tr>
                     @empty
@@ -193,10 +193,24 @@
             <h3 style="font-size:14px;font-weight:700;color:var(--text-dark);margin-bottom:14px;">Aktivitas Terkini</h3>
             @forelse($recentActivities as $act)
             <div class="activity-item">
-                <div class="activity-dot {{ $act['colorClass'] }}"></div>
+                <div class="activity-dot {{ $act['color'] }}"></div>
                 <div>
-                    <p class="activity-text">{!! $act['message'] !!}</p>
-                    <span class="activity-time">{{ $act['timeLabel'] }}</span>
+                    <p class="activity-text">
+                        @switch($act['status'])
+                            @case('pending')
+                                Pesanan baru <strong>{{ $act['order_code'] }}</strong> masuk dari {{ $act['user_name'] }}.
+                                @break
+                            @case('processing')
+                                Pesanan <strong>{{ $act['order_code'] }}</strong> sedang diproses.
+                                @break
+                            @case('completed')
+                                Pesanan <strong>{{ $act['order_code'] }}</strong> telah selesai.
+                                @break
+                            @default
+                                Pesanan <strong>{{ $act['order_code'] }}</strong> dibatalkan.
+                        @endswitch
+                    </p>
+                    <span class="activity-time">{{ $act['time_label'] }}</span>
                 </div>
             </div>
             @empty
@@ -215,21 +229,21 @@
                         <div class="quick-link-desc">Daftarkan kue baru</div>
                     </div>
                 </a>
-                <a href="{{ route('admin.analytics') }}" class="quick-link">
+                <a href="{{ route('admin.analytics.index') }}" class="quick-link">
                     <span class="quick-link-icon"><i class="fas fa-chart-bar" style="color:var(--pink)"></i></span>
                     <div>
                         <div class="quick-link-title">Lihat Laporan</div>
                         <div class="quick-link-desc">Analisis penjualan</div>
                     </div>
                 </a>
-                <a href="{{ route('admin.orders') }}" class="quick-link">
+                <a href="{{ route('admin.orders.index') }}" class="quick-link">
                     <span class="quick-link-icon"><i class="fas fa-clipboard-list" style="color:var(--pink)"></i></span>
                     <div>
                         <div class="quick-link-title">Kelola Pesanan</div>
                         <div class="quick-link-desc">Lihat semua pesanan</div>
                     </div>
                 </a>
-                <a href="{{ route('admin.customers') }}" class="quick-link">
+                <a href="{{ route('admin.customers.index') }}" class="quick-link">
                     <span class="quick-link-icon"><i class="fas fa-users" style="color:var(--pink)"></i></span>
                     <div>
                         <div class="quick-link-title">Data Pelanggan</div>
