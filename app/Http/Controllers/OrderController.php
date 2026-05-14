@@ -92,6 +92,16 @@ class OrderController extends Controller
         return redirect()->route('orders.payment', $order)->with('success', 'Pesanan berhasil dibuat!');
     }
 
+    public function showStatus(Order $order)
+    {
+        if ($order->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $order->load('orderItems.product', 'payment');
+        return view('orders.status', compact('order'));
+    }
+
     public function show(Order $order)
     {
         // Ownership check
