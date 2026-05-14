@@ -82,6 +82,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
     Route::get('/orders/{order}', [AdminController::class, 'orderDetail'])->name('orders.detail');
+    Route::get('/orders/{order}/download-proof', [AdminController::class, 'downloadProof'])->name('orders.downloadProof');
     Route::patch('/orders/{order}/status/{status}', [AdminController::class, 'updateOrderStatus'])->name('orders.status');
 
     // CRUD Produk (admin)

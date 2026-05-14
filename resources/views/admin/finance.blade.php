@@ -29,22 +29,22 @@
 {{-- STATS --}}
 <div class="stats-grid">
     <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(34,197,94,0.1);">💰</div>
+        <div class="stat-icon" style="background:rgba(34,197,94,0.1);"><i class="fas fa-money-bill-wave" style="color:var(--pink)"></i></div>
         <div class="stat-value">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</div>
         <div class="stat-label">Total Pendapatan</div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(245,158,11,0.1);">⏳</div>
+        <div class="stat-icon" style="background:rgba(245,158,11,0.1);"><i class="fas fa-hourglass-half" style="color:var(--pink)"></i></div>
         <div class="stat-value">Rp {{ number_format($pendingPayments, 0, ',', '.') }}</div>
         <div class="stat-label">Menunggu Pembayaran</div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(240,80,122,0.1);">✅</div>
+        <div class="stat-icon" style="background:rgba(240,80,122,0.1);"><i class="fas fa-check-circle" style="color:var(--pink)"></i></div>
         <div class="stat-value">{{ $paidCount }}</div>
         <div class="stat-label">Pembayaran Lunas</div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(59,130,246,0.1);">⏰</div>
+        <div class="stat-icon" style="background:rgba(59,130,246,0.1);"><i class="fas fa-clock" style="color:var(--pink)"></i></div>
         <div class="stat-value">{{ $pendingCount }}</div>
         <div class="stat-label">Belum Dibayar</div>
     </div>
@@ -87,7 +87,7 @@
                 @empty
                 <tr>
                     <td colspan="7" style="text-align:center;padding:64px;">
-                        <div style="font-size:48px;margin-bottom:12px;">💳</div>
+                        <div style="font-size:48px;margin-bottom:12px;"><i class="fas fa-credit-card" style="color:var(--pink)"></i></div>
                         <h3 style="font-weight:700;color:var(--brown-dark);">Belum Ada Transaksi</h3>
                         <p style="font-size:14px;color:var(--gray);">Transaksi pembayaran akan muncul di sini.</p>
                     </td>
