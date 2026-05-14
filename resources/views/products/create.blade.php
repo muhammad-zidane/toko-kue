@@ -6,14 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jagoan Kue - Tambah Produk</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --pink: #F0507A; --brown-dark: #2C1810; --cream: #FFF8EE; --white: #FFFFFF; --gray: #6B7280; --text-dark: #1A1A1A; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text-dark); background: var(--cream); }
-        a { text-decoration: none; }
-        .navbar { background-color: var(--brown-dark); padding: 16px 24px; }
-        .navbar-inner { max-width: 800px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
-        .navbar-logo { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; color: var(--pink); }
+        .navbar-inner { max-width: 800px; }
         .btn-back { border: 1.5px solid white; color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; }
         .page { max-width: 800px; margin: 0 auto; padding: 32px 24px 60px; }
         .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; margin-bottom: 24px; }
@@ -30,9 +25,6 @@
         .btn-cancel { background: #F5EDD8; color: var(--text-dark); border: 1.5px solid #D1C0B8; border-radius: 10px; padding: 14px 24px; font-size: 15px; font-weight: 600; }
         .form-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
     </style>
-    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @endif
 </head>
 <body>
 <nav class="navbar"><div class="navbar-inner"><a href="{{ route('admin.dashboard') }}" class="navbar-logo">Jagoan Kue — Admin</a><a href="{{ route('admin.dashboard') }}" class="btn-back">← Dashboard</a></div></nav>

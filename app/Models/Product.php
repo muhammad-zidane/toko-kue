@@ -16,10 +16,10 @@ class Product extends Model
      *
      * @return string
      */
-    public function getRouteKeyName()
-{
-    return 'slug';
-}
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 
     /**
      * Kategori yang memiliki produk ini.

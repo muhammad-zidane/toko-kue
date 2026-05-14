@@ -67,7 +67,7 @@
                         <td style="text-align:right;">
                             <form method="POST" action="{{ route('admin.categories.destroy', $cat) }}" onsubmit="return confirm('Hapus kategori {{ $cat->name }}? Semua produk di kategori ini juga akan terhapus.')">
                                 @csrf @method('DELETE')
-                                <button class="btn-delete">🗑️ Hapus</button>
+                                <button class="btn-delete"><i class="fas fa-trash"></i> Hapus</button>
                             </form>
                         </td>
                     </tr>
@@ -75,7 +75,7 @@
                     <tr>
                         <td colspan="4">
                             <div class="empty-state">
-                                <div class="empty-icon">🏷️</div>
+                                <div class="empty-icon"><i class="fas fa-tag" style="color:var(--pink)"></i></div>
                                 <h3 style="font-size:14px;font-weight:700;color:var(--text-dark);margin-bottom:4px;">Belum Ada Kategori</h3>
                                 <p style="font-size:12px;">Silakan tambah kategori baru di panel sebelah kanan.</p>
                             </div>
@@ -100,7 +100,7 @@
                 <label class="form-label">Deskripsi Singkat</label>
                 <textarea name="description" rows="3" placeholder="Deskripsi kategori..." class="form-input form-textarea">{{ old('description') }}</textarea>
             </div>
-            <button type="submit" class="btn-submit">➕ Simpan Kategori</button>
+            <button type="submit" class="btn-submit"><i class="fas fa-plus" style="color:white"></i> Simpan Kategori</button>
         </form>
     </div>
 </div>

@@ -1,4 +1,4 @@
-@extends('admin.layout')
+﻿@extends('admin.layout')
 @section('title', 'Kelola Pesanan')
 @section('page-title', 'Kelola Pesanan')
 @section('page-subtitle', 'Lihat dan kelola semua pesanan pelanggan')
@@ -62,7 +62,7 @@
                     <td>{{ $order->created_at->format('d M Y, H:i') }}</td>
                     <td>
                         <div class="status-actions">
-                            <a href="{{ route('admin.orders.detail', $order) }}" class="btn-detail">Detail</a>
+                            <a href="{{ route('admin.orders.show', $order) }}" class="btn-detail">Detail</a>
                             @if($order->status !== 'processing')
                             <form method="POST" action="{{ route('admin.orders.status', [$order, 'processing']) }}">
                                 @csrf @method('PATCH')

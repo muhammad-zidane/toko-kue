@@ -16,10 +16,11 @@ class ProductController extends Controller
      * @return \Illuminate\View\View
      */
     public function index()
-{
-    $categories = \App\Models\Category::with('products')->get();
-    return view('products.index', compact('categories'));
-}
+    {
+        $categories = Category::with('products')->get();
+
+        return view('products.index', compact('categories'));
+    }
 
     /**
      * Tampilkan halaman detail produk (diakses via slug).
@@ -28,15 +29,13 @@ class ProductController extends Controller
      * @return \Illuminate\View\View
      */
     public function show(Product $product)
-{
-    $product->load([
-        'reviews' => function ($query) {
-            $query->with(['user', 'images'])->latest();
-        },
-    ]);
+    {
+        $product->load([
+            'reviews' => fn ($q) => $q->with(['user', 'images'])->latest(),
+        ]);
 
-    return view('products.show', compact('product'));
-}
+        return view('products.show', compact('product'));
+    }
 
     /**
      * Tampilkan form tambah produk baru (admin).
