@@ -14,6 +14,15 @@ use Carbon\Carbon;
 
 class AdminController extends Controller
 {
+    /**
+     * Tampilkan halaman dashboard admin.
+     *
+     * Menghitung KPI bulan ini (pesanan, pendapatan, pelanggan) beserta
+     * persentase pertumbuhannya dibanding bulan lalu, grafik pendapatan
+     * harian 7 hari terakhir, top 3 produk terlaris, dan aktivitas terbaru.
+     *
+     * @return \Illuminate\View\View
+     */
     public function dashboard()
     {
         $now = Carbon::now();
@@ -111,18 +120,37 @@ class AdminController extends Controller
         ));
     }
 
+    /**
+     * Tampilkan daftar semua pesanan untuk admin (paginated 10 per halaman).
+     *
+     * @return \Illuminate\View\View
+     */
     public function orders()
     {
         $orders = Order::with(['user', 'payment', 'orderItems'])->latest()->paginate(10);
         return view('admin.orders', compact('orders'));
     }
 
+    /**
+     * Tampilkan detail satu pesanan beserta item dan data pembayaran.
+     *
+     * @param  Order $order  Pesanan yang akan ditampilkan
+     * @return \Illuminate\View\View
+     */
     public function orderDetail(Order $order)
     {
         $order->load(['user', 'orderItems.product', 'payment']);
         return view('admin.order-detail', compact('order'));
     }
 
+    /**
+     * Perbarui status pesanan. Jika status menjadi 'completed',
+     * pembayaran terkait juga otomatis ditandai 'paid'.
+     *
+     * @param  Order  $order   Pesanan yang diperbarui
+     * @param  string $status  Status baru: pending|processing|completed|cancelled
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function updateOrderStatus(Order $order, $status)
     {
 $validStatuses = ['pending', 'processing', 'completed', 'cancelled'];
@@ -140,12 +168,23 @@ $validStatuses = ['pending', 'processing', 'completed', 'cancelled'];
         return back()->with('success', 'Status pesanan berhasil diperbarui!');
     }
 
+    /**
+     * Tampilkan daftar semua kategori beserta jumlah produk di tiap kategori.
+     *
+     * @return \Illuminate\View\View
+     */
     public function categories()
     {
 $categories = Category::withCount('products')->latest()->get();
         return view('admin.categories', compact('categories'));
     }
 
+    /**
+     * Simpan kategori baru ke database. Slug dibuat otomatis dari nama.
+     *
+     * @param  Request $request  Input: name (wajib), description (opsional)
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function storeCategory(Request $request)
     {
 $request->validate([
@@ -162,12 +201,23 @@ $request->validate([
         return back()->with('success', 'Kategori berhasil ditambahkan!');
     }
 
+    /**
+     * Hapus kategori dari database.
+     *
+     * @param  Category $category  Kategori yang akan dihapus
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroyCategory(Category $category)
     {
 $category->delete();
         return back()->with('success', 'Kategori berhasil dihapus!');
     }
 
+    /**
+     * Tampilkan daftar semua pelanggan (non-admin) beserta statistik.
+     *
+     * @return \Illuminate\View\View
+     */
     public function customers()
     {
         $customers = User::where('role', '!=', 'admin')
@@ -183,6 +233,12 @@ $category->delete();
         return view('admin.customers', compact('customers', 'totalCustomers', 'newCustomers', 'totalOrders'));
     }
 
+    /**
+     * Tampilkan halaman analitik: pendapatan bulanan, grafik harian,
+     * top 5 produk terlaris, distribusi status pesanan, dan statistik kategori.
+     *
+     * @return \Illuminate\View\View
+     */
     public function analytics()
     {
 $now = Carbon::now();
@@ -237,6 +293,12 @@ $now = Carbon::now();
         ));
     }
 
+    /**
+     * Tampilkan halaman keuangan: daftar semua pembayaran, total pendapatan,
+     * dan rekapitulasi pembayaran yang belum dilunasi.
+     *
+     * @return \Illuminate\View\View
+     */
     public function finance()
     {
 $payments = Payment::with('order.user')->latest()->get();
@@ -249,12 +311,23 @@ $payments = Payment::with('order.user')->latest()->get();
         return view('admin.finance', compact('payments', 'totalRevenue', 'pendingPayments', 'paidCount', 'pendingCount'));
     }
 
+    /**
+     * Tampilkan form pengaturan akun admin.
+     *
+     * @return \Illuminate\View\View
+     */
     public function settings()
     {
         $this->checkAdmin();
         return view('admin.settings');
     }
 
+    /**
+     * Simpan perubahan data akun admin (nama, email, password opsional).
+     *
+     * @param  Request $request  Input: name, email, password (opsional), password_confirmation
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function updateSettings(Request $request)
     {
 $request->validate([
@@ -276,6 +349,11 @@ $request->validate([
         return back()->with('success', 'Pengaturan berhasil disimpan!');
     }
 
+    /**
+     * Tampilkan daftar semua produk di panel admin (paginated 15 per halaman).
+     *
+     * @return \Illuminate\View\View
+     */
     public function adminProducts()
     {
 $products = Product::with('category')->latest()->paginate(15);

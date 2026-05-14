@@ -25,6 +25,11 @@ class User extends Authenticatable
         'role',
     ];
 
+    /**
+     * Semua pesanan yang dibuat oleh user ini.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function orders()
     {
         return $this->hasMany(Order::class);
