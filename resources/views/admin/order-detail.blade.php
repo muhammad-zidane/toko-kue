@@ -144,7 +144,7 @@
             @if($order->payment)
             <div class="info-row">
                 <span class="info-label">Metode</span>
-                <span class="info-value">{{ strtoupper($order->payment->payment_method) }}</span>
+                <span class="info-value">{{ ['transfer_bank'=>'Transfer Bank','ewallet'=>'E-Wallet','qris'=>'QRIS','cod'=>'COD'][$order->payment->payment_method ?? ''] ?? strtoupper($order->payment->payment_method ?? '-') }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Status</span>

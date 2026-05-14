@@ -139,7 +139,7 @@
                 <p class="card-label">INFO PESANAN</p>
                 <div class="info-row"><span>Status</span><span><span class="badge badge-{{ $order->status }}">{{ ucfirst($order->status) }}</span></span></div>
                 <div class="info-row"><span>Pembayaran</span><span><span class="badge badge-{{ $order->payment->status ?? 'unpaid' }}">{{ ucfirst($order->payment->status ?? 'unpaid') }}</span></span></div>
-                <div class="info-row"><span>Metode</span><span>{{ ucfirst($order->payment->payment_method ?? '-') }}</span></div>
+                <div class="info-row"><span>Metode</span><span>{{ ['transfer_bank'=>'Transfer Bank','ewallet'=>'E-Wallet','qris'=>'QRIS','cod'=>'COD'][$order->payment->payment_method ?? ''] ?? ucfirst($order->payment->payment_method ?? '-') }}</span></div>
                 <div class="info-row"><span>Alamat</span><span>{{ $order->shipping_address }}</span></div>
                 @if($order->notes)
                 <div class="info-row"><span>Catatan</span><span>{{ $order->notes }}</span></div>
