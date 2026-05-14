@@ -7,27 +7,14 @@
     <title>Jagoan Kue - Keranjang</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --pink: #F0507A; --brown-dark: #2C1810; --cream: #FFF8EE; --cream-dark: #F5EDD8; --white: #FFFFFF; --gray: #6B7280; --text-dark: #1A1A1A; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text-dark); background: var(--cream); }
-        a { text-decoration: none; }
-        .navbar { background-color: var(--brown-dark); padding: 16px 24px; position: sticky; top: 0; z-index: 100; }
-        .navbar-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
-        .navbar-logo { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; color: var(--pink); }
-        .navbar-links { display: flex; gap: 32px; list-style: none; }
-        .navbar-links a { color: white; font-size: 14px; font-weight: 500; opacity: 0.9; }
-        .navbar-links a:hover { opacity: 1; }
-        .navbar-actions { display: flex; align-items: center; gap: 12px; }
-        .btn-cart { background-color: var(--pink); color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; }
-        .btn-cart:hover { opacity: 0.85; }
-        .btn-login { border: 1.5px solid white; color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; transition: all 0.2s; }
-        .btn-login:hover { background: white; color: var(--brown-dark); }
+        body { background: var(--cream); }
         .page { max-width: 1100px; margin: 0 auto; padding: 32px 24px 60px; }
         .page-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
         .cart-layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
-        .cart-box { background: var(--white); border-radius: 16px; border: 1px solid #EDE0D4; overflow: hidden; }
+        .cart-box { background: var(--white); border-radius: 16px; border: 1px solid #EDE0D4; overflow: hidden; height: 290px;}
         .select-all-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #F0E8E0; }
         .select-all-left { display: flex; align-items: center; gap: 12px; }
         .custom-check { width: 20px; height: 20px; accent-color: var(--brown-dark); cursor: pointer; }
@@ -59,24 +46,10 @@
         .summary-row span:last-child { font-size: 16px; font-weight: 700; }
         .btn-beli { width: 100%; background: var(--pink); color: white; border: none; border-radius: 10px; padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: opacity 0.2s; }
         .btn-beli:hover { opacity: 0.85; }
-        .footer { background-color: var(--brown-dark); color: white; padding: 56px 24px; }
-        .footer-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 40px; }
-        .footer-logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 800; color: var(--pink); margin-bottom: 8px; }
-        .footer-desc { font-size: 13px; opacity: 0.6; margin-bottom: 20px; line-height: 1.6; }
-        .footer-socials { display: flex; gap: 16px; font-size: 18px; }
-        .footer-socials a { opacity: 0.6; transition: opacity 0.2s; }
-        .footer-socials a:hover { opacity: 1; }
-        .footer-heading { font-size: 14px; font-weight: 700; margin-bottom: 16px; }
-        .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-        .footer-links a { color: white; font-size: 13px; opacity: 0.6; }
-        .footer-contact { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-        .footer-contact li { font-size: 13px; opacity: 0.6; line-height: 1.5; }
-        @media (max-width: 768px) { .navbar-links { display: none; } .cart-layout { grid-template-columns: 1fr; } .footer-inner { grid-template-columns: 1fr 1fr; } }
-    </style>
-    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @endif
-</head>
+        @media (max-width: 768px) {
+ .cart-layout { grid-template-columns: 1fr; }
+ }
+    </style></head>
 <body>
 @include('partials.navbar')
 
@@ -243,5 +216,6 @@
 
     updateTotal();
 </script>
+<script src="{{ asset('js/app.js') }}" defer></script>
 </body>
 </html>

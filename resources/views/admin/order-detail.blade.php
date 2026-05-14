@@ -1,4 +1,4 @@
-@extends('admin.layout')
+﻿@extends('admin.layout')
 @section('title', 'Detail Pesanan')
 @section('page-title', 'Detail Pesanan #' . $order->order_code)
 @section('page-subtitle', 'Dibuat pada ' . $order->created_at->format('d M Y, H:i'))
@@ -42,7 +42,7 @@
 
 @section('content')
 <div style="margin-bottom:16px;">
-    <a href="{{ route('admin.orders') }}" style="font-size:13px;font-weight:600;color:var(--brown-dark);">← Kembali ke Pesanan</a>
+    <a href="{{ route('admin.orders.index') }}" style="font-size:13px;font-weight:600;color:var(--brown-dark);">← Kembali ke Pesanan</a>
 </div>
 
 <div class="detail-grid">
