@@ -165,16 +165,11 @@
             <p class="metode-label">Metode Pembayaran</p>
             <div class="status-badge"><div class="status-dot"></div> Menunggu Pembayaran</div>
 
-            @if(in_array($paymentMethod, ['bca', 'bni']))
-            {{-- BANK TRANSFER UI --}}
+            @if($paymentMethod === 'transfer_bank')
+            {{-- TRANSFER BANK UI --}}
             <div class="bank-header">
-                @if($paymentMethod === 'bca')
-                <div class="bank-logo" style="background:#006CB0;">BCA</div>
-                <div><p class="bank-name">Bank BCA</p><p class="bank-desc">Transfer Manual</p></div>
-                @else
-                <div class="bank-logo" style="background:#F26522;">BNI</div>
-                <div><p class="bank-name">Bank BNI</p><p class="bank-desc">Transfer Manual</p></div>
-                @endif
+                <div class="bank-logo" style="background:#006CB0;"><i class="fas fa-university"></i></div>
+                <div><p class="bank-name">Transfer Bank</p><p class="bank-desc">Transfer Manual</p></div>
             </div>
 
             <div class="bank-row"><span class="bank-row-label">Nama Rekening</span><span class="bank-row-value">Jagoan Kue Official</span></div>
@@ -189,24 +184,50 @@
             </div>
             <p class="kode-unik-note">Nominal transfer berbeda {{ $uniqueCode }} rupiah dari total pesanan — ini adalah kode unik untuk verifikasi.</p>
 
-            @elseif($paymentMethod === 'gopay')
-            {{-- GOPAY UI --}}
+            @elseif($paymentMethod === 'ewallet')
+            {{-- E-WALLET UI --}}
             <div class="bank-header">
-                <div class="bank-logo" style="background:#00B14F;">GP</div>
-                <div><p class="bank-name">GoPay</p><p class="bank-desc">E-Wallet</p></div>
+                <div class="bank-logo" style="background:#00B14F;"><i class="fas fa-wallet"></i></div>
+                <div><p class="bank-name">E-Wallet</p><p class="bank-desc">GoPay / OVO / dll</p></div>
             </div>
 
             <div class="jumlah-box">
-                <div class="jumlah-left"><p>Jumlah Pembayaran</p><small>Bayar via GoPay</small></div>
+                <div class="jumlah-left"><p>Jumlah Pembayaran</p><small>Bayar via E-Wallet</small></div>
                 <div class="jumlah-right">
                     <span class="jumlah-amount">Rp {{ number_format($totalAmount, 0, ',', '.') }}</span>
                 </div>
             </div>
+
+            @elseif($paymentMethod === 'qris')
+            {{-- QRIS UI --}}
+            <div class="bank-header">
+                <div class="bank-logo" style="background:#7C3AED;"><i class="fas fa-qrcode"></i></div>
+                <div><p class="bank-name">QRIS</p><p class="bank-desc">Scan & Bayar</p></div>
+            </div>
+
+            <div class="jumlah-box">
+                <div class="jumlah-left"><p>Jumlah Pembayaran</p><small>Scan QR Code di bawah</small></div>
+                <div class="jumlah-right">
+                    <span class="jumlah-amount">Rp {{ number_format($totalAmount, 0, ',', '.') }}</span>
+                </div>
+            </div>
+
+            <div style="text-align:center;margin-top:16px;">
+                @if(file_exists(public_path('images/qris.png')))
+                <img src="{{ asset('images/qris.png') }}" alt="QR Code QRIS" style="width:220px;height:220px;object-fit:contain;border:1px solid #e5e7eb;border-radius:12px;padding:8px;">
+                @else
+                <div style="width:220px;height:220px;margin:0 auto;border:2px dashed #7C3AED;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#7C3AED;background:#f5f3ff;">
+                    <i class="fas fa-qrcode" style="font-size:64px;opacity:0.4;"></i>
+                    <small style="font-size:11px;opacity:0.7;">QR Code belum tersedia</small>
+                </div>
+                @endif
+                <p style="margin-top:10px;font-size:12px;color:#6B7280;">Scan QR Code ini menggunakan aplikasi apapun yang mendukung QRIS</p>
+            </div>
             @endif
         </div>
 
-        @if(in_array($paymentMethod, ['bca', 'bni']))
-        {{-- CARA TRANSFER --}}
+        @if($paymentMethod === 'transfer_bank')
+        {{-- CARA TRANSFER BANK --}}
         <div class="card">
             <p class="cara-label">CARA MELAKUKAN TRANSFER</p>
             <ul class="cara-list">
@@ -217,14 +238,25 @@
                 <li class="cara-item"><div class="cara-num">5</div><div>Selesaikan transfer, lalu upload bukti pembayaran di bawah</div></li>
             </ul>
         </div>
-        @elseif($paymentMethod === 'gopay')
+        @elseif($paymentMethod === 'ewallet')
         <div class="card">
-            <p class="cara-label">CARA PEMBAYARAN GOPAY</p>
+            <p class="cara-label">CARA PEMBAYARAN E-WALLET</p>
             <ul class="cara-list">
-                <li class="cara-item"><div class="cara-num">1</div><div>Buka aplikasi Gojek atau GoPay di HP kamu</div></li>
-                <li class="cara-item"><div class="cara-num">2</div><div>Transfer ke nomor GoPay: <strong>0822-8320-3385</strong> a.n. Jagoan Kue</div></li>
+                <li class="cara-item"><div class="cara-num">1</div><div>Buka aplikasi E-Wallet kamu (GoPay, OVO, Dana, dll)</div></li>
+                <li class="cara-item"><div class="cara-num">2</div><div>Transfer ke nomor: <strong>0822-8320-3385</strong> a.n. Jagoan Kue</div></li>
                 <li class="cara-item"><div class="cara-num">3</div><div>Masukkan nominal Rp {{ number_format($totalAmount, 0, ',', '.') }}</div></li>
                 <li class="cara-item"><div class="cara-num">4</div><div>Selesaikan pembayaran, lalu screenshot dan upload bukti di bawah</div></li>
+            </ul>
+        </div>
+        @elseif($paymentMethod === 'qris')
+        <div class="card">
+            <p class="cara-label">CARA PEMBAYARAN QRIS</p>
+            <ul class="cara-list">
+                <li class="cara-item"><div class="cara-num">1</div><div>Buka aplikasi apapun yang mendukung QRIS (GoPay, OVO, Dana, m-Banking, dll)</div></li>
+                <li class="cara-item"><div class="cara-num">2</div><div>Pilih menu Scan QR atau Bayar dengan QR</div></li>
+                <li class="cara-item"><div class="cara-num">3</div><div>Scan QR Code yang ditampilkan</div></li>
+                <li class="cara-item"><div class="cara-num">4</div><div>Pastikan nominal Rp {{ number_format($totalAmount, 0, ',', '.') }} sudah sesuai</div></li>
+                <li class="cara-item"><div class="cara-num">5</div><div>Selesaikan pembayaran, lalu screenshot dan upload bukti di bawah</div></li>
             </ul>
         </div>
         @endif
