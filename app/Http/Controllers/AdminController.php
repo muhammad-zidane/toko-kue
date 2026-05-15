@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\LaporanPenjualanExport;
 use App\Models\Banner;
 use App\Models\Category;
 use App\Models\Order;
@@ -16,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AdminController extends Controller
 {
@@ -251,13 +253,21 @@ class AdminController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function analytics()
+    public function analytics(Request $request)
     {
         $now              = Carbon::now();
         $startOfThisMonth = $now->copy()->startOfMonth();
         $startOfLastMonth = $now->copy()->subMonth()->startOfMonth();
         $endOfLastMonth   = $now->copy()->subMonth()->endOfMonth();
 
+        // Filter tanggal dari request
+        $dari   = $request->filled('dari')   ? $request->dari   : $startOfThisMonth->format('Y-m-d');
+        $sampai = $request->filled('sampai') ? $request->sampai : $now->format('Y-m-d');
+
+        $dariCarbon   = Carbon::parse($dari)->startOfDay();
+        $sampaiCarbon = Carbon::parse($sampai)->endOfDay();
+
+        // Stats bulan ini (tetap untuk kartu ringkasan)
         $revenueThisMonth = (float) Payment::where('status', 'paid')->where('created_at', '>=', $startOfThisMonth)->sum('amount');
         $revenueLastMonth = (float) Payment::where('status', 'paid')->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])->sum('amount');
         $growthPercent    = $this->calculateGrowthPercent($revenueThisMonth, $revenueLastMonth, 1);
@@ -265,10 +275,26 @@ class AdminController extends Controller
         $ordersThisMonth = Order::where('created_at', '>=', $startOfThisMonth)->count();
         $avgOrderValue   = $ordersThisMonth > 0 ? round($revenueThisMonth / $ordersThisMonth) : 0;
 
+        // Data berdasarkan filter tanggal
+        $filteredOrders  = Order::whereBetween('created_at', [$dariCarbon, $sampaiCarbon]);
+        $totalFilterOrders   = (clone $filteredOrders)->count();
+        $totalFilterRevenue  = (float) Payment::where('status', 'paid')
+            ->whereBetween('created_at', [$dariCarbon, $sampaiCarbon])->sum('amount');
+        $totalItemsTerjual   = \App\Models\OrderItem::whereHas('order', fn($q) =>
+            $q->whereBetween('created_at', [$dariCarbon, $sampaiCarbon]))->sum('quantity');
+        $avgFilterOrder = $totalFilterOrders > 0 ? round($totalFilterRevenue / $totalFilterOrders) : 0;
+
+        // Grafik penjualan per hari (untuk Chart.js)
+        $penjualanPerHari = Order::whereBetween('created_at', [$dariCarbon, $sampaiCarbon])
+            ->selectRaw('DATE(created_at) as tanggal, COUNT(*) as jumlah_pesanan, SUM(total_price) as total')
+            ->groupBy('tanggal')
+            ->orderBy('tanggal')
+            ->get();
+
         $dailyRevenue = $this->buildDailyRevenue();
         $maxDaily     = max(array_column($dailyRevenue, 'amount') ?: [1]) ?: 1;
 
-        $topProducts = Product::withCount('orderItems')->with('category')->orderByDesc('order_items_count')->take(5)->get();
+        $topProducts = Product::withCount('orderItems')->with('category')->orderByDesc('order_items_count')->take(10)->get();
         $maxSold     = max($topProducts->first()->order_items_count ?? 0, 1);
 
         $statusCounts  = Order::selectRaw('status, count(*) as count')->groupBy('status')->pluck('count', 'status')->toArray();
@@ -283,8 +309,22 @@ class AdminController extends Controller
             'dailyRevenue', 'maxDaily',
             'topProducts', 'maxSold',
             'statusCounts', 'totalOrdersAll',
-            'categories', 'maxProd'
+            'categories', 'maxProd',
+            'dari', 'sampai',
+            'totalFilterOrders', 'totalFilterRevenue', 'totalItemsTerjual', 'avgFilterOrder',
+            'penjualanPerHari'
         ));
+    }
+
+    public function exportLaporan(Request $request)
+    {
+        $request->validate([
+            'dari'   => 'required|date',
+            'sampai' => 'required|date|after_or_equal:dari',
+        ]);
+
+        $filename = 'laporan-penjualan-' . $request->dari . '-sd-' . $request->sampai . '.xlsx';
+        return Excel::download(new LaporanPenjualanExport($request->dari, $request->sampai), $filename);
     }
 
     /**
