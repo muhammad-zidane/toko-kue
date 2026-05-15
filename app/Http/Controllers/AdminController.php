@@ -541,7 +541,7 @@ class AdminController extends Controller
         $zone->update([
             'area_name'    => $request->area_name,
             'cost'         => $request->cost,
-            'is_available' => $request->boolean('is_available', true),
+            'is_available' => $request->has('is_available'),
         ]);
 
         return back()->with('success', 'Zona pengiriman diperbarui.');
