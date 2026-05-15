@@ -121,7 +121,7 @@
                 <p class="card-label">INFO PESANAN</p>
                 <div class="info-row"><span>Status</span><span><span class="badge badge-{{ $order->status }}">{{ ucfirst($order->status) }}</span></span></div>
                 @php
-                    $payStatus = $order->payment->status ?? 'unpaid';
+                    $payStatus = $order->payment_status ?? $order->payment?->status ?? 'unpaid';
                     $payLabel = match($payStatus) { 'paid' => 'Lunas', 'dp' => 'DP 50%', default => 'Belum Bayar' };
                 @endphp
                 <div class="info-row"><span>Pembayaran</span><span><span class="badge badge-{{ $payStatus }}">{{ $payLabel }}</span></span></div>
