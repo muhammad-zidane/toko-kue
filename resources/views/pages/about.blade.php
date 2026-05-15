@@ -371,7 +371,10 @@
 <section class="about-story">
     <div class="story-inner">
         <div class="story-img-wrap">
-            <div class="story-img-placeholder">🎂</div>
+            <img src="{{ asset('images/cake.png') }}"
+                 alt="Dapur Jagoan Kue"
+                 style="width:100%;height:380px;object-fit:cover;border-radius:20px;display:block;box-shadow:0 12px 40px rgba(0,0,0,0.12);"
+                 loading="lazy">
             <div class="story-badge">
                 <div class="story-badge-num">3+</div>
                 <div class="story-badge-text">Tahun Melayani</div>
@@ -451,7 +454,7 @@
                     <div>
                         <div class="contact-label">Telepon / WhatsApp</div>
                         <div class="contact-value">
-                            <a href="https://wa.me/6281234567890">+62 812-3456-7890</a>
+                            <a href="https://wa.me/6281234567890">081234567890</a>
                         </div>
                     </div>
                 </div>
@@ -460,7 +463,7 @@
                     <div>
                         <div class="contact-label">Email</div>
                         <div class="contact-value">
-                            <a href="mailto:halo@jagoan-kue.id">halo@jagoan-kue.id</a>
+                            <a href="mailto:muhammadzidane@student.unp.ac.id">muhammadzidane@student.unp.ac.id</a>
                         </div>
                     </div>
                 </div>
@@ -468,7 +471,7 @@
                     <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
                     <div>
                         <div class="contact-label">Alamat</div>
-                        <div class="contact-value">Jl. Mawar No. 12, Kelurahan Sukamaju,<br>Kota Bandung, Jawa Barat</div>
+                        <div class="contact-value">Jl. Imam Bonjol No. 139, Kelurahan Padangdata Tanahmati,<br>Kota Payakumbuh, Sumatera Barat</div>
                     </div>
                 </div>
                 <div class="contact-item">

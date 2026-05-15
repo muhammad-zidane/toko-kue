@@ -16,6 +16,7 @@
         .product-page { background-color: var(--cream); padding: 60px 24px; min-height: 70vh; }
         .product-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1.2fr 0.8fr; gap: 40px; align-items: start; }
         .product-image img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
+        .product-info { background: white; border-radius: 16px; border: 1px solid #EDE0D4; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
         .product-info h1 { font-size: 22px; font-weight: 700; color: var(--text-dark); margin-bottom: 6px; }
         .product-sold { font-size: 12px; color: var(--gray); margin-bottom: 16px; }
         .product-price { font-size: 22px; font-weight: 700; color: var(--text-dark); margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1.5px solid #E5B8C2; }
@@ -52,9 +53,12 @@
         .price-total-label { font-size: 15px; font-weight: 700; color: var(--text-dark); }
         .btn-add-cart { width: 100%; background-color: var(--pink); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: opacity 0.2s; }
         .btn-add-cart:hover { opacity: 0.85; }
-        .reviews-section { max-width: 1100px; margin: 26px auto 0; padding: 0 24px 60px; }
-        .reviews-title { font-family: 'Playfair Display', serif; font-size: 28px; margin-bottom: 14px; }
-        .review-card { background: var(--white); border: 1px solid #EDE0D4; border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+        .reviews-section { max-width: 1100px; margin: 24px auto 0; padding: 0 24px 60px; }
+        .reviews-card { background: white; border-radius: 16px; border: 1px solid #EDE0D4; padding: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+        .reviews-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
+        .reviews-count { font-size: 13px; color: var(--gray); margin-bottom: 20px; }
+        .reviews-divider { height: 1px; background: #EDE0D4; margin-bottom: 20px; }
+        .review-card { background: var(--cream); border: 1px solid #EDE0D4; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
         .review-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 12px; }
         .review-user { font-size: 14px; font-weight: 700; }
         .review-date { font-size: 12px; color: var(--gray); }
@@ -190,8 +194,12 @@
     </div>
 
     <div class="reviews-section">
-        <h2 class="reviews-title">Ulasan</h2>
-        @forelse($product->reviews as $review)
+        <div class="reviews-card">
+            <h2 class="reviews-title">Ulasan Produk</h2>
+            <p class="reviews-count">{{ $product->reviews->count() }} ulasan</p>
+            <div class="reviews-divider"></div>
+
+            @forelse($product->reviews as $review)
             <div class="review-card">
                 <div class="review-top">
                     <div>
@@ -202,16 +210,20 @@
                 </div>
                 <p class="review-comment">{{ $review->comment }}</p>
                 @if($review->images->isNotEmpty())
-                    <div class="review-images">
-                        @foreach($review->images as $image)
-                            <img src="{{ asset('storage/' . $image->path) }}" alt="Gambar ulasan produk">
-                        @endforeach
-                    </div>
+                <div class="review-images">
+                    @foreach($review->images as $image)
+                    <img src="{{ asset('storage/' . $image->path) }}" alt="Gambar ulasan" loading="lazy">
+                    @endforeach
+                </div>
                 @endif
             </div>
-        @empty
-            <p style="font-size:14px; color:var(--gray);">Belum ada ulasan untuk produk ini.</p>
-        @endforelse
+            @empty
+            <div style="text-align:center;padding:32px 0;color:var(--gray);">
+                <i class="fas fa-star" style="font-size:32px;color:#E5D5C5;margin-bottom:10px;display:block;"></i>
+                <p style="font-size:14px;">Belum ada ulasan untuk produk ini.</p>
+            </div>
+            @endforelse
+        </div>
     </div>
 </section>
 

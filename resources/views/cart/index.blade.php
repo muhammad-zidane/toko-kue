@@ -14,7 +14,7 @@
         .page { max-width: 1100px; margin: 0 auto; padding: 32px 24px 60px; }
         .page-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
         .cart-layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
-        .cart-box { background: var(--white); border-radius: 16px; border: 1px solid #EDE0D4; overflow: hidden; height: 290px;}
+        .cart-box { background: var(--white); border-radius: 16px; border: 1px solid #EDE0D4; overflow: hidden; min-height: 290px;}
         .select-all-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #F0E8E0; }
         .select-all-left { display: flex; align-items: center; gap: 12px; }
         .custom-check { width: 20px; height: 20px; accent-color: var(--brown-dark); cursor: pointer; }
