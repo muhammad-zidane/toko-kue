@@ -10,8 +10,14 @@
             @endauth
         </ul>
         <div class="navbar-actions">
-            <a href="/cart" class="btn-cart">
+            @php $cartCount = collect(session()->get('cart', []))->sum('quantity'); @endphp
+            <a href="/cart" class="btn-cart" style="position:relative;">
                 <i class="fas fa-shopping-cart" style="color:white"></i> Keranjang
+                @if($cartCount > 0)
+                <span id="cart-badge" style="position:absolute;top:-8px;right:-8px;background:#fff;color:var(--pink);font-size:11px;font-weight:800;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;border:2px solid var(--pink);line-height:1;">{{ $cartCount }}</span>
+                @else
+                <span id="cart-badge" style="position:absolute;top:-8px;right:-8px;background:#fff;color:var(--pink);font-size:11px;font-weight:800;border-radius:50%;width:20px;height:20px;display:none;align-items:center;justify-content:center;border:2px solid var(--pink);line-height:1;">0</span>
+                @endif
             </a>
             @auth
                 <div style="position:relative;display:inline-block;">

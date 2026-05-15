@@ -68,6 +68,17 @@ class CartController extends Controller
         }
 
         session()->put('cart', $cart);
+
+        $cartCount = collect(session()->get('cart', []))->sum('quantity');
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Produk ditambahkan ke keranjang!',
+                'cart_count' => $cartCount,
+            ]);
+        }
+
         return redirect()->route('cart.index')->with('success', 'Produk ditambahkan ke keranjang!');
     }
 
