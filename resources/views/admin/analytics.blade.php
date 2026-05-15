@@ -1,9 +1,9 @@
-@extends('admin.layout')
+﻿@extends('admin.layout')
 @section('title', 'Analisis')
 @section('page-title', 'Analisis & Laporan')
 @section('page-subtitle', 'Pantau performa bisnis secara keseluruhan')
 
-@section('styles')
+@push('styles')
 <style>
     .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
     .stat-card { background: white; border-radius: 16px; padding: 20px; border: 1px solid #EDE0D4; transition: transform 0.2s; }
@@ -48,7 +48,7 @@
     @media (max-width: 1024px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .two-grid { grid-template-columns: 1fr; } }
     @media (max-width: 640px) { .stats-grid { grid-template-columns: 1fr; } .donut-container { flex-direction: column; } }
 </style>
-@endsection
+@endpush
 
 @section('content')
 {{-- STATS --}}
@@ -156,3 +156,4 @@
     </div>
 </div>
 @endsection
+
