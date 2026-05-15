@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
@@ -21,6 +22,10 @@ require __DIR__.'/auth.php';
 
 // Authenticated user routes
 Route::middleware('auth')->group(function () {
+
+    // Ganti Password
+    Route::get('/akun/ganti-password', [AccountController::class, 'showChangePassword'])->name('account.change-password');
+    Route::post('/akun/ganti-password', [AccountController::class, 'updatePassword'])->name('account.update-password');
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');

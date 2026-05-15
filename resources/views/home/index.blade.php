@@ -89,8 +89,8 @@
                         Menyediakan Bermacam-macam kue yang<br>dibuat oleh cinta
                     </p>
                     <div class="hero-buttons">
-                        <a href="/orders" class="btn-primary">Pemesanan</a>
-                        <a href="/products" class="btn-secondary">Katalog</a>
+                        <a href="/products" class="btn-primary">Katalog</a>
+                        <a href="/orders" class="btn-secondary">Pesanan Saya</a>
                     </div>
                 </div>
                 <div class="hero-image">
