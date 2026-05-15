@@ -8,7 +8,13 @@ class Order extends Model
 {
     protected $fillable = [
         'user_id', 'order_code', 'status',
-        'shipping_address', 'total_price', 'notes'
+        'shipping_address', 'total_price', 'notes',
+        'delivery_method', 'delivery_date', 'delivery_slot',
+        'shipping_cost', 'voucher_code', 'discount_amount',
+    ];
+
+    protected $casts = [
+        'delivery_date' => 'date',
     ];
 
     /**

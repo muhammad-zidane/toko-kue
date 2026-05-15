@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Banner;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Product;
+use App\Models\ProductReview;
+use App\Models\ShippingZone;
 use App\Models\User;
+use App\Models\Voucher;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class AdminController extends Controller
@@ -158,6 +163,11 @@ class AdminController extends Controller
         }
 
         $order->update(['status' => $status]);
+
+        try {
+            \Illuminate\Support\Facades\Mail::to($order->user->email)
+                ->queue(new \App\Mail\OrderStatusUpdatedMail($order));
+        } catch (\Throwable) {}
 
         if ($status === 'completed' && $order->payment) {
             $order->payment->update(['status' => 'paid', 'paid_at' => now()]);
@@ -368,5 +378,232 @@ class AdminController extends Controller
         }
 
         return round(($current - $previous) / $previous * 100, $decimals);
+    }
+
+    // ─── NOTIFICATIONS ──────────────────────────────────────────────────────────
+
+    public function markAllNotificationsRead()
+    {
+        auth()->user()->unreadNotifications->markAsRead();
+        return back();
+    }
+
+    public function markNotificationRead(string $id)
+    {
+        auth()->user()->notifications()->where('id', $id)->first()?->markAsRead();
+        return response()->json(['ok' => true]);
+    }
+
+    // ─── BANNERS ────────────────────────────────────────────────────────────────
+
+    public function banners()
+    {
+        $banners = Banner::orderBy('order')->get();
+        return view('admin.banners', compact('banners'));
+    }
+
+    public function storeBanner(Request $request)
+    {
+        $request->validate([
+            'title'    => 'required|string|max:255',
+            'subtitle' => 'nullable|string|max:255',
+            'image'    => 'required|image|max:3072',
+            'link'     => 'nullable|url',
+            'order'    => 'nullable|integer',
+        ]);
+
+        $data = $request->only(['title', 'subtitle', 'link', 'order']);
+        $data['image']     = $request->file('image')->store('banners', 'public');
+        $data['is_active'] = true;
+
+        Banner::create($data);
+        return back()->with('success', 'Banner berhasil ditambahkan.');
+    }
+
+    public function updateBanner(Request $request, Banner $banner)
+    {
+        $request->validate([
+            'title'     => 'required|string|max:255',
+            'subtitle'  => 'nullable|string|max:255',
+            'image'     => 'nullable|image|max:3072',
+            'link'      => 'nullable|url',
+            'order'     => 'nullable|integer',
+            'is_active' => 'nullable|boolean',
+        ]);
+
+        $data = $request->only(['title', 'subtitle', 'link', 'order']);
+        $data['is_active'] = $request->boolean('is_active');
+
+        if ($request->hasFile('image')) {
+            Storage::disk('public')->delete($banner->image);
+            $data['image'] = $request->file('image')->store('banners', 'public');
+        }
+
+        $banner->update($data);
+        return back()->with('success', 'Banner berhasil diperbarui.');
+    }
+
+    public function destroyBanner(Banner $banner)
+    {
+        Storage::disk('public')->delete($banner->image);
+        $banner->delete();
+        return back()->with('success', 'Banner berhasil dihapus.');
+    }
+
+    // ─── VOUCHERS ───────────────────────────────────────────────────────────────
+
+    public function vouchers()
+    {
+        $vouchers = Voucher::latest()->paginate(20);
+        return view('admin.vouchers', compact('vouchers'));
+    }
+
+    public function storeVoucher(Request $request)
+    {
+        $request->validate([
+            'code'        => 'required|string|unique:vouchers,code',
+            'type'        => 'required|in:percent,fixed',
+            'value'       => 'required|numeric|min:0',
+            'usage_limit' => 'nullable|integer|min:1',
+            'min_purchase'=> 'nullable|numeric|min:0',
+            'expires_at'  => 'nullable|date',
+        ]);
+
+        Voucher::create([
+            'code'         => strtoupper($request->code),
+            'type'         => $request->type,
+            'value'        => $request->value,
+            'usage_limit'  => $request->usage_limit,
+            'min_purchase' => $request->min_purchase ?? 0,
+            'is_active'    => true,
+            'expires_at'   => $request->expires_at,
+        ]);
+
+        return back()->with('success', 'Voucher berhasil ditambahkan.');
+    }
+
+    public function updateVoucher(Request $request, Voucher $voucher)
+    {
+        $request->validate([
+            'type'        => 'required|in:percent,fixed',
+            'value'       => 'required|numeric|min:0',
+            'usage_limit' => 'nullable|integer|min:1',
+            'min_purchase'=> 'nullable|numeric|min:0',
+            'expires_at'  => 'nullable|date',
+            'is_active'   => 'nullable|boolean',
+        ]);
+
+        $voucher->update([
+            'type'         => $request->type,
+            'value'        => $request->value,
+            'usage_limit'  => $request->usage_limit,
+            'min_purchase' => $request->min_purchase ?? 0,
+            'is_active'    => $request->boolean('is_active'),
+            'expires_at'   => $request->expires_at,
+        ]);
+
+        return back()->with('success', 'Voucher berhasil diperbarui.');
+    }
+
+    public function destroyVoucher(Voucher $voucher)
+    {
+        $voucher->delete();
+        return back()->with('success', 'Voucher berhasil dihapus.');
+    }
+
+    // ─── SHIPPING ZONES ─────────────────────────────────────────────────────────
+
+    public function shippingZones()
+    {
+        $zones = ShippingZone::orderBy('area_name')->get();
+        return view('admin.shipping-zones', compact('zones'));
+    }
+
+    public function storeShippingZone(Request $request)
+    {
+        $request->validate([
+            'area_name' => 'required|string|max:255',
+            'cost'      => 'required|numeric|min:0',
+        ]);
+
+        ShippingZone::create(['area_name' => $request->area_name, 'cost' => $request->cost]);
+        return back()->with('success', 'Zona pengiriman ditambahkan.');
+    }
+
+    public function updateShippingZone(Request $request, ShippingZone $zone)
+    {
+        $request->validate([
+            'area_name'    => 'required|string|max:255',
+            'cost'         => 'required|numeric|min:0',
+            'is_available' => 'nullable|boolean',
+        ]);
+
+        $zone->update([
+            'area_name'    => $request->area_name,
+            'cost'         => $request->cost,
+            'is_available' => $request->boolean('is_available', true),
+        ]);
+
+        return back()->with('success', 'Zona pengiriman diperbarui.');
+    }
+
+    public function destroyShippingZone(ShippingZone $zone)
+    {
+        $zone->delete();
+        return back()->with('success', 'Zona pengiriman dihapus.');
+    }
+
+    // ─── PRODUCTION CALENDAR ────────────────────────────────────────────────────
+
+    public function productionCalendar(Request $request)
+    {
+        $month = $request->integer('month', now()->month);
+        $year  = $request->integer('year', now()->year);
+
+        $orders = Order::with('orderItems.product')
+            ->whereNotIn('status', ['cancelled'])
+            ->whereYear('delivery_date', $year)
+            ->whereMonth('delivery_date', $month)
+            ->get()
+            ->groupBy(fn($o) => $o->delivery_date?->format('Y-m-d'));
+
+        return view('admin.production-calendar', compact('orders', 'month', 'year'));
+    }
+
+    // ─── REVIEWS MODERATION ─────────────────────────────────────────────────────
+
+    public function reviews()
+    {
+        $reviews = ProductReview::with('user', 'product')->latest()->paginate(20);
+        return view('admin.reviews', compact('reviews'));
+    }
+
+    public function approveReview(ProductReview $review)
+    {
+        $review->update(['is_approved' => !$review->is_approved]);
+        return back()->with('success', 'Status ulasan diperbarui.');
+    }
+
+    public function destroyReview(ProductReview $review)
+    {
+        $review->delete();
+        return back()->with('success', 'Ulasan berhasil dihapus.');
+    }
+
+    // ─── PAYMENT CONFIRM / REJECT ────────────────────────────────────────────────
+
+    public function confirmPayment(Request $request, Order $order)
+    {
+        $order->payment?->update(['status' => 'paid', 'paid_at' => now()]);
+        $order->update(['status' => 'processing']);
+        return back()->with('success', 'Pembayaran dikonfirmasi.');
+    }
+
+    public function rejectPayment(Request $request, Order $order)
+    {
+        $request->validate(['reason' => 'nullable|string|max:500']);
+        $order->payment?->update(['status' => 'failed']);
+        $order->update(['status' => 'pending', 'notes' => $request->reason ? '[Pembayaran Ditolak] ' . $request->reason : $order->notes]);
+        return back()->with('success', 'Pembayaran ditolak.');
     }
 }

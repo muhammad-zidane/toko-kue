@@ -4,7 +4,8 @@
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jagoan Kue - Kue Lezat Dikirim ke Pintumu</title>
+    <title>Jagoan Kue — Kue Lezat Dikirim ke Pintumu</title>
+    <meta name="description" content="Jagoan Kue menyediakan berbagai kue lezat: kue ulang tahun, pernikahan, kering, dan custom cake. Pesan sekarang, kirim ke pintumu!">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
@@ -77,6 +78,52 @@
         {{-- NAVBAR --}}
         @include('partials.navbar')
 
+        {{-- BANNER SLIDESHOW (dari database) --}}
+        @if($banners->isNotEmpty())
+        <div id="bannerSlider" style="position:relative;overflow:hidden;background:var(--cream);">
+            @foreach($banners as $i => $banner)
+            <div class="banner-slide" style="display:{{ $i === 0 ? 'block' : 'none' }};position:relative;">
+                <a href="{{ $banner->link ?? '#' }}">
+                    <img src="{{ asset('storage/' . $banner->image) }}"
+                         alt="{{ $banner->title }}"
+                         style="width:100%;max-height:480px;object-fit:cover;display:block;" loading="lazy">
+                </a>
+                @if($banner->title)
+                <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.55));padding:24px 32px;">
+                    <h2 style="color:white;font-family:'Playfair Display',serif;font-size:28px;font-weight:800;margin-bottom:4px;">{{ $banner->title }}</h2>
+                    @if($banner->subtitle)<p style="color:rgba(255,255,255,0.85);font-size:14px;">{{ $banner->subtitle }}</p>@endif
+                </div>
+                @endif
+            </div>
+            @endforeach
+
+            @if($banners->count() > 1)
+            <button onclick="slideBanner(-1)" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.8);border:none;border-radius:50%;width:36px;height:36px;font-size:16px;cursor:pointer;">‹</button>
+            <button onclick="slideBanner(1)"  style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.8);border:none;border-radius:50%;width:36px;height:36px;font-size:16px;cursor:pointer;">›</button>
+            <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;" id="bannerDots">
+                @foreach($banners as $i => $banner)
+                <div class="banner-dot" onclick="goToBanner({{ $i }})"
+                     style="width:8px;height:8px;border-radius:50%;background:{{ $i === 0 ? 'white' : 'rgba(255,255,255,0.5)' }};cursor:pointer;transition:background 0.2s;"></div>
+                @endforeach
+            </div>
+            @endif
+        </div>
+        <script>
+        let bannerIdx = 0;
+        const slides = document.querySelectorAll('.banner-slide');
+        const dots   = document.querySelectorAll('.banner-dot');
+        function goToBanner(n) {
+            slides[bannerIdx].style.display = 'none';
+            dots[bannerIdx].style.background = 'rgba(255,255,255,0.5)';
+            bannerIdx = (n + slides.length) % slides.length;
+            slides[bannerIdx].style.display = 'block';
+            dots[bannerIdx].style.background = 'white';
+        }
+        function slideBanner(dir) { goToBanner(bannerIdx + dir); }
+        setInterval(() => slideBanner(1), 5000);
+        </script>
+        @endif
+
         {{-- HERO --}}
         <section class="hero">
             <div class="hero-inner">
@@ -94,7 +141,7 @@
                     </div>
                 </div>
                 <div class="hero-image">
-                    <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&q=80" alt="Kue Lezat">
+                    <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&q=80" alt="Kue Lezat" loading="lazy">
                 </div>
             </div>
         </section>
