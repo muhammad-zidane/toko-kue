@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CustomizationOption;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
@@ -58,7 +59,13 @@ class ProductController extends Controller
             'reviews' => fn ($q) => $q->with(['user', 'images'])->latest(),
         ]);
 
-        return view('products.show', compact('product'));
+        $customizationOptions = CustomizationOption::where('is_active', true)
+            ->orderBy('type')
+            ->orderBy('sort_order')
+            ->get()
+            ->groupBy('type');
+
+        return view('products.show', compact('product', 'customizationOptions'));
     }
 
     /**

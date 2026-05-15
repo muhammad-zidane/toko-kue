@@ -123,4 +123,8 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'lead_time_days' => env('LEAD_TIME_DAYS', 2),
+    'dp_min_amount'  => env('DP_MIN_AMOUNT', 200000),
+    'dp_percentage'  => env('DP_PERCENTAGE', 50),
+
 ];

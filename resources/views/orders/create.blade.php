@@ -163,16 +163,37 @@
             </div>
 
             <div id="address-section">
+                {{-- Alamat Tersimpan --}}
+                @if(isset($savedAddresses) && $savedAddresses->isNotEmpty())
+                <label class="field-label">Pilih Alamat Tersimpan</label>
+                <select class="field-input" id="savedAddressSelect" onchange="fillSavedAddress(this)">
+                    <option value="">-- Isi manual / alamat baru --</option>
+                    @foreach($savedAddresses as $addr)
+                    <option value="{{ $addr->id }}"
+                            data-name="{{ $addr->recipient_name }}"
+                            data-phone="{{ $addr->phone }}"
+                            data-address="{{ $addr->full_address }}"
+                            {{ $addr->is_default ? 'selected' : '' }}>
+                        {{ $addr->label }} — {{ $addr->recipient_name }} ({{ $addr->city }})
+                    </option>
+                    @endforeach
+                </select>
+                <div style="text-align:right;margin-top:-10px;margin-bottom:14px;">
+                    <a href="{{ route('account.addresses.index') }}" target="_blank"
+                       style="font-size:11px;color:var(--pink);">+ Tambah alamat baru</a>
+                </div>
+                @endif
+
                 <label class="field-label">Nama Penerima</label>
-                <input type="text" name="recipient_name" class="field-input"
+                <input type="text" name="recipient_name" id="fieldName" class="field-input"
                        value="{{ old('recipient_name', auth()->user()->name) }}" placeholder="Nama penerima">
 
                 <label class="field-label">No. Telepon Penerima</label>
-                <input type="text" name="phone" class="field-input"
+                <input type="text" name="phone" id="fieldPhone" class="field-input"
                        value="{{ old('phone') }}" placeholder="08123456789">
 
                 <label class="field-label">Alamat Lengkap</label>
-                <textarea name="shipping_address" class="field-textarea" rows="3"
+                <textarea name="shipping_address" id="fieldAddress" class="field-textarea" rows="3"
                           placeholder="Jl. Imam Bonjol No. 10, RT 01/RW 02...">{{ old('shipping_address') }}</textarea>
 
                 <label class="field-label">Zona Pengiriman</label>
@@ -304,7 +325,26 @@
                 <span>Total</span>
                 <span id="val-total">Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
             </div>
-            <button type="submit" class="btn-lanjut">Lanjutkan Ke Pembayaran →</button>
+
+            {{-- Opsi DP --}}
+            @php $dpMin = $dpMinAmount ?? config('app.dp_min_amount', 200000); $dpPct = $dpPercentage ?? config('app.dp_percentage', 50); @endphp
+            <div id="dp-section" style="display:none;background:var(--cream);border-radius:10px;padding:14px;margin-bottom:14px;">
+                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
+                    <input type="checkbox" name="use_dp" id="useDpCheck" value="1" style="margin-top:2px;accent-color:var(--pink);">
+                    <div>
+                        <p style="font-size:13px;font-weight:700;color:var(--text-dark);margin-bottom:2px;">
+                            Bayar DP {{ $dpPct }}% Sekarang
+                        </p>
+                        <p style="font-size:12px;color:var(--gray);">
+                            Bayar Rp <span id="dp-amount-display">0</span> sekarang, sisanya sebelum pengiriman.
+                        </p>
+                    </div>
+                </label>
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn-lanjut" onclick="return validateCheckout()">
+                Lanjutkan Ke Pembayaran →
+            </button>
         </div>
     </div>
 </div>
@@ -350,12 +390,63 @@ function selectSlot(label) {
     label.querySelector('input').checked = true;
 }
 
+const dpMinAmount  = {{ $dpMin }};
+const dpPercentage = {{ $dpPct }};
+
 function recalc() {
     const total = Math.max(0, subtotal + shippingCost - discountAmt);
     document.getElementById('val-total').textContent = 'Rp ' + fmt(total);
+
+    // Show DP section if total qualifies
+    const dpSection = document.getElementById('dp-section');
+    if (dpSection) {
+        dpSection.style.display = total >= dpMinAmount ? 'block' : 'none';
+        const dpAmt = Math.round(total * dpPercentage / 100);
+        const el = document.getElementById('dp-amount-display');
+        if (el) el.textContent = fmt(dpAmt);
+    }
 }
 
 function fmt(n) { return Math.round(n).toLocaleString('id-ID'); }
+
+function fillSavedAddress(sel) {
+    const opt = sel.options[sel.selectedIndex];
+    if (!opt || !opt.value) return;
+    const name = document.getElementById('fieldName');
+    const phone = document.getElementById('fieldPhone');
+    const addr = document.getElementById('fieldAddress');
+    if (name)  name.value  = opt.dataset.name  || '';
+    if (phone) phone.value = opt.dataset.phone || '';
+    if (addr)  addr.value  = opt.dataset.address || '';
+}
+
+function validateCheckout() {
+    const method   = document.querySelector('[name=delivery_method]:checked')?.value;
+    const date     = document.querySelector('[name=delivery_date]')?.value;
+    const slot     = document.querySelector('[name=delivery_slot]:checked');
+    const errors   = [];
+
+    if (!date) errors.push('Tanggal pengiriman wajib dipilih.');
+    if (!slot) errors.push('Slot waktu wajib dipilih.');
+
+    if (method === 'delivery') {
+        const addr = document.querySelector('[name=shipping_address]')?.value?.trim();
+        if (!addr) errors.push('Alamat pengiriman wajib diisi.');
+    }
+
+    if (errors.length > 0) {
+        alert(errors.join('\n'));
+        return false;
+    }
+    return true;
+}
+
+// Auto-fill default address on load
+window.addEventListener('DOMContentLoaded', () => {
+    const sel = document.getElementById('savedAddressSelect');
+    if (sel && sel.value) fillSavedAddress(sel);
+    recalc();
+});
 
 async function applyVoucher() {
     const code = document.getElementById('voucherInput').value.trim().toUpperCase();

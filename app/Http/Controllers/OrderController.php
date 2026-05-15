@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CustomizationOption;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\OrderItemCustomization;
 use App\Models\Product;
 use App\Models\Payment;
 use App\Models\User;
@@ -32,7 +34,11 @@ class OrderController extends Controller
 
     public function singleProductCheckout(Product $product)
     {
-        return view('orders.create', compact('product'));
+        $savedAddresses = auth()->user()->addresses()->latest()->get();
+        $dpMinAmount    = config('app.dp_min_amount', 200000);
+        $dpPercentage   = config('app.dp_percentage', 50);
+
+        return view('orders.create', compact('product', 'savedAddresses', 'dpMinAmount', 'dpPercentage'));
     }
 
     public function payment(Order $order)
@@ -66,27 +72,50 @@ class OrderController extends Controller
         $leadDays = config('app.lead_time_days', 2);
 
         $request->validate([
-            'delivery_method'    => 'required|in:pickup,delivery',
-            'shipping_address'   => 'required_if:delivery_method,delivery|string',
-            'delivery_date'      => ['required', 'date', 'after_or_equal:' . now()->addDays($leadDays)->format('Y-m-d')],
-            'delivery_slot'      => 'nullable|string',
-            'notes'              => 'nullable|string|max:300',
-            'items'              => 'required|array',
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity'   => 'required|integer|min:1',
-            'items.*.note'       => 'nullable|string',
-            'voucher_code'       => 'nullable|string',
+            'delivery_method'              => 'required|in:pickup,delivery',
+            'shipping_address'             => 'required_if:delivery_method,delivery|string',
+            'delivery_date'                => ['required', 'date', 'after_or_equal:' . now()->addDays($leadDays)->format('Y-m-d')],
+            'delivery_slot'                => 'nullable|string',
+            'notes'                        => 'nullable|string|max:300',
+            'items'                        => 'required|array',
+            'items.*.product_id'           => 'required|exists:products,id',
+            'items.*.quantity'             => 'required|integer|min:1',
+            'items.*.note'                 => 'nullable|string|max:300',
+            'items.*.customizations'       => 'nullable|string', // JSON
+            'voucher_code'                 => 'nullable|string',
+            'use_dp'                       => 'nullable|boolean',
         ]);
 
         $products = Product::findMany(array_column($request->items, 'product_id'))->keyBy('id');
 
+        // Parse customization option IDs from each item (JSON string → array of option IDs)
+        $parsedCustomizations = [];
+        foreach ($request->items as $idx => $item) {
+            $parsed = [];
+            if (!empty($item['customizations'])) {
+                $decoded = json_decode($item['customizations'], true);
+                if (is_array($decoded)) {
+                    $parsed = $decoded; // array of customization_option_id
+                }
+            }
+            $parsedCustomizations[$idx] = $parsed;
+        }
+
+        // Load active options for extra price lookup
+        $optionIds = collect($parsedCustomizations)->flatten()->filter()->unique()->values()->all();
+        $optionsMap = $optionIds
+            ? CustomizationOption::whereIn('id', $optionIds)->get()->keyBy('id')
+            : collect();
+
         $subtotal = 0;
-        foreach ($request->items as $item) {
+        foreach ($request->items as $idx => $item) {
             $product = $products->get($item['product_id']);
             if ($product->stock < $item['quantity']) {
                 return back()->withErrors(['stock' => "Stok {$product->name} tidak mencukupi. Tersisa {$product->stock}."]);
             }
-            $subtotal += $product->price * $item['quantity'];
+            $basePrice = $product->price;
+            $extraTotal = collect($parsedCustomizations[$idx])->sum(fn($id) => $optionsMap->get($id)?->extra_price ?? 0);
+            $subtotal += ($basePrice + $extraTotal) * $item['quantity'];
         }
 
         // Shipping cost
@@ -114,6 +143,13 @@ class OrderController extends Controller
             ? 'Ambil di Toko'
             : $request->shipping_address;
 
+        // DP calculation
+        $dpMinAmount  = config('app.dp_min_amount', 200000);
+        $dpPercentage = config('app.dp_percentage', 50);
+        $useDp        = $request->boolean('use_dp') && $totalPrice >= $dpMinAmount;
+        $dpAmount     = $useDp ? round($totalPrice * $dpPercentage / 100) : 0;
+        $paymentStatus = $useDp ? 'dp' : 'unpaid';
+
         $order = Order::create([
             'user_id'          => auth()->id(),
             'order_code'       => 'ORD-' . strtoupper(Str::random(8)),
@@ -127,35 +163,56 @@ class OrderController extends Controller
             'shipping_cost'    => $shippingCost,
             'voucher_code'     => $voucherCode,
             'discount_amount'  => $discountAmount,
+            'payment_status'   => $paymentStatus,
+            'dp_amount'        => $dpAmount,
+            'paid_amount'      => 0,
         ]);
 
-        foreach ($request->items as $item) {
-            $product = $products->get($item['product_id']);
+        foreach ($request->items as $idx => $item) {
+            $product    = $products->get($item['product_id']);
+            $extraTotal = collect($parsedCustomizations[$idx])->sum(fn($id) => $optionsMap->get($id)?->extra_price ?? 0);
 
-            OrderItem::create([
+            $orderItem = OrderItem::create([
                 'order_id'   => $order->id,
                 'product_id' => $product->id,
                 'quantity'   => $item['quantity'],
-                'price'      => $product->price,
+                'price'      => $product->price + $extraTotal,
                 'note'       => $item['note'] ?? null,
             ]);
+
+            // Save customizations
+            foreach ($parsedCustomizations[$idx] as $optionId) {
+                $opt = $optionsMap->get($optionId);
+                if ($opt) {
+                    OrderItemCustomization::create([
+                        'order_item_id'            => $orderItem->id,
+                        'customization_option_id'  => $opt->id,
+                        'extra_price'              => $opt->extra_price,
+                    ]);
+                }
+            }
 
             $product->decrement('stock', $item['quantity']);
         }
 
-        $paymentMethod = $request->payment_method ?? 'transfer_bank';
-        $isCod = $paymentMethod === 'cod';
+        $paymentMethod  = $request->payment_method ?? 'transfer_bank';
+        $isCod          = $paymentMethod === 'cod';
+        $amountDue      = $useDp ? $dpAmount : $totalPrice;
 
         Payment::create([
             'order_id'       => $order->id,
             'payment_method' => $paymentMethod,
             'status'         => $isCod ? 'paid' : 'unpaid',
-            'amount'         => $totalPrice,
+            'amount'         => $amountDue,
             'paid_at'        => $isCod ? now() : null,
         ]);
 
         if ($isCod) {
-            $order->update(['status' => 'processing']);
+            $order->update([
+                'status'         => 'processing',
+                'payment_status' => 'paid',
+                'paid_amount'    => $totalPrice,
+            ]);
         }
 
         session()->forget('cart');
@@ -221,15 +278,29 @@ class OrderController extends Controller
             ]);
         }
 
+        // Determine if this is DP payment or pelunasan
+        $isDP = $order->payment_status === 'dp' && $order->paid_amount < $order->dp_amount;
+        $newPaidAmount = $order->paid_amount + ($isDP ? $order->dp_amount : ($order->total_price - $order->paid_amount));
+        $isFullyPaid   = $newPaidAmount >= $order->total_price;
+
         $payment->update([
-            'status'      => 'paid',
+            'status'      => $isFullyPaid ? 'paid' : 'unpaid',
             'proof_image' => $path,
+            'amount'      => $isDP ? $order->dp_amount : ($order->total_price - $order->paid_amount),
             'paid_at'     => now(),
         ]);
 
-        $order->update(['status' => 'processing']);
+        $order->update([
+            'status'         => 'processing',
+            'payment_status' => $isFullyPaid ? 'paid' : 'dp',
+            'paid_amount'    => $newPaidAmount,
+        ]);
 
-        return redirect()->route('orders.success', $order)->with('success', 'Bukti pembayaran berhasil diupload!');
+        $message = $isFullyPaid
+            ? 'Pembayaran lunas berhasil dikonfirmasi!'
+            : 'Bukti DP berhasil diupload! Sisa pelunasan: Rp ' . number_format($order->total_price - $newPaidAmount, 0, ',', '.');
+
+        return redirect()->route('orders.success', $order)->with('success', $message);
     }
 
     public function invoice(Order $order)
