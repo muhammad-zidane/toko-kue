@@ -4,7 +4,11 @@
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jagoan Kue - {{ $product->name }}</title>
+    <title>{{ $product->name }} — Jagoan Kue</title>
+    <meta name="description" content="{{ Str::limit(strip_tags($product->description ?? $product->name . ' tersedia di Jagoan Kue.'), 155) }}">
+    <meta property="og:title" content="{{ $product->name }} — Jagoan Kue">
+    <meta property="og:description" content="{{ Str::limit(strip_tags($product->description ?? ''), 155) }}">
+    @if($product->image)<meta property="og:image" content="{{ asset('storage/' . $product->image) }}">@endif
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
