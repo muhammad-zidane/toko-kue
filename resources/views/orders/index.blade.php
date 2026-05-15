@@ -31,7 +31,7 @@
         .total { margin-top: 10px; font-size: 13px; color: var(--gray); }
         .total strong { color: var(--brown-dark); }
         .badges { width: 120px; display: flex; flex-direction: column; gap: 8px; align-items: center; text-align: center; flex-shrink: 0; }
-        .badge { display: inline-block; padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #F3F4F6; color: #111827; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #F3F4F6; color: #111827; white-space: nowrap; max-width: 110px; text-align: center; }
         .badge-warn { background: #FEF3C7; color: #92400E; }
         .badge-success { background: #DCFCE7; color: #166534; }
         .actions { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; }
@@ -83,13 +83,29 @@
                             <p class="meta">{{ $order->created_at?->format('d M Y, H:i') }} WIB</p>
                             <p class="code">{{ $order->order_code }}</p>
                             <p class="total">Total: <strong>Rp {{ number_format((int) $order->total_price, 0, ',', '.') }}</strong></p>
+                        @if($order->shipping_cost > 0)
+                        <p style="font-size:11px;color:var(--gray);margin-top:2px;">Ongkir: Rp {{ number_format((int)$order->shipping_cost, 0, ',', '.') }}</p>
+                        @else
+                        <p style="font-size:11px;color:var(--gray);margin-top:2px;">Ongkir: Gratis</p>
+                        @endif
                         </div>
                     </div>
                     <div class="badges">
                         <span class="badge {{ $status === 'completed' ? 'badge-completed' : ($status === 'cancelled' ? 'badge-cancelled' : '') }}">{{ ucfirst($status) }}</span>
-                        <span class="badge {{ $paymentStatus === 'paid' ? 'badge-success' : 'badge-warn' }}">{{ ucfirst($paymentStatus) }}</span>
+                        @php
+                            $payLabel = match($paymentStatus) { 'paid' => 'Lunas', 'dp' => 'DP 50%', default => 'Belum Bayar' };
+                        @endphp
+                        <span class="badge {{ $paymentStatus === 'paid' ? 'badge-success' : 'badge-warn' }}">{{ $payLabel }}</span>
                     </div>
                 </div>
+
+                @if($paymentStatus === 'dp')
+                @php $sisaBayar = $order->total_price - $order->paid_amount; @endphp
+                <div style="margin:10px 0 0;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:8px 12px;font-size:12px;color:#C2410C;font-weight:600;">
+                    <i class="fas fa-exclamation-circle" style="margin-right:4px;"></i>
+                    Sisa pembayaran: Rp {{ number_format($sisaBayar, 0, ',', '.') }}
+                </div>
+                @endif
 
                 <div class="actions">
                     <a class="btn-outline" href="{{ route('orders.show', $order) }}">Detail</a>
@@ -101,6 +117,10 @@
 
                     @if ($status === 'pending' && $paymentStatus === 'unpaid')
                         <a class="btn-primary" href="{{ route('orders.payment', $order) }}">Bayar Sekarang</a>
+                    @endif
+
+                    @if ($paymentStatus === 'dp')
+                        <a class="btn-primary" href="{{ route('orders.payment', $order) }}" style="background:#F59E0B;">Bayar Sisa</a>
                     @endif
                 </div>
             </div>

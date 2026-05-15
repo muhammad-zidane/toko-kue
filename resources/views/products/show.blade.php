@@ -182,8 +182,11 @@
                     <input type="hidden" name="quantity" id="qty-hidden" value="1">
                     <input type="hidden" name="note" id="note-hidden" value="">
                     <input type="hidden" name="customizations_json" id="form-customizations-json" value="[]">
-                    <button type="submit" class="btn-add-cart">+ Keranjang</button>
+                    <button type="submit" id="btn-add-cart" class="btn-add-cart">+ Keranjang</button>
                 </form>
+            <div id="cart-toast" style="display:none;margin-top:10px;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:8px;padding:10px 14px;font-size:13px;color:#065F46;font-weight:600;">
+                ✓ Produk berhasil ditambahkan ke keranjang!
+            </div>
         @else
             <a href="/login">
                 <button class="btn-add-cart">+ Keranjang</button>
@@ -322,5 +325,50 @@
 </script>
 
 <script src="{{ asset('js/app.js') }}" defer></script>
+@auth
+<script>
+document.getElementById('add-to-cart-form')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btn-add-cart');
+    const toast = document.getElementById('cart-toast');
+    const form = this;
+
+    btn.disabled = true;
+    btn.textContent = 'Menambahkan...';
+
+    try {
+        const resp = await fetch(form.action, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': form.querySelector('[name=_token]').value },
+            body: new FormData(form),
+        });
+        const data = await resp.json();
+
+        if (data.success) {
+            toast.style.display = 'block';
+            btn.textContent = '✓ Ditambahkan';
+            btn.style.background = '#22C55E';
+
+            const badge = document.getElementById('cart-badge');
+            if (badge) {
+                badge.textContent = data.cart_count;
+                badge.style.display = 'flex';
+            }
+
+            setTimeout(() => {
+                toast.style.display = 'none';
+                btn.disabled = false;
+                btn.textContent = '+ Keranjang';
+                btn.style.background = '';
+            }, 2500);
+        }
+    } catch {
+        btn.disabled = false;
+        btn.textContent = '+ Keranjang';
+        form.submit();
+    }
+});
+</script>
+@endauth
 </body>
 </html>

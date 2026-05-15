@@ -9,9 +9,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <style>
+        body { background: var(--cream); }
         .page { max-width: 960px; margin: 0 auto; padding: 40px 24px 60px; }
         .success-header { background: var(--white); border-radius: 20px; padding: 48px 32px; text-align: center; margin-bottom: 24px; border: 1px solid #EDE0D4; }
-        .success-icon { width: 72px; height: 72px; border-radius: 50%; border: 3px solid var(--teal); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; color: var(--teal); animation: popIn 0.5s ease; }
+        .success-icon { width: 72px; height: 72px; border-radius: 50%; background: var(--pink); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; color: var(--cream); animation: popIn 0.5s ease; }
         @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 70% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
         .success-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; margin-bottom: 10px; }
         .success-desc { font-size: 14px; color: var(--gray); line-height: 1.7; max-width: 420px; margin: 0 auto 24px; }
@@ -33,25 +34,30 @@
         .price-total { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--cream); border-radius: 10px; margin-top: 12px; }
         .price-total span:first-child { font-size: 14px; font-weight: 600; }
         .price-total span:last-child { font-size: 18px; font-weight: 800; }
-        .info-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #F0E8E0; font-size: 13px; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid #F0E8E0; font-size: 13px; gap: 12px; }
         .info-row:last-child { border-bottom: none; }
-        .info-row span:first-child { color: var(--gray); flex-shrink: 0; }
-        .info-row span:last-child { font-weight: 600; text-align: right; max-width: 60%; }
-        .info-row .highlight { color: var(--pink); }
-        .badge-status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .info-row .info-label { color: var(--gray); flex-shrink: 0; }
+        .info-row .info-value { font-weight: 600; text-align: right; }
+        .info-row .info-value.wrap { max-width: 58%; line-height: 1.5; }
+        .badge-status { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; line-height: 1.4; }
         .badge-pending { background: #FEF3C7; color: #D97706; }
-        .badge-paid { background: #DCFCE7; color: #16A34A; }
+        .badge-dp      { background: #FFF7ED; color: #C2410C; }
+        .badge-paid    { background: #DCFCE7; color: #16A34A; }
+
+        /* Timeline status */
         .status-list { display: flex; flex-direction: column; }
-        .status-item { display: flex; align-items: flex-start; gap: 12px; position: relative; padding-bottom: 20px; }
-        .status-item:last-child { padding-bottom: 0; }
-        .status-item::before { content: ''; position: absolute; left: 10px; top: 24px; bottom: 0; width: 2px; background: #E5D5C5; }
-        .status-item:last-child::before { display: none; }
-        .status-item.done::before { background: var(--teal); }
-        .status-item.active::before { background: linear-gradient(to bottom, var(--pink), #E5D5C5); }
-        .status-dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #E5D5C5; background: var(--white); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 11px; z-index: 1; }
-        .status-dot.done { background: var(--teal); border-color: var(--teal); color: white; }
-        .status-dot.active { background: var(--pink); border-color: var(--pink); color: white; font-size: 8px; }
-        .status-content p { font-size: 13px; font-weight: 600; }
+        .status-item { display: flex; align-items: flex-start; gap: 14px; position: relative; }
+        .status-item:not(:last-child) { padding-bottom: 24px; }
+        .status-track { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+        .status-dot { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #D1C0B8; background: var(--white); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+        .status-dot.done  { background: #10B981; border-color: #10B981; color: white; }
+        .status-dot.active { background: var(--pink); border-color: var(--pink); color: white; }
+        .status-line { width: 2px; flex: 1; min-height: 24px; background: #E5D5C5; margin-top: 4px; }
+        .status-line.done   { background: #10B981; }
+        .status-line.active { background: linear-gradient(to bottom, var(--pink), #E5D5C5); }
+        .status-content { padding-top: 2px; }
+        .status-content p { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+        .status-content p.muted { color: var(--gray); font-weight: 500; }
         .status-content small { font-size: 12px; color: var(--gray); }
         .wa-banner { background: var(--white); border-radius: 16px; border: 1px solid #EDE0D4; padding: 20px 24px; display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
         .wa-icon { width: 44px; height: 44px; border-radius: 50%; background: #22C55E; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
@@ -93,40 +99,96 @@
             </div>
             @endforeach
 
-            <div class="price-row"><span>Subtotal</span><span>Rp {{ number_format($order->total_price, 0, ',', '.') }}</span></div>
-            <div class="price-total"><span>Total</span><span>Rp {{ number_format($order->total_price, 0, ',', '.') }}</span></div>
+            @php
+                $subtotalItems  = $order->orderItems->sum(fn($i) => $i->price * $i->quantity);
+                $isTransferBank = ($order->payment->payment_method ?? '') === 'transfer_bank';
+                $uniqueCode     = $isTransferBank ? 1000 : 0;
+            @endphp
+            <div class="price-row"><span>Subtotal Produk</span><span>Rp {{ number_format($subtotalItems, 0, ',', '.') }}</span></div>
+            <div class="price-row"><span>Ongkos Kirim</span><span>{{ $order->shipping_cost > 0 ? 'Rp ' . number_format($order->shipping_cost, 0, ',', '.') : 'Gratis' }}</span></div>
+            @if($order->discount_amount > 0)
+            <div class="price-row"><span>Diskon Voucher</span><span style="color:#059669;">-Rp {{ number_format($order->discount_amount, 0, ',', '.') }}</span></div>
+            @endif
+            @if($isTransferBank)
+            <div class="price-row"><span>Biaya Layanan (Kode Unik)</span><span>Rp {{ number_format($uniqueCode, 0, ',', '.') }}</span></div>
+            @endif
+            <div class="price-total"><span>Total Harga</span><span>Rp {{ number_format($order->total_price + $uniqueCode, 0, ',', '.') }}</span></div>
         </div>
 
         <div>
             <div class="card" style="margin-bottom: 20px;">
                 <p class="card-label">INFO PENGIRIMAN</p>
-                <div class="info-row"><span>Penerima</span><span>{{ auth()->user()->name }}</span></div>
-                <div class="info-row"><span>Alamat</span><span>{{ $order->shipping_address }}</span></div>
-                <div class="info-row"><span>Pembayaran</span><span>{{ ['transfer_bank'=>'Transfer Bank','ewallet'=>'E-Wallet','qris'=>'QRIS','cod'=>'COD'][$order->payment->payment_method ?? ''] ?? ucfirst($order->payment->payment_method ?? '-') }}</span></div>
-                <div class="info-row"><span>Status bayar</span><span><span class="badge-status badge-{{ $order->payment->status ?? 'pending' }}">{{ ucfirst($order->payment->status ?? 'unpaid') }}</span></span></div>
+                <div class="info-row">
+                    <span class="info-label">Penerima</span>
+                    <span class="info-value">{{ auth()->user()->name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Alamat</span>
+                    <span class="info-value wrap">{{ $order->shipping_address }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Pembayaran</span>
+                    <span class="info-value">{{ ['transfer_bank'=>'Transfer Bank','ewallet'=>'E-Wallet','qris'=>'QRIS','cod'=>'COD'][$order->payment->payment_method ?? ''] ?? ucfirst($order->payment->payment_method ?? '-') }}</span>
+                </div>
+                @php
+                    $pStatus = $order->payment->status ?? 'unpaid';
+                    $pLabel  = match($pStatus) { 'paid' => 'Lunas', 'dp' => 'DP 50%', default => 'Belum Bayar' };
+                @endphp
+                <div class="info-row">
+                    <span class="info-label">Status Bayar</span>
+                    <span class="info-value"><span class="badge-status badge-{{ $pStatus }}">{{ $pLabel }}</span></span>
+                </div>
                 @if($order->notes)
-                <div class="info-row"><span>Catatan</span><span>{{ $order->notes }}</span></div>
+                <div class="info-row">
+                    <span class="info-label">Catatan</span>
+                    <span class="info-value wrap">{{ $order->notes }}</span>
+                </div>
                 @endif
             </div>
 
             <div class="card">
                 <p class="card-label">STATUS PESANAN</p>
                 <div class="status-list">
-                    <div class="status-item done">
-                        <div class="status-dot done">✓</div>
-                        <div class="status-content"><p>Pesanan Diterima</p><small>{{ $order->created_at->format('d M Y, H:i') }}</small></div>
-                    </div>
-                    <div class="status-item active">
-                        <div class="status-dot active">●</div>
-                        <div class="status-content"><p>Sedang dipersiapkan</p><small>Kue sedang dibuat oleh tim kami</small></div>
-                    </div>
+                    {{-- Step 1: Pesanan Diterima (done) --}}
                     <div class="status-item">
-                        <div class="status-dot"></div>
-                        <div class="status-content"><p style="color: var(--gray);">Dalam pengiriman</p></div>
+                        <div class="status-track">
+                            <div class="status-dot done">✓</div>
+                            <div class="status-line done"></div>
+                        </div>
+                        <div class="status-content">
+                            <p>Pesanan Diterima</p>
+                            <small>{{ $order->created_at->format('d M Y, H:i') }}</small>
+                        </div>
                     </div>
+                    {{-- Step 2: Sedang dipersiapkan (active) --}}
                     <div class="status-item">
-                        <div class="status-dot"></div>
-                        <div class="status-content"><p style="color: var(--gray);">Pesanan diterima</p></div>
+                        <div class="status-track">
+                            <div class="status-dot active"><i class="fas fa-circle" style="font-size:7px;"></i></div>
+                            <div class="status-line active"></div>
+                        </div>
+                        <div class="status-content">
+                            <p>Sedang Dipersiapkan</p>
+                            <small>Kue sedang dibuat oleh tim kami</small>
+                        </div>
+                    </div>
+                    {{-- Step 3: Dalam pengiriman (pending) --}}
+                    <div class="status-item">
+                        <div class="status-track">
+                            <div class="status-dot"></div>
+                            <div class="status-line"></div>
+                        </div>
+                        <div class="status-content">
+                            <p class="muted">Dalam Pengiriman</p>
+                        </div>
+                    </div>
+                    {{-- Step 4: Pesanan diterima (pending) --}}
+                    <div class="status-item">
+                        <div class="status-track">
+                            <div class="status-dot"></div>
+                        </div>
+                        <div class="status-content">
+                            <p class="muted">Pesanan Diterima</p>
+                        </div>
                     </div>
                 </div>
             </div>
