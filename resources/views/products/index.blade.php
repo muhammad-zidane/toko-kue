@@ -14,7 +14,7 @@
         .page-header h1 { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 800; color: var(--text-dark); }
 
         /* FILTER BAR */
-        .filter-bar { background: var(--white); border-bottom: 1px solid #EDE0D4; padding: 16px 24px; position: sticky; top: 70px; z-index: 10; }
+        .filter-bar { background: var(--cream); border-bottom: 1px solid #EDE0D4; padding: 16px 24px; position: sticky; top: 70px; z-index: 10; }
         .filter-inner { max-width: 1100px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
         .search-wrap { position: relative; flex: 1; min-width: 200px; }
         .search-wrap input { width: 100%; border: 1.5px solid #D1C0B8; border-radius: 8px; padding: 9px 36px 9px 14px; font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif; outline: none; }
@@ -31,7 +31,7 @@
         .active-badge { background: var(--pink); color: white; font-size: 11px; font-weight: 700; border-radius: 100px; padding: 2px 8px; margin-left: 6px; }
 
         /* RESULT SECTION */
-        .result-section { padding: 32px 24px 60px; background: var(--white); min-height: 300px; }
+        .result-section { padding: 32px 24px 60px; background: var(--cream); min-height: 300px; }
         .result-inner { max-width: 1100px; margin: 0 auto; }
         .result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
         .result-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--text-dark); }
@@ -39,7 +39,7 @@
 
         /* PRODUCT GRID */
         .product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-        .product-card { background: var(--white); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); transition: transform 0.2s, box-shadow 0.2s; display: block; color: inherit; position: relative; }
+        .product-card { background: #FFFFFF; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); transition: transform 0.2s, box-shadow 0.2s; display: block; color: inherit; position: relative; }
         .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
         .product-card img { width: 100%; height: 200px; object-fit: cover; display: block; transition: transform 0.3s; }
         .product-card:hover img { transform: scale(1.05); }

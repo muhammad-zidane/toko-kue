@@ -65,6 +65,9 @@
         <a href="{{ route('admin.reviews.index') }}" class="sidebar-link {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">
             <span class="sidebar-link-icon"><i class="fas fa-star"></i></span> Ulasan
         </a>
+        <a href="{{ route('admin.customizations.index') }}" class="sidebar-link {{ request()->routeIs('admin.customizations.*') ? 'active' : '' }}">
+            <span class="sidebar-link-icon"><i class="fas fa-sliders-h"></i></span> Kustomisasi
+        </a>
         <a href="{{ route('admin.production-calendar.index') }}" class="sidebar-link {{ request()->routeIs('admin.production-calendar.*') ? 'active' : '' }}">
             <span class="sidebar-link-icon"><i class="fas fa-calendar-alt"></i></span> Kalender
         </a>

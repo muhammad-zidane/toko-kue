@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Admin\CustomizationController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductReviewController;
@@ -48,6 +50,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/orders/{order}/reviews', [ProductReviewController::class, 'index'])->name('orders.reviews.index');
     Route::delete('/orders/{order}/reviews/{review}', [ProductReviewController::class, 'destroy'])->name('orders.reviews.destroy');
     Route::delete('/orders/{order}/reviews/{review}/images/{image}', [ProductReviewController::class, 'destroyImage'])->name('orders.reviews.images.destroy');
+
+    // Saved Addresses
+    Route::get('/account/addresses', [AddressController::class, 'index'])->name('account.addresses.index');
+    Route::post('/account/addresses', [AddressController::class, 'store'])->name('account.addresses.store');
+    Route::put('/account/addresses/{address}', [AddressController::class, 'update'])->name('account.addresses.update');
+    Route::delete('/account/addresses/{address}', [AddressController::class, 'destroy'])->name('account.addresses.destroy');
+    Route::post('/account/addresses/{address}/set-default', [AddressController::class, 'setDefault'])->name('account.addresses.setDefault');
 
     // Cart (read/delete)
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
@@ -126,6 +135,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Notifications
     Route::post('/notifications/read-all', [AdminController::class, 'markAllNotificationsRead'])->name('notifications.readAll');
     Route::post('/notifications/{id}/read', [AdminController::class, 'markNotificationRead'])->name('notifications.read');
+
+    // Customization options
+    Route::get('/customizations', [CustomizationController::class, 'index'])->name('customizations.index');
+    Route::post('/customizations', [CustomizationController::class, 'store'])->name('customizations.store');
+    Route::post('/customizations/{option}/toggle', [CustomizationController::class, 'toggle'])->name('customizations.toggle');
+    Route::delete('/customizations/{option}', [CustomizationController::class, 'destroy'])->name('customizations.destroy');
 });
 
 // PDF Invoice (authenticated)

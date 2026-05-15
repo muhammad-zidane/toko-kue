@@ -11,6 +11,7 @@ class Order extends Model
         'shipping_address', 'total_price', 'notes',
         'delivery_method', 'delivery_date', 'delivery_slot',
         'shipping_cost', 'voucher_code', 'discount_amount',
+        'payment_status', 'dp_amount', 'paid_amount',
     ];
 
     protected $casts = [
