@@ -13,7 +13,7 @@ class HomeController extends Controller
     {
         $banners = Banner::where('is_active', true)->orderBy('order')->get();
         $categories = Category::withCount('products')->get();
-        $featuredProducts = Product::where('is_available', true)->take(3)->get();
+        $featuredProducts = Product::with('category')->where('is_available', true)->take(3)->get();
         $testimonials = ProductReview::with(['user', 'product'])->latest()->take(3)->get();
 
         return view('home.index', compact('banners', 'categories', 'featuredProducts', 'testimonials'));
