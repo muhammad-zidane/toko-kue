@@ -39,25 +39,31 @@ class CartController extends Controller
     public function add(Request $request)
     {
         $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'quantity'   => 'nullable|integer|min:1',
-            'note'       => 'nullable|string',
+            'product_id'        => 'required|exists:products,id',
+            'quantity'          => 'nullable|integer|min:1',
+            'note'              => 'nullable|string',
+            'customizations_json' => 'nullable|string',
         ]);
 
         $cart = session()->get('cart', []);
         $productId = $request->product_id;
         $quantity = $request->quantity ?? 1;
         $note = $request->note;
+        $customizations = json_decode($request->customizations_json ?? '[]', true) ?: [];
 
         if (isset($cart[$productId])) {
             $cart[$productId]['quantity'] += $quantity;
             if ($request->has('note')) {
                 $cart[$productId]['note'] = $note;
             }
+            if ($request->has('customizations_json')) {
+                $cart[$productId]['customizations'] = $customizations;
+            }
         } else {
             $cart[$productId] = [
-                'quantity' => $quantity,
-                'note' => $note,
+                'quantity'       => $quantity,
+                'note'           => $note,
+                'customizations' => $customizations,
             ];
         }
 
@@ -169,6 +175,10 @@ class CartController extends Controller
             return redirect()->route('cart.index')->withErrors($stockWarnings);
         }
 
-        return view('orders.create', compact('cartItems'));
+        $savedAddresses = auth()->user()->addresses()->latest()->get();
+        $dpMinAmount    = config('app.dp_min_amount', 200000);
+        $dpPercentage   = config('app.dp_percentage', 50);
+
+        return view('orders.create', compact('cartItems', 'savedAddresses', 'dpMinAmount', 'dpPercentage'));
     }
 }

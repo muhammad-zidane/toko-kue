@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CustomizationOption;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
@@ -15,11 +16,35 @@ class ProductController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::with('products')->get();
+        $search   = $request->input('search');
+        $sort     = $request->input('sort');
+        $minPrice = $request->input('min_price');
+        $maxPrice = $request->input('max_price');
+        $categorySlug = $request->input('category');
 
-        return view('products.index', compact('categories'));
+        $categories = Category::all();
+
+        $query = Product::with('category')
+            ->where('is_available', true)
+            ->when($search, fn ($q) => $q->where('name', 'like', '%' . $search . '%'))
+            ->when($categorySlug, fn ($q) => $q->whereHas('category', fn ($c) => $c->where('slug', $categorySlug)))
+            ->when($minPrice, fn ($q) => $q->where('price', '>=', (int) $minPrice))
+            ->when($maxPrice, fn ($q) => $q->where('price', '<=', (int) $maxPrice));
+
+        $query = match ($sort) {
+            'price_asc'  => $query->orderBy('price', 'asc'),
+            'price_desc' => $query->orderBy('price', 'desc'),
+            'newest'     => $query->orderBy('created_at', 'desc'),
+            default      => $query->orderBy('name', 'asc'),
+        };
+
+        $products = $query->paginate(12)->withQueryString();
+
+        $isFiltered = $search || $sort || $minPrice || $maxPrice || $categorySlug;
+
+        return view('products.index', compact('categories', 'products', 'isFiltered'));
     }
 
     /**
@@ -34,7 +59,13 @@ class ProductController extends Controller
             'reviews' => fn ($q) => $q->with(['user', 'images'])->latest(),
         ]);
 
-        return view('products.show', compact('product'));
+        $customizationOptions = CustomizationOption::where('is_active', true)
+            ->orderBy('type')
+            ->orderBy('sort_order')
+            ->get()
+            ->groupBy('type');
+
+        return view('products.show', compact('product', 'customizationOptions'));
     }
 
     /**
@@ -64,10 +95,12 @@ class ProductController extends Controller
             'price'       => 'required|numeric|min:0',
             'stock'       => 'required|integer|min:0',
             'image'       => 'nullable|image|max:2048',
+            'badge'       => 'nullable|in:best_seller,new,sale',
         ]);
 
         $data = $request->only(['name', 'category_id', 'description', 'price', 'stock']);
-        $data['slug'] = $this->generateUniqueSlug($request->name);
+        $data['slug']  = $this->generateUniqueSlug($request->name);
+        $data['badge'] = $request->badge ?: null;
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('products', 'public');
@@ -105,10 +138,12 @@ class ProductController extends Controller
             'price'       => 'required|numeric|min:0',
             'stock'       => 'required|integer|min:0',
             'image'       => 'nullable|image|max:2048',
+            'badge'       => 'nullable|in:best_seller,new,sale',
         ]);
 
         $data = $request->only(['name', 'category_id', 'description', 'price', 'stock']);
-        $data['slug'] = $this->generateUniqueSlug($request->name, $product->id);
+        $data['slug']  = $this->generateUniqueSlug($request->name, $product->id);
+        $data['badge'] = $request->badge ?: null;
 
         if ($request->hasFile('image')) {
             if ($product->image) {

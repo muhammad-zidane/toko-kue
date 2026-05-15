@@ -41,6 +41,15 @@
                 <div class="form-group"><label>Harga (Rp)</label><input type="number" name="price" value="{{ old('price') }}" min="0" required></div>
                 <div class="form-group"><label>Stok</label><input type="number" name="stock" value="{{ old('stock', 0) }}" min="0" required></div>
             </div>
+            <div class="form-group">
+                <label>Badge Produk (opsional)</label>
+                <select name="badge" style="width:100%;border:1px solid #ddd;border-radius:8px;padding:10px;font-size:14px;">
+                    <option value="">-- Tidak ada badge --</option>
+                    <option value="best_seller" {{ old('badge') === 'best_seller' ? 'selected' : '' }}>Best Seller</option>
+                    <option value="new"         {{ old('badge') === 'new'         ? 'selected' : '' }}>Baru</option>
+                    <option value="sale"        {{ old('badge') === 'sale'        ? 'selected' : '' }}>Diskon</option>
+                </select>
+            </div>
             <div class="form-group"><label>Gambar Produk</label><input type="file" name="image" accept="image/*"><small>Max 2MB. Format: JPG, PNG.</small></div>
             <div class="form-actions"><a href="{{ route('admin.dashboard') }}" class="btn-cancel">Batal</a><button type="submit" class="btn-submit">Simpan Produk</button></div>
         </form>

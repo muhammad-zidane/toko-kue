@@ -45,6 +45,15 @@
                 <div class="form-group"><label>Stok</label><input type="number" name="stock" value="{{ old('stock', $product->stock) }}" min="0" required></div>
             </div>
             <div class="form-group">
+                <label>Badge Produk (opsional)</label>
+                <select name="badge" style="width:100%;border:1px solid #ddd;border-radius:8px;padding:10px;font-size:14px;">
+                    <option value="">-- Tidak ada badge --</option>
+                    <option value="best_seller" {{ old('badge', $product->badge) === 'best_seller' ? 'selected' : '' }}>Best Seller</option>
+                    <option value="new"         {{ old('badge', $product->badge) === 'new'         ? 'selected' : '' }}>Baru</option>
+                    <option value="sale"        {{ old('badge', $product->badge) === 'sale'        ? 'selected' : '' }}>Diskon</option>
+                </select>
+            </div>
+            <div class="form-group">
                 <label>Gambar Produk</label>
                 @if($product->image)<img src="{{ asset('storage/' . $product->image) }}" class="current-image" alt="Current"><small>Gambar saat ini. Upload baru untuk mengganti.</small>@endif
                 <input type="file" name="image" accept="image/*" style="margin-top:8px;">
