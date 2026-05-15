@@ -298,7 +298,7 @@ function openEditModal(addressId) {
     if (!data) return;
 
     const form = document.getElementById('edit-address-form');
-    form.action = '/akun/alamat/' + addressId;
+    form.action = '/account/addresses/' + addressId;
 
     const set = (name, val) => {
         const el = form.querySelector('[name="' + name + '"]');
