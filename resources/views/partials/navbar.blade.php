@@ -4,7 +4,7 @@
         <ul class="navbar-links">
             <li><a href="/" {{ request()->is('/') ? 'class=active' : '' }}>Beranda</a></li>
             <li><a href="/products" {{ request()->is('products*') ? 'class=active' : '' }}>Katalog</a></li>
-            <li><a href="/orders" {{ request()->is('orders*') ? 'class=active' : '' }}>Pemesanan</a></li>
+            <li><a href="/orders" {{ request()->is('orders*') ? 'class=active' : '' }}>Pesanan Saya</a></li>
         </ul>
         <div class="navbar-actions">
             <a href="/cart" class="btn-cart">
