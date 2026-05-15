@@ -26,6 +26,8 @@
         .sidebar-link { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 12px; font-size: 14px; color: var(--brown-dark); background: var(--cream); transition: background 0.2s; text-decoration: none; }
         .sidebar-link:hover { background: #F3F4F6; }
         .sidebar-link-active { background: #FEF3C7; color: #92400E; font-weight: 700; }
+        .sidebar-link-admin { color: white; background: var(--pink); font-weight: 700; box-shadow: 0 4px 12px rgba(240,80,122,0.2); }
+        .sidebar-link-admin:hover { background: #D64A6C; }
         .sidebar-link-arrow { margin-left: auto; font-size: 12px; color: var(--gray); }
         .btn-logout { width: 100%; background: var(--pink); color: white; border-radius: 12px; padding: 10px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 8px; transition: opacity 0.2s; }
         .btn-logout:hover { opacity: 0.85; }
@@ -107,16 +109,13 @@
                 <div class="user-email">{{ auth()->user()->email }}</div>
 
                 <div class="sidebar-links">
+                    @if(auth()->user()->isAdmin())
+                    <a href="{{ route('admin.dashboard') }}" class="sidebar-link sidebar-link-admin">
+                        <i class="fas fa-cog" style="color:white"></i> Admin Dashboard <span class="sidebar-link-arrow">→</span>
+                    </a>
+                    @endif
                     <a href="{{ route('profile.index') }}" class="sidebar-link">
                         <i class="fas fa-user" style="color:var(--brown-dark)"></i> Info Akun
-                        <span class="sidebar-link-arrow">→</span>
-                    </a>
-                    <a href="{{ route('orders.index') }}" class="sidebar-link">
-                        <i class="fas fa-clipboard-list" style="color:var(--brown-dark)"></i> Riwayat Pesanan
-                        <span class="sidebar-link-arrow">→</span>
-                    </a>
-                    <a href="{{ route('cart.index') }}" class="sidebar-link">
-                        <i class="fas fa-shopping-cart" style="color:var(--brown-dark)"></i> Keranjang
                         <span class="sidebar-link-arrow">→</span>
                     </a>
                     <a href="{{ route('account.addresses.index') }}" class="sidebar-link sidebar-link-active">

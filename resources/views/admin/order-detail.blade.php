@@ -3,7 +3,7 @@
 @section('page-title', 'Detail Pesanan #' . $order->order_code)
 @section('page-subtitle', 'Dibuat pada ' . $order->created_at->format('d M Y, H:i'))
 
-@section('styles')
+@push('styles')
 <style>
     .detail-grid { display: grid; grid-template-columns: 1fr 360px; gap: 20px; }
     .card { background: white; border-radius: 16px; border: 1px solid #EDE0D4; padding: 24px; margin-bottom: 20px; }
@@ -38,7 +38,7 @@
     .proof-img:not(.expanded) { max-height: 200px; object-fit: cover; cursor: zoom-in; }
     @media (max-width: 768px) { .detail-grid { grid-template-columns: 1fr; } }
 </style>
-@endsection
+@endpush
 
 @section('content')
 <div style="margin-bottom:16px;">
@@ -180,3 +180,4 @@
     </div>
 </div>
 @endsection
+

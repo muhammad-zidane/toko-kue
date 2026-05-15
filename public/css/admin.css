@@ -9,6 +9,14 @@
     box-sizing: border-box;
 }
 
+html {
+    overflow-x: hidden;
+}
+
+body {
+    overflow-x: hidden;
+}
+
 :root {
     --pink:       #F0507A;
     --pink-hover: #D64A6C;
@@ -30,6 +38,8 @@ body {
     font-family: 'Plus Jakarta Sans', sans-serif;
     color: var(--text-dark);
     background: var(--cream);
+    margin: 0;
+    padding: 0;
 }
 
 a { text-decoration: none; color: inherit; }
@@ -40,7 +50,7 @@ a { text-decoration: none; color: inherit; }
 .sidebar {
     width: var(--sidebar-w);
     background: var(--brown-dark);
-    min-height: 100vh;
+    height: 100vh;
     position: fixed;
     top: 0;
     left: 0;
@@ -48,6 +58,7 @@ a { text-decoration: none; color: inherit; }
     flex-direction: column;
     z-index: 50;
     transition: transform 0.3s ease;
+    overflow: hidden;
 }
 
 .sidebar-header {
@@ -86,7 +97,10 @@ a { text-decoration: none; color: inherit; }
     flex: 1;
     padding: 16px 12px;
     overflow-y: auto;
+    scrollbar-width: none;
 }
+
+.sidebar-nav::-webkit-scrollbar { display: none; }
 
 .sidebar-section {
     font-size: 10px;
@@ -193,6 +207,7 @@ a { text-decoration: none; color: inherit; }
 .main-content {
     margin-left: var(--sidebar-w);
     min-height: 100vh;
+    padding-top: 69px;
 }
 
 .topbar {
@@ -202,8 +217,10 @@ a { text-decoration: none; color: inherit; }
     display: flex;
     align-items: center;
     justify-content: space-between;
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: var(--sidebar-w);
+    right: 0;
     z-index: 40;
 }
 
@@ -290,5 +307,6 @@ a { text-decoration: none; color: inherit; }
     .sidebar-close { display: block; }
     .sidebar-overlay.active { display: block; }
     .main-content { margin-left: 0; }
+    .topbar { left: 0; }
     .topbar-hamburger { display: block; }
 }

@@ -1,4 +1,4 @@
-@extends('admin.layout')
+﻿@extends('admin.layout')
 @section('title', 'Zona Pengiriman')
 @section('page-title', 'Zona Pengiriman')
 @section('page-subtitle', 'Kelola area dan biaya pengiriman')
@@ -181,3 +181,4 @@ document.getElementById('editModal').addEventListener('click', function(e) {
 });
 </script>
 @endpush
+

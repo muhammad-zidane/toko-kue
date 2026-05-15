@@ -1,9 +1,9 @@
-@extends('admin.layout')
+﻿@extends('admin.layout')
 @section('title', 'Keuangan')
 @section('page-title', 'Keuangan')
 @section('page-subtitle', 'Pantau arus kas dan riwayat pembayaran')
 
-@section('styles')
+@push('styles')
 <style>
     .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
     .stat-card { background: white; border-radius: 16px; padding: 20px; border: 1px solid #EDE0D4; }
@@ -23,7 +23,7 @@
     @media (max-width: 1024px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 640px) { .stats-grid { grid-template-columns: 1fr; } }
 </style>
-@endsection
+@endpush
 
 @section('content')
 {{-- STATS --}}
@@ -98,3 +98,4 @@
     </div>
 </div>
 @endsection
+

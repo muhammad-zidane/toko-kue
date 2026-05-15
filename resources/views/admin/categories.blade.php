@@ -1,9 +1,9 @@
-@extends('admin.layout')
+﻿@extends('admin.layout')
 @section('title', 'Kelola Kategori')
 @section('page-title', 'Kelola Kategori')
 @section('page-subtitle', 'Tambah, lihat, dan hapus kategori produk')
 
-@section('styles')
+@push('styles')
 <style>
     .cat-grid { display: grid; grid-template-columns: 1fr 350px; gap: 24px; }
     .card { background: white; border-radius: 16px; border: 1px solid #EDE0D4; overflow: hidden; }
@@ -33,7 +33,7 @@
     .empty-icon { font-size: 40px; margin-bottom: 12px; }
     @media (max-width: 768px) { .cat-grid { grid-template-columns: 1fr; } }
 </style>
-@endsection
+@endpush
 
 @section('content')
 <div class="cat-grid">
@@ -105,3 +105,4 @@
     </div>
 </div>
 @endsection
+

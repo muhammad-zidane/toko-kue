@@ -3,7 +3,7 @@
 @section('page-title', 'Dashboard Admin')
 @section('page-subtitle', 'Selamat datang, ' . auth()->user()->name . '!')
 
-@section('styles')
+@push('styles')
 <style>
     .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
     .stat-card { background: white; border-radius: 16px; padding: 20px; border: 1px solid #EDE0D4; }
@@ -85,7 +85,7 @@
         .stats-grid { grid-template-columns: 1fr; }
     }
 </style>
-@endsection
+@endpush
 
 @section('content')
 {{-- STATS --}}
@@ -308,3 +308,4 @@
     </div>
 </div>
 @endsection
+

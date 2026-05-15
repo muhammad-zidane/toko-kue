@@ -139,6 +139,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Customization options
     Route::get('/customizations', [CustomizationController::class, 'index'])->name('customizations.index');
     Route::post('/customizations', [CustomizationController::class, 'store'])->name('customizations.store');
+    Route::put('/customizations/{option}', [CustomizationController::class, 'update'])->name('customizations.update');
     Route::post('/customizations/{option}/toggle', [CustomizationController::class, 'toggle'])->name('customizations.toggle');
     Route::delete('/customizations/{option}', [CustomizationController::class, 'destroy'])->name('customizations.destroy');
 });
