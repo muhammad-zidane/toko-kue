@@ -101,6 +101,7 @@
                 <span>Total</span>
                 <span id="total-price">Rp0</span>
             </div>
+            <p id="cart-error" style="display:none;color:#DC2626;font-size:13px;font-weight:600;margin-bottom:8px;text-align:center;"></p>
             <button class="btn-beli" onclick="beliSekarang()">Beli (<span id="beli-count">{{ isset($cartItems) ? count($cartItems) : 0 }}</span>)</button>
         </div>
     </div>
@@ -202,7 +203,12 @@
 
     function beliSekarang() {
         const checked = document.querySelectorAll('.item-check:checked');
-        if (checked.length === 0) { alert('Pilih produk terlebih dahulu!'); return; }
+        const errEl = document.getElementById('cart-error');
+        if (checked.length === 0) {
+            if (errEl) { errEl.textContent = 'Pilih produk terlebih dahulu!'; errEl.style.display = 'block'; }
+            return;
+        }
+        if (errEl) errEl.style.display = 'none';
 
         const ids = [];
         checked.forEach(check => ids.push(check.dataset.id));

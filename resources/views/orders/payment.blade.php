@@ -96,10 +96,25 @@
 <body>
 @php
     $paymentMethod = $order->payment->payment_method ?? 'transfer';
-    $totalAmount = $order->total_price;
-    $uniqueCode = rand(10, 99);
-    $totalTransfer = $totalAmount + $uniqueCode;
-    $deadline = \Carbon\Carbon::parse($order->created_at)->addHours(2);
+
+    // Hitung jumlah yang harus dibayar sekarang (DP atau pelunasan atau penuh)
+    $isFirstDP  = $order->payment_status === 'dp' && $order->paid_amount < $order->dp_amount;
+    $isRemaining = $order->payment_status === 'dp' && $order->paid_amount >= $order->dp_amount;
+    if ($isFirstDP) {
+        $amountDue  = $order->dp_amount;
+        $payLabel   = 'Bayar DP 50%';
+    } elseif ($isRemaining) {
+        $amountDue  = $order->total_price - $order->paid_amount;
+        $payLabel   = 'Pelunasan Sisa';
+    } else {
+        $amountDue  = $order->total_price;
+        $payLabel   = 'Total Bayar';
+    }
+
+    $totalAmount   = $order->total_price;
+    $uniqueCode    = 1000;
+    $totalTransfer = $amountDue + $uniqueCode;
+    $deadline      = \Carbon\Carbon::parse($order->created_at)->addHours(2);
     $remainingSeconds = max(0, now()->diffInSeconds($deadline, false));
 @endphp
 
@@ -154,13 +169,19 @@
             <div class="bank-row"><span class="bank-row-label">Nomor Rekening</span><span class="bank-row-value">1234 5678 9012 <button type="button" class="btn-salin" onclick="salin('123456789012')">Salin</button></span></div>
 
             <div class="jumlah-box">
-                <div class="jumlah-left"><p>Jumlah Transfer Tepat</p><small>Transfer sesuai nominal untuk verifikasi</small></div>
+                <div class="jumlah-left"><p>{{ $payLabel }} (Transfer Tepat)</p><small>Transfer sesuai nominal untuk verifikasi</small></div>
                 <div class="jumlah-right">
                     <span class="jumlah-amount">Rp {{ number_format($totalTransfer, 0, ',', '.') }}</span>
                     <button type="button" class="btn-salin-white" onclick="salin('{{ $totalTransfer }}')">Salin</button>
                 </div>
             </div>
-            <p class="kode-unik-note">Nominal transfer berbeda {{ $uniqueCode }} rupiah dari total pesanan — ini adalah kode unik untuk verifikasi.</p>
+            @if($isFirstDP)
+            <p class="kode-unik-note">Ini adalah pembayaran <strong>DP 50%</strong> dari total Rp {{ number_format($totalAmount, 0, ',', '.') }}. Nominal transfer berbeda Rp {{ number_format($uniqueCode, 0, ',', '.') }} sebagai kode unik verifikasi.</p>
+            @elseif($isRemaining)
+            <p class="kode-unik-note">Ini adalah <strong>pelunasan sisa</strong> dari total Rp {{ number_format($totalAmount, 0, ',', '.') }}. Nominal transfer berbeda Rp {{ number_format($uniqueCode, 0, ',', '.') }} sebagai kode unik verifikasi.</p>
+            @else
+            <p class="kode-unik-note">Nominal transfer berbeda Rp {{ number_format($uniqueCode, 0, ',', '.') }} dari total pesanan — ini adalah kode unik untuk verifikasi otomatis.</p>
+            @endif
 
             @elseif($paymentMethod === 'ewallet')
             {{-- E-WALLET UI --}}
@@ -170,9 +191,9 @@
             </div>
 
             <div class="jumlah-box">
-                <div class="jumlah-left"><p>Jumlah Pembayaran</p><small>Bayar via E-Wallet</small></div>
+                <div class="jumlah-left"><p>{{ $payLabel }}</p><small>Bayar via E-Wallet</small></div>
                 <div class="jumlah-right">
-                    <span class="jumlah-amount">Rp {{ number_format($totalAmount, 0, ',', '.') }}</span>
+                    <span class="jumlah-amount">Rp {{ number_format($amountDue, 0, ',', '.') }}</span>
                 </div>
             </div>
 
@@ -184,9 +205,9 @@
             </div>
 
             <div class="jumlah-box">
-                <div class="jumlah-left"><p>Jumlah Pembayaran</p><small>Scan QR Code di bawah</small></div>
+                <div class="jumlah-left"><p>{{ $payLabel }}</p><small>Scan QR Code di bawah</small></div>
                 <div class="jumlah-right">
-                    <span class="jumlah-amount">Rp {{ number_format($totalAmount, 0, ',', '.') }}</span>
+                    <span class="jumlah-amount">Rp {{ number_format($amountDue, 0, ',', '.') }}</span>
                 </div>
             </div>
 
@@ -212,7 +233,7 @@
                 <li class="cara-item"><div class="cara-num">1</div><div>Buka aplikasi mobile banking atau m-banking kamu</div></li>
                 <li class="cara-item"><div class="cara-num">2</div><div>Pilih menu Transfer</div></li>
                 <li class="cara-item"><div class="cara-num">3</div><div>Masukkan nomor rekening 1234 5678 9012 a.n. Jagoan Kue Official</div></li>
-                <li class="cara-item"><div class="cara-num">4</div><div>Masukkan nominal transfer Rp {{ number_format($totalTransfer, 0, ',', '.') }} (termasuk kode unik)</div></li>
+                <li class="cara-item"><div class="cara-num">4</div><div>Masukkan nominal transfer <strong>Rp {{ number_format($totalTransfer, 0, ',', '.') }}</strong> ({{ $payLabel }} + kode unik Rp {{ number_format($uniqueCode, 0, ',', '.') }})</div></li>
                 <li class="cara-item"><div class="cara-num">5</div><div>Selesaikan transfer, lalu upload bukti pembayaran di bawah</div></li>
             </ul>
         </div>
@@ -248,13 +269,14 @@
                     {{ $errors->first('proof_image') }}
                 </div>
             @endif
+            <div id="upload-error" style="display:none;color:#DC2626;font-size:13px;font-weight:600;margin-bottom:12px;"></div>
 
             <input
                 type="file"
                 id="file-input"
                 name="proof_image"
                 style="display:none"
-                accept=".jpg,.jpeg,.png,.webp,.heic,.heif"
+                accept=".jpg,.jpeg,.png"
                 onchange="handleFile(this)"
             >
 
@@ -263,7 +285,7 @@
                 <p class="upload-text" id="upload-text">Seret & letakkan file di sini</p>
                 <p class="upload-sub" id="upload-sub">atau klik untuk memilih file</p>
                 <button class="btn-pilih" type="button">Pilih File</button>
-                <p class="upload-format" id="upload-format" style="margin-top:10px;">Format: JPG, PNG, WEBP, HEIC • Maks. 5MB</p>
+                <p class="upload-format" id="upload-format" style="margin-top:10px;">Format: JPG, PNG • Maks. 2MB</p>
             </div>
             <div class="upload-info">Bukti pembayaran akan diverifikasi oleh tim kami dalam 5-10 menit.</div>
         </div>
@@ -285,13 +307,26 @@
             </div>
             @endforeach
 
-            <div class="summary-row"><span>Subtotal</span><span>Rp {{ number_format($order->total_price, 0, ',', '.') }}</span></div>
-            <div class="summary-row"><span>Ongkir</span><span style="color:#22C55E;font-weight:700;">Gratis</span></div>
-            @if(in_array($paymentMethod, ['bca', 'bni']))
-            <div class="summary-row"><span>Kode unik</span><span>+ Rp {{ $uniqueCode }}</span></div>
-            <div class="summary-total"><span>Total Transfer</span><span>Rp {{ number_format($totalTransfer, 0, ',', '.') }}</span></div>
+            @php
+                $subtotalItems = $order->orderItems->sum(fn($i) => $i->price * $i->quantity);
+            @endphp
+            <div class="summary-row"><span>Subtotal Produk</span><span>Rp {{ number_format($subtotalItems, 0, ',', '.') }}</span></div>
+            <div class="summary-row"><span>Ongkir</span><span>{{ $order->shipping_cost > 0 ? 'Rp ' . number_format($order->shipping_cost, 0, ',', '.') : 'Gratis' }}</span></div>
+            @if($isFirstDP || $isRemaining)
+            <div class="summary-row"><span>Total Pesanan</span><span>Rp {{ number_format($totalAmount, 0, ',', '.') }}</span></div>
+            @endif
+            @if($isFirstDP)
+            <div class="summary-row"><span style="color:#C2410C;font-weight:700;">DP 50% (Dibayar Sekarang)</span><span style="color:#C2410C;font-weight:700;">Rp {{ number_format($order->dp_amount, 0, ',', '.') }}</span></div>
+            <div class="summary-row"><span>Sisa (Bayar Nanti)</span><span>Rp {{ number_format($totalAmount - $order->dp_amount, 0, ',', '.') }}</span></div>
+            @elseif($isRemaining)
+            <div class="summary-row"><span>Sudah Dibayar (DP)</span><span>Rp {{ number_format($order->paid_amount, 0, ',', '.') }}</span></div>
+            <div class="summary-row"><span style="color:#C2410C;font-weight:700;">Sisa Pelunasan</span><span style="color:#C2410C;font-weight:700;">Rp {{ number_format($amountDue, 0, ',', '.') }}</span></div>
+            @endif
+            @if($paymentMethod === 'transfer_bank')
+            <div class="summary-row"><span>Kode Unik</span><span>+ Rp {{ number_format($uniqueCode, 0, ',', '.') }}</span></div>
+            <div class="summary-total"><span>{{ $payLabel }} (Transfer)</span><span>Rp {{ number_format($totalTransfer, 0, ',', '.') }}</span></div>
             @else
-            <div class="summary-total"><span>Total Bayar</span><span>Rp {{ number_format($totalAmount, 0, ',', '.') }}</span></div>
+            <div class="summary-total"><span>{{ $payLabel }}</span><span>Rp {{ number_format($amountDue, 0, ',', '.') }}</span></div>
             @endif
 
             <div style="margin-bottom:20px;">
@@ -320,6 +355,10 @@
 </div>
 </form>
 
+<div id="salin-toast" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1F2937;color:white;font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;z-index:9999;">
+    ✓ Berhasil disalin!
+</div>
+
 @include('partials.footer')
 
 <script>
@@ -334,7 +373,12 @@
     updateTimer();
     setInterval(updateTimer, 1000);
 
-    function salin(text) { navigator.clipboard.writeText(text).then(() => alert('Disalin: ' + text)); }
+    function salin(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            const el = document.getElementById('salin-toast');
+            if (el) { el.style.display = 'block'; setTimeout(() => el.style.display = 'none', 2000); }
+        });
+    }
 
     function handleFile(input) {
         if (input.files && input.files[0]) {
@@ -343,13 +387,46 @@
             const text = document.getElementById('upload-text');
             const sub = document.getElementById('upload-sub');
             const format = document.getElementById('upload-format');
+            const btn = document.getElementById('btn-submit');
+
+            const allowedTypes = ['image/jpeg', 'image/png'];
+            const maxSize = 2 * 1024 * 1024;
+
+            const errEl = document.getElementById('upload-error');
+
+            if (!allowedTypes.includes(file.type)) {
+                input.value = '';
+                if (text) text.textContent = 'Seret & letakkan file di sini';
+                if (sub) sub.textContent = 'atau klik untuk memilih file';
+                if (format) format.textContent = 'Format: JPG, PNG • Maks. 2MB';
+                if (icon) icon.innerHTML = '<i class="fas fa-file-upload" style="color:var(--pink)"></i>';
+                if (errEl) { errEl.textContent = 'Format file tidak didukung. Gunakan JPG atau PNG.'; errEl.style.display = 'block'; }
+                btn.disabled = true;
+                btn.style.background = '';
+                btn.textContent = 'Menunggu Upload Bukti Bayar';
+                return;
+            }
+
+            if (file.size > maxSize) {
+                input.value = '';
+                if (text) text.textContent = 'Seret & letakkan file di sini';
+                if (sub) sub.textContent = 'atau klik untuk memilih file';
+                if (format) format.textContent = 'Format: JPG, PNG • Maks. 2MB';
+                if (icon) icon.innerHTML = '<i class="fas fa-file-upload" style="color:var(--pink)"></i>';
+                if (errEl) { errEl.textContent = 'Ukuran file maksimal 2MB.'; errEl.style.display = 'block'; }
+                btn.disabled = true;
+                btn.style.background = '';
+                btn.textContent = 'Menunggu Upload Bukti Bayar';
+                return;
+            }
+
+            if (errEl) errEl.style.display = 'none';
 
             if (icon) icon.innerHTML = '<i class="fas fa-check-circle" style="color:#22C55E;"></i>';
             if (text) text.textContent = file.name;
             if (sub) sub.textContent = 'File siap diupload';
             if (format) format.textContent = '';
 
-            const btn = document.getElementById('btn-submit');
             btn.style.background = 'var(--pink)';
             btn.textContent = '✓ Kirim Bukti Pembayaran';
             btn.disabled = false;

@@ -121,6 +121,9 @@
     <div class="alert-error">@foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>
 </div>
 @endif
+<div id="js-errors" style="display:none;max-width:1100px;margin:0 auto;padding:0 24px 0;">
+    <div class="alert-error" id="js-errors-inner"></div>
+</div>
 
 <div class="checkout-layout">
     <div>
@@ -196,21 +199,35 @@
                 <textarea name="shipping_address" id="fieldAddress" class="field-textarea" rows="3"
                           placeholder="Jl. Imam Bonjol No. 10, RT 01/RW 02...">{{ old('shipping_address') }}</textarea>
 
-                <label class="field-label">Zona Pengiriman</label>
-                @if($shippingZones->isNotEmpty())
-                <select name="shipping_zone_id" class="field-input" id="zoneSelect" onchange="updateShipping()">
-                    <option value="">-- Pilih zona --</option>
-                    @foreach($shippingZones as $zone)
-                    <option value="{{ $zone->id }}" data-cost="{{ $zone->cost }}"
-                            @selected(old('shipping_zone_id') == $zone->id)>
-                        {{ $zone->area_name }} — Rp {{ number_format($zone->cost, 0, ',', '.') }}
-                    </option>
-                    @endforeach
+                <label class="field-label">Kota / Kabupaten Tujuan <span style="color:#F9A8D4;">*</span></label>
+                @php
+                    $kotaZones = $shippingZones->filter(fn($z) => str_starts_with($z->area_name, 'Kota'));
+                    $kabZones  = $shippingZones->filter(fn($z) => str_starts_with($z->area_name, 'Kabupaten'));
+                @endphp
+                <select name="shipping_zone_id" class="field-input" id="zoneSelect" onchange="updateShipping()" required>
+                    <option value="">-- Pilih kota/kabupaten tujuan --</option>
+                    @if($kotaZones->isNotEmpty())
+                    <optgroup label="── Kota ──">
+                        @foreach($kotaZones as $zone)
+                        <option value="{{ $zone->id }}" data-cost="{{ $zone->cost }}"
+                                @selected(old('shipping_zone_id') == $zone->id)>
+                            {{ $zone->area_name }} — Rp {{ number_format($zone->cost, 0, ',', '.') }}
+                        </option>
+                        @endforeach
+                    </optgroup>
+                    @endif
+                    @if($kabZones->isNotEmpty())
+                    <optgroup label="── Kabupaten ──">
+                        @foreach($kabZones as $zone)
+                        <option value="{{ $zone->id }}" data-cost="{{ $zone->cost }}"
+                                @selected(old('shipping_zone_id') == $zone->id)>
+                            {{ $zone->area_name }} — Rp {{ number_format($zone->cost, 0, ',', '.') }}
+                        </option>
+                        @endforeach
+                    </optgroup>
+                    @endif
                 </select>
-                @else
-                <input type="text" name="shipping_address_extra" class="field-input"
-                       placeholder="Kelurahan / Kecamatan / Kota">
-                @endif
+                <p style="font-size:11px;color:var(--gray);margin-top:-10px;margin-bottom:14px;">Ongkir dihitung berdasarkan kota/kabupaten tujuan pengiriman</p>
             </div>
 
             <div id="pickup-section" style="display:none;">
@@ -231,8 +248,12 @@
                 Tanggal
                 <span style="color:var(--gray);font-weight:400;">(minimal {{ $leadDays }} hari ke depan)</span>
             </label>
-            <input type="date" name="delivery_date" class="field-input"
-                   min="{{ $minDate }}" value="{{ old('delivery_date') }}" required>
+            <input type="date" name="delivery_date" id="delivery_date" class="field-input"
+                   min="{{ $minDate }}" value="{{ old('delivery_date', $minDate) }}" required
+                   oninput="validateDeliveryDate(this)">
+            <p id="date-error" style="display:none;color:#DC2626;font-size:12px;margin-top:-10px;margin-bottom:10px;">
+                Tanggal pengiriman minimal {{ $leadDays }} hari setelah tanggal pemesanan.
+            </p>
 
             <label class="field-label">Slot Waktu</label>
             <div class="slot-grid">
@@ -303,7 +324,7 @@
             @endforeach
 
             <div class="summary-row"><span>Subtotal</span><span>Rp {{ number_format($subtotal, 0, ',', '.') }}</span></div>
-            <div class="summary-row" id="row-shipping"><span>Ongkir</span><span id="val-shipping">Rp 0</span></div>
+            <div class="summary-row" id="row-shipping"><span>Ongkir</span><span id="val-shipping" style="color:var(--gray);">Pilih kota tujuan</span></div>
             <div class="summary-row" id="row-discount" style="display:none;">
                 <span>Diskon Voucher</span>
                 <span id="val-discount" style="color:#059669;">-Rp 0</span>
@@ -354,7 +375,8 @@
 
 <script>
 const subtotal = {{ $subtotal }};
-let shippingCost = 0;
+const DEFAULT_SHIPPING = 0;
+let shippingCost = DEFAULT_SHIPPING;
 let discountAmt  = 0;
 
 function setDelivery(method) {
@@ -362,14 +384,29 @@ function setDelivery(method) {
     document.getElementById('opt-' + method).classList.add('selected');
     document.querySelector('[name=delivery_method][value=' + method + ']').checked = true;
 
+    const zoneSelect = document.getElementById('zoneSelect');
+
     if (method === 'pickup') {
         document.getElementById('address-section').style.display = 'none';
         document.getElementById('pickup-section').style.display  = 'block';
         shippingCost = 0;
         document.getElementById('val-shipping').textContent = 'Gratis';
+        // Nonaktifkan required agar tidak divalidasi browser
+        if (zoneSelect) {
+            zoneSelect.required = false;
+            zoneSelect.disabled = true;
+        }
+        document.querySelectorAll('#address-section input, #address-section textarea').forEach(el => {
+            el.required = false;
+        });
     } else {
         document.getElementById('address-section').style.display = 'block';
         document.getElementById('pickup-section').style.display  = 'none';
+        // Aktifkan kembali required
+        if (zoneSelect) {
+            zoneSelect.required = true;
+            zoneSelect.disabled = false;
+        }
         updateShipping();
     }
     recalc();
@@ -379,8 +416,13 @@ function updateShipping() {
     const sel = document.getElementById('zoneSelect');
     if (!sel) return;
     const opt = sel.options[sel.selectedIndex];
-    shippingCost = opt && opt.dataset.cost ? parseFloat(opt.dataset.cost) : 0;
-    document.getElementById('val-shipping').textContent = 'Rp ' + fmt(shippingCost);
+    if (opt && opt.value && opt.dataset.cost) {
+        shippingCost = parseFloat(opt.dataset.cost);
+        sel.style.borderColor = '';
+    } else {
+        shippingCost = DEFAULT_SHIPPING;
+    }
+    document.getElementById('val-shipping').textContent = shippingCost > 0 ? 'Rp ' + fmt(shippingCost) : 'Gratis';
     recalc();
 }
 
@@ -409,6 +451,17 @@ function recalc() {
 
 function fmt(n) { return Math.round(n).toLocaleString('id-ID'); }
 
+function validateDeliveryDate(input) {
+    const errEl = document.getElementById('date-error');
+    if (input.value && input.value < input.min) {
+        errEl.style.display = 'block';
+        input.value = input.min;
+        setTimeout(() => { errEl.style.display = 'none'; }, 3000);
+    } else {
+        errEl.style.display = 'none';
+    }
+}
+
 function fillSavedAddress(sel) {
     const opt = sel.options[sel.selectedIndex];
     if (!opt || !opt.value) return;
@@ -432,12 +485,24 @@ function validateCheckout() {
     if (method === 'delivery') {
         const addr = document.querySelector('[name=shipping_address]')?.value?.trim();
         if (!addr) errors.push('Alamat pengiriman wajib diisi.');
+
+        const zone = document.getElementById('zoneSelect');
+        if (zone && !zone.value) {
+            errors.push('Zona pengiriman wajib dipilih.');
+            zone.style.borderColor = '#DC2626';
+            zone.focus();
+        }
     }
 
     if (errors.length > 0) {
-        alert(errors.join('\n'));
+        const box = document.getElementById('js-errors');
+        const inner = document.getElementById('js-errors-inner');
+        inner.innerHTML = errors.map(e => '<p>' + e + '</p>').join('');
+        box.style.display = 'block';
+        box.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return false;
     }
+    document.getElementById('js-errors').style.display = 'none';
     return true;
 }
 
@@ -445,7 +510,10 @@ function validateCheckout() {
 window.addEventListener('DOMContentLoaded', () => {
     const sel = document.getElementById('savedAddressSelect');
     if (sel && sel.value) fillSavedAddress(sel);
-    recalc();
+
+    // Sinkronkan state delivery method saat halaman dimuat
+    const currentMethod = document.querySelector('[name=delivery_method]:checked')?.value ?? 'delivery';
+    setDelivery(currentMethod);
 });
 
 async function applyVoucher() {

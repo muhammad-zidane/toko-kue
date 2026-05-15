@@ -73,7 +73,8 @@ class OrderController extends Controller
 
         $request->validate([
             'delivery_method'              => 'required|in:pickup,delivery',
-            'shipping_address'             => 'required_if:delivery_method,delivery|string',
+            'shipping_address'             => 'required_if:delivery_method,delivery|nullable|string',
+            'shipping_zone_id'             => 'required_if:delivery_method,delivery|nullable|exists:shipping_zones,id',
             'delivery_date'                => ['required', 'date', 'after_or_equal:' . now()->addDays($leadDays)->format('Y-m-d')],
             'delivery_slot'                => 'nullable|string',
             'notes'                        => 'nullable|string|max:300',
@@ -81,9 +82,12 @@ class OrderController extends Controller
             'items.*.product_id'           => 'required|exists:products,id',
             'items.*.quantity'             => 'required|integer|min:1',
             'items.*.note'                 => 'nullable|string|max:300',
-            'items.*.customizations'       => 'nullable|string', // JSON
+            'items.*.customizations'       => 'nullable|string',
             'voucher_code'                 => 'nullable|string',
             'use_dp'                       => 'nullable|boolean',
+        ], [
+            'shipping_zone_id.required_if' => 'Zona pengiriman wajib dipilih jika metode pengiriman adalah diantar.',
+            'shipping_zone_id.exists'      => 'Zona pengiriman tidak valid.',
         ]);
 
         $products = Product::findMany(array_column($request->items, 'product_id'))->keyBy('id');
