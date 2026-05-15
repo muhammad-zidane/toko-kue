@@ -31,7 +31,7 @@
         .info-row span:first-child { color: var(--gray); flex-shrink: 0; }
         .info-row span:last-child { font-weight: 600; text-align: right; }
 
-        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
         .badge-pending { background: #FEF3C7; color: #D97706; }
         .badge-processing { background: #DBEAFE; color: #2563EB; }
         .badge-completed { background: #DCFCE7; color: #16A34A; }
@@ -78,8 +78,16 @@
             </div>
             @endforeach
 
+            @php $subtotalItems = $order->orderItems->sum(fn($i) => $i->price * $i->quantity); @endphp
+            <div style="margin-top:12px;">
+                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span style="color:var(--gray);">Subtotal Produk</span><span>Rp {{ number_format($subtotalItems, 0, ',', '.') }}</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span style="color:var(--gray);">Ongkos Kirim</span><span>{{ $order->shipping_cost > 0 ? 'Rp ' . number_format($order->shipping_cost, 0, ',', '.') : 'Gratis' }}</span></div>
+                @if($order->discount_amount > 0)
+                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span style="color:var(--gray);">Diskon Voucher</span><span style="color:#059669;">-Rp {{ number_format($order->discount_amount, 0, ',', '.') }}</span></div>
+                @endif
+            </div>
             <div class="price-total">
-                <span>Total</span>
+                <span>Total Harga</span>
                 <span>Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
             </div>
 
@@ -112,7 +120,15 @@
             <div class="card">
                 <p class="card-label">INFO PESANAN</p>
                 <div class="info-row"><span>Status</span><span><span class="badge badge-{{ $order->status }}">{{ ucfirst($order->status) }}</span></span></div>
-                <div class="info-row"><span>Pembayaran</span><span><span class="badge badge-{{ $order->payment->status ?? 'unpaid' }}">{{ ucfirst($order->payment->status ?? 'unpaid') }}</span></span></div>
+                @php
+                    $payStatus = $order->payment->status ?? 'unpaid';
+                    $payLabel = match($payStatus) { 'paid' => 'Lunas', 'dp' => 'DP 50%', default => 'Belum Bayar' };
+                @endphp
+                <div class="info-row"><span>Pembayaran</span><span><span class="badge badge-{{ $payStatus }}">{{ $payLabel }}</span></span></div>
+                @if(($order->payment_status ?? '') === 'dp')
+                <div class="info-row"><span>DP Dibayar</span><span>Rp {{ number_format($order->paid_amount, 0, ',', '.') }}</span></div>
+                <div class="info-row"><span>Sisa Pembayaran</span><span style="color:#C2410C;font-weight:700;">Rp {{ number_format($order->total_price - $order->paid_amount, 0, ',', '.') }}</span></div>
+                @endif
                 <div class="info-row"><span>Metode</span><span>{{ ['transfer_bank'=>'Transfer Bank','ewallet'=>'E-Wallet','qris'=>'QRIS','cod'=>'COD'][$order->payment->payment_method ?? ''] ?? ucfirst($order->payment->payment_method ?? '-') }}</span></div>
                 <div class="info-row"><span>Alamat</span><span>{{ $order->shipping_address }}</span></div>
                 @if($order->notes)
