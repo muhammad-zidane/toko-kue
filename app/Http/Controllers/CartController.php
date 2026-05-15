@@ -169,6 +169,10 @@ class CartController extends Controller
             return redirect()->route('cart.index')->withErrors($stockWarnings);
         }
 
-        return view('orders.create', compact('cartItems'));
+        $savedAddresses = auth()->user()->addresses()->latest()->get();
+        $dpMinAmount    = config('app.dp_min_amount', 200000);
+        $dpPercentage   = config('app.dp_percentage', 50);
+
+        return view('orders.create', compact('cartItems', 'savedAddresses', 'dpMinAmount', 'dpPercentage'));
     }
 }
