@@ -48,6 +48,9 @@
         .btn-save { background: var(--pink); color: white; padding: 10px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; box-shadow: 0 4px 12px rgba(240,80,122,0.2); transition: all 0.2s; margin-top: 16px; }
         .btn-save:hover { background: #D64A6C; transform: translateY(-1px); }
         .alert-success { background: #DCFCE7; border: 1px solid #A7F3D0; border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #065F46; margin-bottom: 16px; }
+        .confirm-pwd-group { display: none; margin-top: 8px; }
+        .confirm-pwd-group.visible { display: block; }
+        .confirm-pwd-note { font-size: 12px; color: #D97706; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
         @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr; } .profile-layout { flex-direction: column; } .profile-sidebar { width: 100%; } .form-grid { grid-template-columns: 1fr; } }
     </style>
     </head>
@@ -102,6 +105,7 @@
                     <a href="{{ route('orders.index') }}" class="sidebar-link"><i class="fas fa-clipboard-list" style="color:var(--brown-dark)"></i> Riwayat Pesanan <span class="sidebar-link-arrow">→</span></a>
                     <a href="{{ route('cart.index') }}" class="sidebar-link"><i class="fas fa-shopping-cart" style="color:var(--brown-dark)"></i> Keranjang <span class="sidebar-link-arrow">→</span></a>
                     <a href="{{ route('products.index') }}" class="sidebar-link"><i class="fas fa-birthday-cake" style="color:var(--brown-dark)"></i> Katalog Produk <span class="sidebar-link-arrow">→</span></a>
+                    <a href="{{ route('account.change-password') }}" class="sidebar-link"><i class="fas fa-lock" style="color:var(--brown-dark)"></i> Ganti Password <span class="sidebar-link-arrow">→</span></a>
                 </div>
 
                 <form method="POST" action="{{ route('logout') }}" style="width:100%;">
@@ -125,7 +129,11 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Email</label>
-                            <input type="email" name="email" value="{{ old('email', $user->email) }}" class="form-input" required>
+                            <input type="email" id="email-input" name="email"
+                                   value="{{ old('email', $user->email) }}"
+                                   class="form-input" required
+                                   data-original="{{ $user->email }}"
+                                   oninput="toggleConfirmPwd(this)">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Bergabung Sejak</label>
@@ -136,6 +144,16 @@
                             <input type="text" value="{{ ucfirst($user->role ?? 'customer') }}" class="form-input" readonly>
                         </div>
                     </div>
+                    {{-- Konfirmasi password saat ganti email --}}
+                    <div class="confirm-pwd-group{{ $errors->has('confirm_password') ? ' visible' : '' }}" id="confirm-pwd-group">
+                        <p class="confirm-pwd-note"><i class="fas fa-exclamation-triangle" style="color:#D97706"></i> Masukkan password untuk konfirmasi penggantian email</p>
+                        <div class="form-group" style="margin-bottom:0">
+                            <label class="form-label">Password Saat Ini</label>
+                            <input type="password" name="confirm_password" class="form-input" placeholder="Masukkan password kamu" autocomplete="current-password">
+                            @error('confirm_password') <p style="font-size:12px;color:#D4607A;margin-top:4px">{{ $message }}</p> @enderror
+                        </div>
+                    </div>
+
                     @if($errors->any())
                     <div style="background:#FEE2E2;border:1px solid #FECACA;border-radius:8px;padding:10px 14px;font-size:13px;color:#991B1B;margin-top:12px;">
                         @foreach($errors->all() as $error)
@@ -151,5 +169,15 @@
 </div>
 @include('partials.footer')
 <script src="{{ asset('js/app.js') }}" defer></script>
+<script>
+function toggleConfirmPwd(input) {
+    const group = document.getElementById('confirm-pwd-group');
+    if (input.value !== input.dataset.original) {
+        group.classList.add('visible');
+    } else {
+        group.classList.remove('visible');
+    }
+}
+</script>
 </body>
 </html>
