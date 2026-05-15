@@ -1,4 +1,4 @@
-@extends('admin.layout')
+﻿@extends('admin.layout')
 @section('title', 'Kelola Banner')
 @section('page-title', 'Kelola Banner')
 @section('page-subtitle', 'Atur banner yang tampil di halaman utama')
@@ -225,3 +225,4 @@ document.getElementById('editModal').addEventListener('click', function(e) {
 });
 </script>
 @endpush
+

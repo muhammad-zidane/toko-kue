@@ -177,3 +177,4 @@ document.addEventListener('click', function(e) {
 @stack('scripts')
 </body>
 </html>
+

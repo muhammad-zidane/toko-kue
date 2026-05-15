@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <style>
+        body { background-color: var(--cream); }
         .breadcrumb { max-width: 1100px; margin: 0 auto; padding: 20px 24px 0; font-size: 14px; color: var(--gray); }
         .stepper-wrap { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
         .stepper { display: flex; align-items: center; justify-content: center; }
@@ -176,6 +177,7 @@
                             data-name="{{ $addr->recipient_name }}"
                             data-phone="{{ $addr->phone }}"
                             data-address="{{ $addr->full_address }}"
+                            data-city="{{ $addr->city }}"
                             {{ $addr->is_default ? 'selected' : '' }}>
                         {{ $addr->label }} — {{ $addr->recipient_name }} ({{ $addr->city }})
                     </option>
@@ -471,6 +473,24 @@ function fillSavedAddress(sel) {
     if (name)  name.value  = opt.dataset.name  || '';
     if (phone) phone.value = opt.dataset.phone || '';
     if (addr)  addr.value  = opt.dataset.address || '';
+
+    // Sinkronkan kota/kabupaten ke zoneSelect
+    const city = (opt.dataset.city || '').trim().toLowerCase();
+    if (city) {
+        const zoneSelect = document.getElementById('zoneSelect');
+        if (zoneSelect) {
+            let matched = false;
+            for (const option of zoneSelect.options) {
+                const areaName = option.textContent.split('—')[0].trim().toLowerCase();
+                if (areaName === city || areaName.includes(city) || city.includes(areaName)) {
+                    zoneSelect.value = option.value;
+                    matched = true;
+                    break;
+                }
+            }
+            if (matched) updateShipping();
+        }
+    }
 }
 
 function validateCheckout() {
