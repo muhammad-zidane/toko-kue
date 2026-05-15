@@ -60,6 +60,7 @@ class ProductController extends Controller
         ]);
 
         $customizationOptions = CustomizationOption::where('is_active', true)
+            ->where('category_id', $product->category_id)
             ->orderBy('type')
             ->orderBy('sort_order')
             ->get()

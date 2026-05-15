@@ -15,8 +15,11 @@
         .page-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; margin-bottom: 8px; }
         .page-subtitle { font-size: 14px; color: var(--gray); margin-bottom: 24px; }
 
-        .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; align-items: stretch; }
         .card { background: var(--white); border-radius: 16px; border: 1px solid #EDE0D4; padding: 24px; margin-bottom: 20px; }
+        .detail-grid > .card { margin-bottom: 0; }
+        .info-col { display: flex; flex-direction: column; }
+        .card-info { flex: 1; margin-bottom: 0; }
         .card-label { font-size: 13px; font-weight: 700; color: var(--pink); margin-bottom: 16px; letter-spacing: 0.5px; }
 
         .order-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--cream); border-radius: 10px; margin-bottom: 12px; }
@@ -117,8 +120,8 @@
             @endforeach
         </div>
 
-        <div>
-            <div class="card">
+        <div class="info-col">
+            <div class="card card-info">
                 <p class="card-label">INFO PESANAN</p>
                 <div class="info-row"><span>Status</span><span><span class="badge badge-{{ $order->status }}">{{ ucfirst($order->status) }}</span></span></div>
                 @php
