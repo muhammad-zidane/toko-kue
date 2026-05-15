@@ -114,13 +114,13 @@
         const dots   = document.querySelectorAll('.banner-dot');
         function goToBanner(n) {
             slides[bannerIdx].style.display = 'none';
-            dots[bannerIdx].style.background = 'rgba(255,255,255,0.5)';
+            if (dots[bannerIdx]) dots[bannerIdx].style.background = 'rgba(255,255,255,0.5)';
             bannerIdx = (n + slides.length) % slides.length;
             slides[bannerIdx].style.display = 'block';
-            dots[bannerIdx].style.background = 'white';
+            if (dots[bannerIdx]) dots[bannerIdx].style.background = 'white';
         }
         function slideBanner(dir) { goToBanner(bannerIdx + dir); }
-        setInterval(() => slideBanner(1), 5000);
+        if (slides.length > 1) setInterval(() => slideBanner(1), 5000);
         </script>
         @endif
 
