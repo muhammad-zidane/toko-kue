@@ -1,4 +1,4 @@
-@extends('admin.layout')
+﻿@extends('admin.layout')
 @section('title', 'Kelola Kustomisasi')
 @section('page-title', 'Kelola Kustomisasi')
 @section('page-subtitle', 'Tambah dan kelola opsi kustomisasi produk (rasa, ukuran, topping, dll.)')
@@ -195,3 +195,4 @@
 
 </div>
 @endsection
+

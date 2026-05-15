@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <style>
 
+        body { background-color: var(--cream); }
         .page { max-width: 900px; margin: 0 auto; padding: 32px 24px 60px; }
         .page-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; margin-bottom: 8px; }
         .page-subtitle { font-size: 14px; color: var(--gray); margin-bottom: 24px; }

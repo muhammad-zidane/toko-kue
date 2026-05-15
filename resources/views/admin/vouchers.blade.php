@@ -1,4 +1,4 @@
-@extends('admin.layout')
+﻿@extends('admin.layout')
 @section('title', 'Kelola Voucher')
 @section('page-title', 'Kelola Voucher')
 @section('page-subtitle', 'Buat dan kelola kode diskon untuk pelanggan')
@@ -200,3 +200,4 @@
     </div>
 </div>
 @endsection
+

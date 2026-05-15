@@ -102,9 +102,7 @@
                         <i class="fas fa-cog" style="color:white"></i> Admin Dashboard <span class="sidebar-link-arrow">→</span>
                     </a>
                     @endif
-                    <a href="{{ route('orders.index') }}" class="sidebar-link"><i class="fas fa-clipboard-list" style="color:var(--brown-dark)"></i> Riwayat Pesanan <span class="sidebar-link-arrow">→</span></a>
-                    <a href="{{ route('cart.index') }}" class="sidebar-link"><i class="fas fa-shopping-cart" style="color:var(--brown-dark)"></i> Keranjang <span class="sidebar-link-arrow">→</span></a>
-                    <a href="{{ route('products.index') }}" class="sidebar-link"><i class="fas fa-birthday-cake" style="color:var(--brown-dark)"></i> Katalog Produk <span class="sidebar-link-arrow">→</span></a>
+                    <a href="{{ route('account.addresses.index') }}" class="sidebar-link"><i class="fas fa-map-marker-alt" style="color:var(--brown-dark)"></i> Alamat Tersimpan <span class="sidebar-link-arrow">→</span></a>
                     <a href="{{ route('account.change-password') }}" class="sidebar-link"><i class="fas fa-lock" style="color:var(--brown-dark)"></i> Ganti Password <span class="sidebar-link-arrow">→</span></a>
                 </div>
 

@@ -1,9 +1,9 @@
-@extends('admin.layout')
+﻿@extends('admin.layout')
 @section('title', 'Produk')
 @section('page-title', 'Kelola Produk')
 @section('page-subtitle', 'Lihat, tambah, edit, dan hapus produk')
 
-@section('styles')
+@push('styles')
 <style>
     .card { background: white; border-radius: 16px; border: 1px solid #EDE0D4; overflow: hidden; }
     .card-header { display: flex; align-items: center; justify-content: space-between; padding: 20px; border-bottom: 1px solid #EDE0D4; }
@@ -30,7 +30,7 @@
     .btn-delete:hover { opacity: 0.8; }
     .pagination { display: flex; justify-content: center; gap: 8px; padding: 16px; }
 </style>
-@endsection
+@endpush
 
 @section('content')
 <div class="card">
@@ -114,3 +114,4 @@
     </div>
 </div>
 @endsection
+
