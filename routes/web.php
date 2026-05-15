@@ -98,6 +98,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Other pages
     Route::get('/customers', [AdminController::class, 'customers'])->name('customers.index');
     Route::get('/analytics', [AdminController::class, 'analytics'])->name('analytics.index');
+    Route::get('/analytics/export', [AdminController::class, 'exportLaporan'])->name('analytics.export');
     Route::get('/finance', [AdminController::class, 'finance'])->name('finance.index');
     Route::get('/settings', [AdminController::class, 'settings'])->name('settings.index');
     Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');

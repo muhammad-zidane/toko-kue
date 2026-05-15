@@ -1,43 +1,61 @@
 # Jagoan Kue
 
-Aplikasi web e-commerce pemesanan kue online berbasis Laravel. Dibangun sebagai tugas akademik mata kuliah Pemrograman Web dengan metodologi Waterfall.
+E-commerce toko kue berbasis Laravel. Final project mata kuliah Pemrograman Web,
+Informatika UNP 2025.
+
+**Nama:** Muhammad Zidane | **NIM:** 25343071 | **Kelas:** Informatika A
 
 ---
 
 ## Fitur Utama
 
-- **Registrasi & Login** — autentikasi pelanggan dan admin menggunakan Laravel Breeze
-- **Katalog Produk** — browsing kue berdasarkan kategori
-- **Keranjang Belanja** — tambah, hapus, dan checkout produk
-- **Pemesanan** — checkout dengan validasi stok otomatis
-- **Pembayaran** — Transfer Bank, E-Wallet, QRIS, dan COD
-- **Upload Bukti Bayar** — pelanggan upload foto bukti transfer
-- **Status Pesanan** — pelacakan status (pending → processing → completed)
-- **Dashboard Admin** — statistik, grafik pendapatan, manajemen produk & pesanan
-- **Manajemen Kategori** — CRUD kategori produk
-- **Manajemen Pelanggan** — daftar dan statistik pelanggan
-- **Analitik & Keuangan** — laporan pendapatan dan distribusi pesanan
+### Customer
+- Registrasi & Login (Laravel Breeze)
+- Katalog produk dengan filter kategori, harga, dan pencarian
+- Detail produk + kustomisasi (rasa, ukuran, tulisan, dll)
+- Keranjang belanja (AJAX, tanpa redirect)
+- Checkout dengan pilihan pengiriman / ambil di toko
+- Pembayaran DP 50% atau lunas
+- Upload bukti pembayaran
+- Lacak status pesanan
+- Riwayat & detail pesanan
+- Ulasan produk
+- Voucher diskon
+
+### Admin
+- Dashboard ringkasan (pendapatan, pesanan, produk)
+- CRUD produk + upload gambar
+- CRUD kategori
+- Manajemen pesanan & update status
+- Manajemen user/pelanggan
+- CRUD voucher diskon
+- Kustomisasi per kategori produk
+- Analitik & laporan penjualan (filter tanggal, grafik Chart.js, export Excel)
+- Manajemen zona pengiriman & ongkir
+- Manajemen banner homepage
+- Kalender produksi
+- Notifikasi pesanan baru
 
 ---
 
-## Teknologi yang Digunakan
+## Tech Stack
 
-| Komponen        | Teknologi                  |
-|-----------------|----------------------------|
-| Backend         | PHP 8.2+, Laravel 12       |
-| Frontend        | Blade Template             |
-| Autentikasi     | Laravel Breeze             |
-| Database        | MySQL                      |
-| ORM             | Eloquent                   |
-| Penyimpanan     | Laravel Storage (lokal)    |
-| Package Manager | Composer, NPM              |
+| Komponen    | Teknologi                        |
+|-------------|----------------------------------|
+| Backend     | PHP 8.2+, Laravel 12             |
+| Frontend    | Blade Template, vanilla JS       |
+| Auth        | Laravel Breeze                   |
+| Database    | MySQL                            |
+| ORM         | Eloquent                         |
+| Storage     | Laravel Storage (lokal)          |
+| Export      | Maatwebsite/Excel (PhpSpreadsheet)|
 
 ---
 
-## Instalasi dan Menjalankan Project
+## Cara Menjalankan
 
 ### Prasyarat
-- PHP >= 8.2
+- PHP >= 8.2 (dengan extension: `gd`, `zip`, `fileinfo`, `pdo_mysql`)
 - Composer
 - Node.js & NPM
 - MySQL
@@ -45,120 +63,104 @@ Aplikasi web e-commerce pemesanan kue online berbasis Laravel. Dibangun sebagai 
 ### Langkah Instalasi
 
 ```bash
-# 1. Clone repository
 git clone <url-repository> jagoan-kue
 cd jagoan-kue
 
-# 2. Install dependensi PHP
 composer install
+npm install
 
-# 3. Salin file environment
 cp .env.example .env
-
-# 4. Generate application key
 php artisan key:generate
 
-# 5. Konfigurasi database di .env
-# Ubah bagian ini sesuai konfigurasi MySQL Anda:
-# DB_CONNECTION=mysql
-# DB_HOST=127.0.0.1
-# DB_PORT=3306
+# Isi konfigurasi DB di .env:
 # DB_DATABASE=jagoan_kue
 # DB_USERNAME=root
 # DB_PASSWORD=
 
-# 6. Jalankan migrasi dan seeder
-php artisan migrate --seed
-
-# 7. Buat symbolic link untuk storage
+php artisan migrate:fresh --seed
 php artisan storage:link
 
-# 8. Install dependensi frontend
-npm install
-
-# 9. Build asset frontend
 npm run build
-
-# 10. Jalankan server
 php artisan serve
 ```
 
-Akses aplikasi di: `http://localhost:8000`
+Buka `http://127.0.0.1:8000`
 
 ---
 
-## Struktur Folder Project
+## Akun Demo
+
+| Role     | Email                    | Password |
+|----------|--------------------------|----------|
+| Admin    | admin@jagoankue.test     | password |
+| Customer | budi@mail.test           | password |
+| Customer | siti@mail.test           | password |
+| Customer | dian@mail.test           | password |
+
+---
+
+## Struktur Folder Penting
 
 ```
-jagoan-kue/
-├── app/
-│   ├── Http/
-│   │   ├── Controllers/
-│   │   │   ├── AdminController.php     # Dashboard dan manajemen admin
-│   │   │   ├── CartController.php      # Keranjang belanja (session-based)
-│   │   │   ├── OrderController.php     # Pemesanan dan pembayaran
-│   │   │   ├── ProductController.php   # CRUD produk
-│   │   │   └── ProfileController.php   # Profil pengguna
-│   │   └── Requests/
-│   │       └── ProfileUpdateRequest.php
-│   └── Models/
-│       ├── Category.php
-│       ├── Order.php
-│       ├── OrderItem.php
-│       ├── Payment.php
-│       ├── Product.php
-│       ├── Testimonial.php
-│       └── User.php
-├── database/
-│   ├── migrations/                     # Skema tabel database
-│   └── seeders/                        # Data awal
-├── resources/
-│   └── views/
-│       ├── admin/                      # Tampilan dashboard admin
-│       ├── auth/                       # Tampilan login & register
-│       ├── cart/                       # Tampilan keranjang
-│       ├── home/                       # Tampilan halaman utama
-│       ├── layouts/                    # Layout utama aplikasi
-│       ├── orders/                     # Tampilan pesanan
-│       ├── products/                   # Tampilan katalog produk
-│       └── profile/                    # Tampilan profil pengguna
-├── routes/
-│   ├── web.php                         # Semua route web
-│   └── auth.php                        # Route autentikasi (Breeze)
-└── public/
-    └── storage/                        # Gambar produk & bukti bayar
+app/
+├── Exports/                        # Export Excel (LaporanPenjualanExport)
+├── Http/
+│   ├── Controllers/
+│   │   ├── AdminController.php     # Dashboard & semua fitur admin
+│   │   ├── Admin/
+│   │   │   └── CustomizationController.php
+│   │   ├── CartController.php      # Keranjang (session-based, AJAX)
+│   │   ├── OrderController.php     # Pemesanan & pembayaran
+│   │   └── ProductController.php  # CRUD produk (admin)
+│   └── Middleware/
+│       └── IsAdmin.php             # Guard admin routes
+└── Models/                         # Eloquent models
+
+database/seeders/
+├── AdminSeeder.php                 # Akun admin
+├── CategorySeeder.php              # 5 kategori
+├── ProductSeeder.php               # 10 produk dasar
+├── ShippingZoneSeeder.php          # Zona ongkir
+└── DemoSeeder.php                  # 3 customer + 6 produk extra + voucher + 10 pesanan
+
+resources/views/
+├── admin/                          # Semua tampilan admin
+├── orders/                         # Checkout, payment, success, detail
+├── products/                       # Katalog & detail produk
+└── partials/navbar.blade.php       # Navbar dengan cart badge
+
+routes/web.php                      # Semua route (public + auth + admin)
 ```
 
 ---
 
-## Informasi Database
+## ERD
 
-**Nama database:** `jagoan_kue`
+Lihat `docs/ERD.png` (jika ada) atau jalankan `php artisan db:show`.
 
-### Cara Import
+Relasi utama:
+- `users` → hasMany `orders`, `cart_items`, `addresses`
+- `categories` → hasMany `products`, `customization_options`
+- `products` → belongsTo `category`, hasMany `order_items`, `product_reviews`
+- `orders` → belongsTo `user`, hasMany `order_items`, hasOne `payment`
+- `order_items` → belongsTo `order`, `product`, hasMany `order_item_customizations`
 
-Menggunakan migrasi Laravel:
+---
+
+## Screenshots
+
+> Lihat folder `docs/screenshots/` untuk screenshot halaman utama.
+
+---
+
+## Quick Reference
+
 ```bash
-php artisan migrate --seed
+php artisan serve                    # Jalankan dev server
+php artisan migrate:fresh --seed     # Reset DB + isi data demo
+php artisan tinker                   # REPL Laravel
+php artisan route:list --except-vendor
+php artisan optimize:clear           # Clear semua cache
+npm run dev                          # Asset dev mode
+npm run build                        # Asset production
 ```
-
-Dokumentasi lengkap skema database tersedia di [docs/database.md](docs/database.md).
-
----
-
-## Kredensial Akun Default
-
-| Role     | Email                   | Password  |
-|----------|-------------------------|-----------|
-| Admin    | admin@jagoan-kue.com    | password  |
-| Customer | customer@jagoan-kue.com | password  |
-
-> Kredensial di atas adalah bawaan seeder. Ubah segera setelah instalasi di lingkungan produksi.
-
----
-
-## Dokumentasi Tambahan
-
-- [Dokumentasi Database](docs/database.md)
-- [Dokumentasi Route](docs/routes.md)
-- [Dokumentasi Fitur](docs/features.md)
