@@ -309,7 +309,7 @@ class OrderController extends Controller
 
     public function invoice(Order $order)
     {
-        if ($order->user_id !== auth()->id() && !auth()->user()?->role === 'admin') {
+        if ($order->user_id !== auth()->id() && auth()->user()?->role !== 'admin') {
             abort(403);
         }
 
