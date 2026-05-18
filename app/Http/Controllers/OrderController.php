@@ -29,6 +29,10 @@ class OrderController extends Controller
             ->latest()
             ->paginate(10);
 
+        foreach ($orders as $order) {
+            $this->authorizeOwner($order);
+        }
+
         return view('orders.index', compact('orders'));
     }
 
