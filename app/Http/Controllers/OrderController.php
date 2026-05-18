@@ -270,8 +270,13 @@ class OrderController extends Controller
     {
         $this->authorizeOwner($order);
 
+        $order->load('payment');
+        if ($order->payment && $order->payment->status === 'paid') {
+            return back()->with('error', 'Pembayaran untuk pesanan ini sudah dikonfirmasi.');
+        }
+
         $request->validate([
-            'proof_image' => 'required|image|mimes:jpg,jpeg,png,webp,heic,heif|max:5120',
+            'proof_image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'mimetypes:image/jpeg,image/png', 'max:2048'],
         ]);
 
         $path = $request->file('proof_image')->store('payment_proofs', 'public');
@@ -286,27 +291,12 @@ class OrderController extends Controller
             ]);
         }
 
-        // Determine if this is DP payment or pelunasan
-        $isDP = $order->payment_status === 'dp' && $order->paid_amount < $order->dp_amount;
-        $newPaidAmount = $order->paid_amount + ($isDP ? $order->dp_amount : ($order->total_price - $order->paid_amount));
-        $isFullyPaid   = $newPaidAmount >= $order->total_price;
-
         $payment->update([
-            'status'      => $isFullyPaid ? 'paid' : 'unpaid',
             'proof_image' => $path,
-            'amount'      => $isDP ? $order->dp_amount : ($order->total_price - $order->paid_amount),
-            'paid_at'     => now(),
+            'status'      => 'unpaid',
         ]);
 
-        $order->update([
-            'status'         => 'processing',
-            'payment_status' => $isFullyPaid ? 'paid' : 'dp',
-            'paid_amount'    => $newPaidAmount,
-        ]);
-
-        $message = $isFullyPaid
-            ? 'Pembayaran lunas berhasil dikonfirmasi!'
-            : 'Bukti DP berhasil diupload! Sisa pelunasan: Rp ' . number_format($order->total_price - $newPaidAmount, 0, ',', '.');
+        $message = 'Bukti pembayaran berhasil diunggah. Menunggu verifikasi admin.';
 
         return redirect()->route('orders.success', $order)->with('success', $message);
     }
