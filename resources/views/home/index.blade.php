@@ -74,7 +74,7 @@
         }
     </style>
 </head>
-<body class="bg-white">
+<body>
         {{-- NAVBAR --}}
         @include('partials.navbar')
 
