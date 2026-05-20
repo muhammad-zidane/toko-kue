@@ -148,7 +148,7 @@
             </div>
             <div class="info-row">
                 <span class="info-label">Status</span>
-                <span class="badge badge-{{ $order->payment->status }}">{{ ucfirst($order->payment->status) }}</span>
+                <span class="badge badge-{{ $order->payment->status }}">{{ $order->payment?->status_label ?? 'Belum Bayar' }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Jumlah</span>
