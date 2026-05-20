@@ -126,9 +126,8 @@
                 <div class="info-row"><span>Status</span><span><span class="badge badge-{{ $order->status }}">{{ ucfirst($order->status) }}</span></span></div>
                 @php
                     $payStatus = $order->payment->status ?? 'unpaid';
-                    $payLabel = match($payStatus) { 'paid' => 'Lunas', 'dp' => 'DP 50%', default => 'Belum Bayar' };
                 @endphp
-                <div class="info-row"><span>Pembayaran</span><span><span class="badge badge-{{ $payStatus }}">{{ $payLabel }}</span></span></div>
+                <div class="info-row"><span>Pembayaran</span><span><span class="badge badge-{{ $payStatus }}">{{ $order->payment?->status_label ?? 'Belum Bayar' }}</span></span></div>
                 @if(($order->payment_status ?? '') === 'dp')
                 <div class="info-row"><span>DP Dibayar</span><span>Rp {{ number_format($order->paid_amount, 0, ',', '.') }}</span></div>
                 <div class="info-row"><span>Sisa Pembayaran</span><span style="color:#C2410C;font-weight:700;">Rp {{ number_format($order->total_price - $order->paid_amount, 0, ',', '.') }}</span></div>
@@ -140,7 +139,7 @@
                 @endif
             </div>
 
-            @if($order->status === 'pending' && $order->payment && $order->payment->status === 'unpaid')
+            @if($order->status === 'pending' && $order->payment && $order->payment->status === 'unpaid' && !$order->payment->proof_image)
             <a href="{{ route('orders.payment', $order) }}" class="btn-back-page" style="width:100%;text-align:center;display:block;margin-bottom:20px;background:var(--pink);">Bayar Sekarang</a>
             @endif
         </div>

@@ -57,7 +57,7 @@
                         <span class="badge badge-{{ $order->status }}">{{ ucfirst($order->status) }}</span>
                     </td>
                     <td>
-                        <span class="badge badge-{{ $order->payment->status ?? 'unpaid' }}">{{ ucfirst($order->payment->status ?? 'unpaid') }}</span>
+                        <span class="badge badge-{{ $order->payment->status ?? 'unpaid' }}">{{ $order->payment?->status_label ?? 'Belum Bayar' }}</span>
                     </td>
                     <td>{{ $order->created_at->format('d M Y, H:i') }}</td>
                     <td>

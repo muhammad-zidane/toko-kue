@@ -92,10 +92,7 @@
                     </div>
                     <div class="badges">
                         <span class="badge {{ $status === 'completed' ? 'badge-completed' : ($status === 'cancelled' ? 'badge-cancelled' : '') }}">{{ ucfirst($status) }}</span>
-                        @php
-                            $payLabel = match($paymentStatus) { 'paid' => 'Lunas', 'dp' => 'DP 50%', default => 'Belum Bayar' };
-                        @endphp
-                        <span class="badge {{ $paymentStatus === 'paid' ? 'badge-success' : 'badge-warn' }}">{{ $payLabel }}</span>
+                        <span class="badge {{ $paymentStatus === 'paid' ? 'badge-success' : 'badge-warn' }}">{{ $order->payment?->status_label ?? 'Belum Bayar' }}</span>
                     </div>
                 </div>
 
@@ -115,7 +112,7 @@
                         <a class="btn-outline" href="{{ route('orders.reviews.index', $order) }}">Ulasan</a>
                     @endif
 
-                    @if ($status === 'pending' && $paymentStatus === 'unpaid')
+                    @if ($status === 'pending' && $paymentStatus === 'unpaid' && !($order->payment && $order->payment->proof_image))
                         <a class="btn-primary" href="{{ route('orders.payment', $order) }}">Bayar Sekarang</a>
                     @endif
 

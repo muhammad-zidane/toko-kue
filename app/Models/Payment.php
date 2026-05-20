@@ -29,4 +29,12 @@ class Payment extends Model
     {
         return $this->belongsTo(Order::class);
     }
+
+    public function getStatusLabelAttribute(): string
+    {
+        if ($this->status === 'paid') return 'Lunas';
+        if ($this->status === 'failed') return 'Pembayaran Ditolak';
+        if ($this->status === 'unpaid' && $this->proof_image !== null) return 'Menunggu Verifikasi';
+        return 'Belum Bayar';
+    }
 }

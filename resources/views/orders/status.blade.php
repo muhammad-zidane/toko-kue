@@ -219,7 +219,7 @@
                     <span class="info-label">Pembayaran</span>
                     <span class="info-value">
                         <span class="badge badge-{{ $order->payment->status ?? 'unpaid' }}">
-                            {{ $order->payment && $order->payment->status === 'paid' ? 'Lunas' : 'Belum Dibayar' }}
+                            {{ $order->payment?->status_label ?? 'Belum Bayar' }}
                         </span>
                     </span>
                 </div>
