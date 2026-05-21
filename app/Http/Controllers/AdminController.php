@@ -612,16 +612,30 @@ class AdminController extends Controller
 
     // ─── REVIEWS MODERATION ─────────────────────────────────────────────────────
 
-    public function reviews()
+    public function reviews(Request $request)
     {
-        $reviews = ProductReview::with('user', 'product')->latest()->paginate(20);
-        return view('admin.reviews', compact('reviews'));
+        $query = ProductReview::with('user', 'product')->latest();
+
+        if ($request->filled('status')) {
+            $query->where('is_approved', $request->status === 'approved');
+        }
+
+        if ($request->filled('rating')) {
+            $query->where('rating', $request->integer('rating'));
+        }
+
+        $reviews       = $query->paginate(20)->withQueryString();
+        $pendingCount  = ProductReview::where('is_approved', false)->count();
+        $approvedCount = ProductReview::where('is_approved', true)->count();
+
+        return view('admin.reviews', compact('reviews', 'pendingCount', 'approvedCount'));
     }
 
     public function approveReview(ProductReview $review)
     {
         $review->update(['is_approved' => !$review->is_approved]);
-        return back()->with('success', 'Status ulasan diperbarui.');
+        $label = $review->is_approved ? 'disetujui' : 'dibatalkan persetujuannya';
+        return back()->with('success', "Ulasan berhasil {$label}.");
     }
 
     public function destroyReview(ProductReview $review)
