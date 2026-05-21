@@ -20,6 +20,15 @@ Route::get('/products', [ProductController::class, 'index'])->name('products.ind
 Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 Route::post('/voucher/apply', [VoucherController::class, 'apply'])->name('voucher.apply');
 
+// Cart — bisa diakses guest (session-based), hanya checkout yang butuh auth
+Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
+Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+Route::middleware('throttle:20,1')->group(function () {
+    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/cart/update-item', [CartController::class, 'updateItem'])->name('cart.updateItem');
+});
+
 // Breeze requires a named "dashboard" route
 Route::get('/dashboard', fn () => redirect()->route('home'))->middleware('auth')->name('dashboard');
 
@@ -58,10 +67,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/account/addresses/{address}', [AddressController::class, 'destroy'])->name('account.addresses.destroy');
     Route::post('/account/addresses/{address}/set-default', [AddressController::class, 'setDefault'])->name('account.addresses.setDefault');
 
-    // Cart (read/delete)
-    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-    Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
-    Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+    // Cart checkout (butuh auth)
     Route::get('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
 
     // Write operations (rate-limited)
@@ -70,8 +76,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/orders/{order}/upload-proof', [OrderController::class, 'uploadProof'])->name('orders.uploadProof');
         Route::post('/orders/{order}/reviews/{product}', [ProductReviewController::class, 'store'])->name('orders.reviews.store');
         Route::patch('/orders/{order}/reviews/{review}', [ProductReviewController::class, 'update'])->name('orders.reviews.update');
-        Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
-        Route::post('/cart/update-item', [CartController::class, 'updateItem'])->name('cart.updateItem');
     });
 });
 
