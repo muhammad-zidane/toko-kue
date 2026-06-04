@@ -158,7 +158,7 @@
                 <div class="category-grid" style="margin-top: 40px;">
                     @forelse($categories as $category)
                     <a href="/products?category={{ $category->slug }}" class="category-card">
-                        <img src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=600&q=80" alt="{{ $category->name }}">
+                        <img src="{{ $category->image ? Storage::url($category->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=600&q=80' }}" alt="{{ $category->name }}">
                         <div class="category-info">
                             <h3>{{ $category->name }}</h3>
                             <p>{{ $category->products_count ?? 0 }} Produk</p>
