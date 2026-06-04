@@ -309,4 +309,7 @@ a { text-decoration: none; color: inherit; }
     .main-content { margin-left: 0; }
     .topbar { left: 0; }
     .topbar-hamburger { display: block; }
+    .page-content { padding: 16px; }
+    .topbar-title { font-size: 18px; }
+    .topbar-subtitle { font-size: 12px; }
 }

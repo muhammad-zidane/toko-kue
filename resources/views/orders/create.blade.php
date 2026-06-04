@@ -79,7 +79,18 @@
         .voucher-msg { font-size: 12px; margin-bottom: 10px; }
         .voucher-msg.ok { color: #059669; }
         .voucher-msg.err { color: #DC2626; }
-        @media (max-width: 768px) { .checkout-layout { grid-template-columns: 1fr; } .slot-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 768px) {
+            .checkout-layout { grid-template-columns: 1fr; }
+            .slot-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 480px) {
+            .payment-grid { grid-template-columns: 1fr; }
+            .slot-grid { grid-template-columns: 1fr; }
+            .step-circle { width: 36px; height: 36px; font-size: 14px; }
+            .step-label { font-size: 11px; }
+            .step-line { max-width: 60px; }
+            .delivery-toggle { flex-direction: column; }
+        }
     </style>
 </head>
 <body>

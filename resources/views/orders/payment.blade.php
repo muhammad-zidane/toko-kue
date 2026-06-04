@@ -83,14 +83,17 @@
         .aman-title { font-size: 12px; font-weight: 700; margin-bottom: 8px; }
         .aman-item { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 6px; }
         .aman-check { color: var(--green); font-size: 14px; }
-        .footer { background-color: var(--brown-dark); color: white; padding: 56px 24px; }
-        .footer-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 40px; }
-        .footer-logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 800; color: var(--pink); margin-bottom: 8px; }
-        .footer-desc { font-size: 13px; opacity: 0.6; margin-bottom: 20px; line-height: 1.6; }
-        .footer-socials { display: flex; gap: 16px; font-size: 18px; }
-        .footer-socials a { opacity: 0.6; transition: opacity 0.2s; }
-        .footer-socials a:hover { opacity: 1; }
-        @media (max-width: 768px) { .main { grid-template-columns: 1fr; } .timer-box { flex-direction: column; gap: 12px; } }
+        @media (max-width: 768px) {
+            .main { grid-template-columns: 1fr; }
+            .timer-box { flex-direction: column; gap: 12px; }
+        }
+        @media (max-width: 480px) {
+            .step-circle { width: 36px; height: 36px; font-size: 14px; }
+            .step-label { font-size: 11px; }
+            .step-line { max-width: 60px; }
+            .jumlah-box { flex-direction: column; gap: 10px; }
+            .jumlah-right { justify-content: flex-start; }
+        }
     </style>
 </head>
 <body>
