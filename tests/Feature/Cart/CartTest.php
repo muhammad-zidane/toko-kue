@@ -80,12 +80,14 @@ it('clears cart after calling clear', function () {
     expect($cart)->toBeEmpty();
 });
 
-it('guest is redirected to login when adding to cart', function () {
+it('guest can add product to cart (session-based)', function () {
     $product = Product::factory()->create(['stock' => 5, 'is_available' => true]);
 
     $response = $this->post('/cart/add', ['product_id' => $product->id, 'quantity' => 1]);
 
-    $response->assertRedirect('/login');
+    $response->assertRedirect('/cart');
+    $cart = session('cart');
+    expect($cart)->toHaveKey((string) $product->id);
 });
 
 it('shows cart page', function () {

@@ -10,6 +10,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
+#[\PHPUnit\Framework\Attributes\RequiresPhpExtension('gd')]
 class PaymentProofUploadTest extends TestCase
 {
     use RefreshDatabase;
