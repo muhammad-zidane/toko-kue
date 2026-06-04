@@ -1,4 +1,4 @@
-﻿@extends('admin.layout')
+@extends('admin.layout')
 @section('title', 'Kelola Kategori')
 @section('page-title', 'Kelola Kategori')
 @section('page-subtitle', 'Tambah, lihat, dan hapus kategori produk')
@@ -14,12 +14,17 @@
     th { padding: 12px 16px; font-size: 11px; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; background: #FAFAF8; border-bottom: 1px solid #EDE0D4; text-align: left; }
     td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid rgba(237,224,212,0.5); vertical-align: middle; }
     tr:hover { background: #FFFBF5; }
+    .cat-img { width: 48px; height: 48px; border-radius: 10px; object-fit: cover; border: 1px solid #EDE0D4; }
+    .cat-img-placeholder { width: 48px; height: 48px; border-radius: 10px; background: #F3F4F6; display: flex; align-items: center; justify-content: center; color: #D1D5DB; font-size: 18px; border: 1px solid #EDE0D4; }
     .cat-name { font-weight: 700; color: var(--text-dark); }
     .cat-desc { font-size: 11px; color: var(--gray); margin-top: 2px; }
     .cat-slug { font-size: 12px; color: var(--gray); font-family: monospace; background: rgba(243,244,246,0.5); padding: 2px 4px; border-radius: 4px; }
     .cat-count { display: inline-block; background: var(--cream); padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; color: var(--brown-dark); }
     .btn-delete { padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; background: #FEE2E2; color: #DC2626; border: none; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; }
     .btn-delete:hover { opacity: 0.8; }
+    .btn-edit { padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; background: #EDE9FE; color: #7C3AED; border: none; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; margin-right: 6px; }
+    .btn-edit:hover { opacity: 0.8; }
+    .action-group { display: flex; justify-content: flex-end; gap: 4px; }
     .form-card { background: white; border-radius: 16px; border: 1px solid #EDE0D4; padding: 20px; height: fit-content; position: sticky; top: 96px; }
     .form-card h2 { font-size: 15px; font-weight: 700; color: var(--text-dark); margin-bottom: 16px; }
     .form-group { margin-bottom: 16px; }
@@ -31,6 +36,22 @@
     .btn-submit:hover { background: var(--pink-hover); }
     .empty-state { text-align: center; padding: 40px 20px; color: var(--gray); }
     .empty-icon { font-size: 40px; margin-bottom: 12px; }
+    /* Image upload */
+    .img-upload-area { border: 2px dashed #EDE0D4; border-radius: 10px; padding: 16px; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; background: #FAFAF8; }
+    .img-upload-area:hover { border-color: var(--pink); background: #FFF5F7; }
+    .img-upload-area.has-preview { border-style: solid; border-color: #EDE0D4; padding: 8px; }
+    .img-upload-area input[type="file"] { display: none; }
+    .img-preview { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; display: none; }
+    .img-upload-placeholder { color: var(--gray); font-size: 12px; }
+    .img-upload-placeholder i { font-size: 24px; margin-bottom: 6px; display: block; color: #D1D5DB; }
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+    .modal-box { background: white; border-radius: 16px; padding: 24px; width: 100%; max-width: 420px; transform: translateY(10px); transition: transform 0.2s; }
+    .modal-overlay.active .modal-box { transform: translateY(0); }
+    .modal-title { font-size: 15px; font-weight: 700; color: var(--text-dark); margin-bottom: 16px; }
+    .modal-actions { display: flex; gap: 8px; margin-top: 20px; }
+    .btn-cancel { flex: 1; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; background: #F3F4F6; color: var(--text-dark); border: none; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; }
     @media (max-width: 768px) { .cat-grid { grid-template-columns: 1fr; } }
 </style>
 @endpush
@@ -47,6 +68,7 @@
             <table>
                 <thead>
                     <tr>
+                        <th style="width:60px;">Gambar</th>
                         <th>Nama Kategori</th>
                         <th>Slug</th>
                         <th style="text-align:center;">Jumlah Produk</th>
@@ -57,6 +79,13 @@
                     @forelse($categories as $cat)
                     <tr>
                         <td>
+                            @if($cat->image)
+                                <img src="{{ Storage::url($cat->image) }}" alt="{{ $cat->name }}" class="cat-img">
+                            @else
+                                <div class="cat-img-placeholder"><i class="fas fa-tag"></i></div>
+                            @endif
+                        </td>
+                        <td>
                             <div class="cat-name">{{ $cat->name }}</div>
                             @if($cat->description)
                             <div class="cat-desc">{{ Str::limit($cat->description, 60) }}</div>
@@ -65,15 +94,21 @@
                         <td><span class="cat-slug">/{{ $cat->slug }}</span></td>
                         <td style="text-align:center;"><span class="cat-count">{{ $cat->products_count }}</span></td>
                         <td style="text-align:right;">
-                            <form method="POST" action="{{ route('admin.categories.destroy', $cat) }}" onsubmit="return confirm('Hapus kategori {{ $cat->name }}? Semua produk di kategori ini juga akan terhapus.')">
-                                @csrf @method('DELETE')
-                                <button class="btn-delete"><i class="fas fa-trash"></i> Hapus</button>
-                            </form>
+                            <div class="action-group">
+                                <button class="btn-edit"
+                                    onclick="openEditModal({{ $cat->id }}, '{{ addslashes($cat->name) }}', '{{ addslashes($cat->description ?? '') }}', '{{ $cat->image ? Storage::url($cat->image) : '' }}')">
+                                    <i class="fas fa-pencil-alt"></i> Edit
+                                </button>
+                                <form method="POST" action="{{ route('admin.categories.destroy', $cat) }}" onsubmit="return confirm('Hapus kategori {{ $cat->name }}? Semua produk di kategori ini juga akan terhapus.')">
+                                    @csrf @method('DELETE')
+                                    <button class="btn-delete"><i class="fas fa-trash"></i> Hapus</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="4">
+                        <td colspan="5">
                             <div class="empty-state">
                                 <div class="empty-icon"><i class="fas fa-tag" style="color:var(--pink)"></i></div>
                                 <h3 style="font-size:14px;font-weight:700;color:var(--text-dark);margin-bottom:4px;">Belum Ada Kategori</h3>
@@ -90,7 +125,7 @@
     {{-- FORM TAMBAH --}}
     <div class="form-card">
         <h2>Tambah Kategori Baru</h2>
-        <form method="POST" action="{{ route('admin.categories.store') }}">
+        <form method="POST" action="{{ route('admin.categories.store') }}" enctype="multipart/form-data">
             @csrf
             <div class="form-group">
                 <label class="form-label">Nama Kategori <span style="color:#EF4444;">*</span></label>
@@ -100,9 +135,109 @@
                 <label class="form-label">Deskripsi Singkat</label>
                 <textarea name="description" rows="3" placeholder="Deskripsi kategori..." class="form-input form-textarea">{{ old('description') }}</textarea>
             </div>
+            <div class="form-group">
+                <label class="form-label">Gambar Kategori</label>
+                <label class="img-upload-area" id="uploadArea" for="imageInput">
+                    <input type="file" id="imageInput" name="image" accept="image/jpg,image/jpeg,image/png,image/webp"
+                        onchange="previewImage(this, 'imgPreview', 'uploadArea', 'uploadPlaceholder')">
+                    <img id="imgPreview" class="img-preview" alt="Preview">
+                    <div id="uploadPlaceholder" class="img-upload-placeholder">
+                        <i class="fas fa-image"></i>
+                        Klik untuk upload gambar<br>
+                        <span style="font-size:11px;color:#9CA3AF;">JPG, PNG, WebP — maks. 2MB</span>
+                    </div>
+                </label>
+                @error('image')<p style="color:#EF4444;font-size:11px;margin-top:4px;">{{ $message }}</p>@enderror
+            </div>
             <button type="submit" class="btn-submit"><i class="fas fa-plus" style="color:white"></i> Simpan Kategori</button>
+        </form>
+    </div>
+</div>
+
+{{-- MODAL EDIT --}}
+<div class="modal-overlay" id="editModal">
+    <div class="modal-box">
+        <div class="modal-title">Edit Kategori</div>
+        <form method="POST" id="editForm" enctype="multipart/form-data">
+            @csrf @method('PUT')
+            <div class="form-group">
+                <label class="form-label">Nama Kategori <span style="color:#EF4444;">*</span></label>
+                <input type="text" name="name" id="editName" required class="form-input">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Deskripsi Singkat</label>
+                <textarea name="description" id="editDescription" rows="3" class="form-input form-textarea"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Ganti Gambar <span style="font-weight:400;color:#9CA3AF;">(kosongkan jika tidak ingin ganti)</span></label>
+                <label class="img-upload-area" id="editUploadArea" for="editImageInput">
+                    <input type="file" id="editImageInput" name="image" accept="image/jpg,image/jpeg,image/png,image/webp"
+                        onchange="previewImage(this, 'editImgPreview', 'editUploadArea', 'editUploadPlaceholder')">
+                    <img id="editImgPreview" class="img-preview" alt="Preview">
+                    <div id="editUploadPlaceholder" class="img-upload-placeholder">
+                        <i class="fas fa-image"></i>
+                        Klik untuk ganti gambar
+                    </div>
+                </label>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeEditModal()">Batal</button>
+                <button type="submit" class="btn-submit" style="flex:1;">Simpan Perubahan</button>
+            </div>
         </form>
     </div>
 </div>
 @endsection
 
+@push('scripts')
+<script>
+function previewImage(input, previewId, areaId, placeholderId) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        const img = document.getElementById(previewId);
+        const placeholder = document.getElementById(placeholderId);
+        const area = document.getElementById(areaId);
+        img.src = e.target.result;
+        img.style.display = 'block';
+        placeholder.style.display = 'none';
+        area.classList.add('has-preview');
+    };
+    reader.readAsDataURL(file);
+}
+
+function openEditModal(id, name, description, imageUrl) {
+    document.getElementById('editName').value = name;
+    document.getElementById('editDescription').value = description;
+    document.getElementById('editForm').action = '/admin/categories/' + id;
+
+    const img = document.getElementById('editImgPreview');
+    const placeholder = document.getElementById('editUploadPlaceholder');
+    const area = document.getElementById('editUploadArea');
+
+    if (imageUrl) {
+        img.src = imageUrl;
+        img.style.display = 'block';
+        placeholder.style.display = 'none';
+        area.classList.add('has-preview');
+    } else {
+        img.src = '';
+        img.style.display = 'none';
+        placeholder.style.display = 'block';
+        area.classList.remove('has-preview');
+    }
+
+    document.getElementById('editImageInput').value = '';
+    document.getElementById('editModal').classList.add('active');
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').classList.remove('active');
+}
+
+document.getElementById('editModal').addEventListener('click', function(e) {
+    if (e.target === this) closeEditModal();
+});
+</script>
+@endpush
