@@ -6,20 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jagoan Kue - Riwayat Pesanan</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --pink: #F0507A; --brown-dark: #2C1810; --cream: #FFF8EE; --cream-dark: #F5EDD8; --white: #FFFFFF; --gray: #6B7280; --text-dark: #1A1A1A; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text-dark); background: var(--cream); }
-        a { text-decoration: none; }
-        .navbar { background-color: var(--brown-dark); padding: 16px 24px; position: sticky; top: 0; z-index: 100; }
-        .navbar-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
-        .navbar-logo { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; color: var(--pink); }
-        .navbar-links { display: flex; gap: 32px; list-style: none; }
-        .navbar-links a { color: white; font-size: 14px; font-weight: 500; opacity: 0.9; }
-        .navbar-actions { display: flex; align-items: center; gap: 12px; }
-        .btn-cart { background-color: var(--pink); color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; }
-        .btn-login { border: 1.5px solid white; color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; }
-
+        body { background: var(--cream); }
         .page { max-width: 1100px; margin: 0 auto; padding: 32px 24px 60px; }
         .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 800; margin-bottom: 8px; }
         .page-subtitle { font-size: 14px; color: var(--gray); margin-bottom: 22px; line-height: 1.6; }
@@ -41,39 +31,21 @@
         .total { margin-top: 10px; font-size: 13px; color: var(--gray); }
         .total strong { color: var(--brown-dark); }
         .badges { width: 120px; display: flex; flex-direction: column; gap: 8px; align-items: center; text-align: center; flex-shrink: 0; }
-        .badge { display: inline-block; padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #F3F4F6; color: #111827; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #F3F4F6; color: #111827; white-space: nowrap; max-width: 110px; text-align: center; }
         .badge-warn { background: #FEF3C7; color: #92400E; }
         .badge-success { background: #DCFCE7; color: #166534; }
         .actions { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; }
         .btn-outline { border: 1.5px solid #D1C0B8; color: var(--brown-dark); padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; display: inline-block; }
 
+        .badge-completed { background: #FFF0F3; color: var(--pink); }
+        .badge-cancelled { background: #FEE2E2; color: var(--red); }
         .empty { grid-column: 1 / -1; text-align: center; padding: 28px; }
 
-        @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } .navbar-links { display: none; } }
-    </style>
-    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @endif
-</head>
+        @media (max-width: 860px) { .grid { grid-template-columns: 1fr; }
+ }
+    </style></head>
 <body>
-<nav class="navbar">
-    <div class="navbar-inner">
-        <a href="/" class="navbar-logo">Jagoan Kue</a>
-        <ul class="navbar-links">
-            <li><a href="/">Beranda</a></li>
-            <li><a href="/products">Katalog</a></li>
-            <li><a href="/orders">Pemesanan</a></li>
-        </ul>
-        <div class="navbar-actions">
-            <a href="/cart" class="btn-cart">🛒 Keranjang</a>
-            @auth
-                <a href="/profile" class="btn-login">{{ auth()->user()->name }}</a>
-            @else
-                <a href="/login" class="btn-login">Login</a>
-            @endauth
-        </div>
-    </div>
-</nav>
+@include('partials.navbar')
 
 <div class="page">
     <div class="top-row">
@@ -111,23 +83,41 @@
                             <p class="meta">{{ $order->created_at?->format('d M Y, H:i') }} WIB</p>
                             <p class="code">{{ $order->order_code }}</p>
                             <p class="total">Total: <strong>Rp {{ number_format((int) $order->total_price, 0, ',', '.') }}</strong></p>
+                        @if($order->shipping_cost > 0)
+                        <p style="font-size:11px;color:var(--gray);margin-top:2px;">Ongkir: Rp {{ number_format((int)$order->shipping_cost, 0, ',', '.') }}</p>
+                        @else
+                        <p style="font-size:11px;color:var(--gray);margin-top:2px;">Ongkir: Gratis</p>
+                        @endif
                         </div>
                     </div>
                     <div class="badges">
-                        <span class="badge">{{ ucfirst($status) }}</span>
-                        <span class="badge {{ $paymentStatus === 'paid' ? 'badge-success' : 'badge-warn' }}">{{ ucfirst($paymentStatus) }}</span>
+                        <span class="badge {{ $status === 'completed' ? 'badge-completed' : ($status === 'cancelled' ? 'badge-cancelled' : '') }}">{{ ucfirst($status) }}</span>
+                        <span class="badge {{ $paymentStatus === 'paid' ? 'badge-success' : 'badge-warn' }}">{{ $order->payment?->status_label ?? 'Belum Bayar' }}</span>
                     </div>
                 </div>
 
+                @if($paymentStatus === 'dp')
+                @php $sisaBayar = $order->total_price - $order->paid_amount; @endphp
+                <div style="margin:10px 0 0;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:8px 12px;font-size:12px;color:#C2410C;font-weight:600;">
+                    <i class="fas fa-exclamation-circle" style="margin-right:4px;"></i>
+                    Sisa pembayaran: Rp {{ number_format($sisaBayar, 0, ',', '.') }}
+                </div>
+                @endif
+
                 <div class="actions">
                     <a class="btn-outline" href="{{ route('orders.show', $order) }}">Detail</a>
+                    <a class="btn-primary" href="{{ route('orders.status', $order) }}"><i class="fa-solid fa-location-dot" style="margin-right:5px;"></i>Lacak</a>
 
                     @if ($status === 'completed' && $paymentStatus === 'paid')
                         <a class="btn-outline" href="{{ route('orders.reviews.index', $order) }}">Ulasan</a>
                     @endif
 
-                    @if ($status === 'pending' && $paymentStatus === 'unpaid')
+                    @if ($status === 'pending' && $paymentStatus === 'unpaid' && !($order->payment && $order->payment->proof_image))
                         <a class="btn-primary" href="{{ route('orders.payment', $order) }}">Bayar Sekarang</a>
+                    @endif
+
+                    @if ($paymentStatus === 'dp')
+                        <a class="btn-primary" href="{{ route('orders.payment', $order) }}" style="background:#F59E0B;">Bayar Sisa</a>
                     @endif
                 </div>
             </div>
@@ -144,5 +134,7 @@
         {{ $orders->links() }}
     </div>
 </div>
+@include('partials.footer')
+<script src="{{ asset('js/app.js') }}" defer></script>
 </body>
 </html>

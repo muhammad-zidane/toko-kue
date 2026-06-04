@@ -1,9 +1,9 @@
-@extends('admin.layout')
+﻿@extends('admin.layout')
 @section('title', 'Data Pelanggan')
 @section('page-title', 'Data Pelanggan')
 @section('page-subtitle', 'Lihat semua pelanggan terdaftar')
 
-@section('styles')
+@push('styles')
 <style>
     .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
     .stat-card { background: white; border-radius: 16px; padding: 20px; border: 1px solid #EDE0D4; transition: transform 0.2s; }
@@ -22,7 +22,7 @@
     .order-badge { background: var(--cream); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; color: var(--brown-dark); }
     @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr; } }
 </style>
-@endsection
+@endpush
 
 @section('content')
 @php
@@ -32,17 +32,17 @@
 {{-- STATS --}}
 <div class="stats-grid">
     <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(240,80,122,0.1);">👤</div>
+        <div class="stat-icon" style="background:rgba(240,80,122,0.1);"><i class="fas fa-user" style="color:var(--pink)"></i></div>
         <div class="stat-value">{{ $totalCustomers }}</div>
         <div class="stat-label">Total Pelanggan</div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(34,197,94,0.1);">🆕</div>
+        <div class="stat-icon" style="background:rgba(34,197,94,0.1);"><i class="fas fa-user-plus" style="color:var(--pink)"></i></div>
         <div class="stat-value">{{ $newCustomers }}</div>
         <div class="stat-label">Pelanggan Baru (Bulan Ini)</div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(59,130,246,0.1);">📦</div>
+        <div class="stat-icon" style="background:rgba(59,130,246,0.1);"><i class="fas fa-box" style="color:var(--pink)"></i></div>
         <div class="stat-value">{{ $totalOrders }}</div>
         <div class="stat-label">Total Pesanan</div>
     </div>
@@ -65,7 +65,7 @@
                 @forelse($customers as $i => $customer)
                 @php $totalSpent = $customer->orders->sum('total_price'); @endphp
                 <tr>
-                    <td style="font-weight:600;color:var(--gray);">{{ $i + 1 }}</td>
+                    <td style="font-weight:600;color:var(--gray);">{{ $loop->iteration + ($customers->currentPage() - 1) * $customers->perPage() }}</td>
                     <td>
                         <div style="display:flex;align-items:center;gap:12px;">
                             <div class="avatar" style="background:{{ $colors[$i % count($colors)] }};">
@@ -84,7 +84,7 @@
                 @empty
                 <tr>
                     <td colspan="5" style="text-align:center;padding:64px;">
-                        <div style="font-size:48px;margin-bottom:12px;">👤</div>
+                        <div style="font-size:48px;margin-bottom:12px;"><i class="fas fa-user"></i></div>
                         <h3 style="font-weight:700;color:var(--brown-dark);">Belum Ada Pelanggan</h3>
                         <p style="font-size:14px;color:var(--gray);">Pelanggan akan muncul di sini.</p>
                     </td>
@@ -93,5 +93,9 @@
             </tbody>
         </table>
     </div>
+    @if($customers->hasPages())
+    <div style="padding:16px;">{{ $customers->links() }}</div>
+    @endif
 </div>
 @endsection
+

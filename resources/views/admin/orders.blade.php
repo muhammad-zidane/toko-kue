@@ -1,9 +1,9 @@
-@extends('admin.layout')
+﻿@extends('admin.layout')
 @section('title', 'Kelola Pesanan')
 @section('page-title', 'Kelola Pesanan')
 @section('page-subtitle', 'Lihat dan kelola semua pesanan pelanggan')
 
-@section('styles')
+@push('styles')
 <style>
     .card { background: white; border-radius: 16px; border: 1px solid #EDE0D4; overflow: hidden; }
     table { width: 100%; border-collapse: collapse; }
@@ -30,7 +30,7 @@
     .pagination a:hover { background: var(--pink); color: white; }
     .pagination .current { background: var(--pink); color: white; }
 </style>
-@endsection
+@endpush
 
 @section('content')
 <div class="card">
@@ -57,12 +57,12 @@
                         <span class="badge badge-{{ $order->status }}">{{ ucfirst($order->status) }}</span>
                     </td>
                     <td>
-                        <span class="badge badge-{{ $order->payment->status ?? 'unpaid' }}">{{ ucfirst($order->payment->status ?? 'unpaid') }}</span>
+                        <span class="badge badge-{{ $order->payment->status ?? 'unpaid' }}">{{ $order->payment?->status_label ?? 'Belum Bayar' }}</span>
                     </td>
                     <td>{{ $order->created_at->format('d M Y, H:i') }}</td>
                     <td>
                         <div class="status-actions">
-                            <a href="{{ route('admin.orders.detail', $order) }}" class="btn-detail">Detail</a>
+                            <a href="{{ route('admin.orders.show', $order) }}" class="btn-detail">Detail</a>
                             @if($order->status !== 'processing')
                             <form method="POST" action="{{ route('admin.orders.status', [$order, 'processing']) }}">
                                 @csrf @method('PATCH')
@@ -97,3 +97,4 @@
     </div>
 </div>
 @endsection
+

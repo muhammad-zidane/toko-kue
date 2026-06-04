@@ -12,6 +12,7 @@ class ProductReview extends Model
         'order_id',
         'rating',
         'comment',
+        'is_approved',
     ];
 
     public function user()

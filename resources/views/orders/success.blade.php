@@ -6,22 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jagoan Kue - Pesanan Berhasil</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --pink: #F0507A; --brown-dark: #2C1810; --cream: #FFF8EE; --cream-dark: #F5EDD8; --white: #FFFFFF; --gray: #6B7280; --text-dark: #1A1A1A; --green: #22C55E; --teal: #0D9488; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text-dark); background: var(--cream); }
-        a { text-decoration: none; }
-        .navbar { background-color: var(--brown-dark); padding: 16px 24px; }
-        .navbar-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
-        .navbar-logo { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; color: var(--pink); }
-        .navbar-links { display: flex; gap: 32px; list-style: none; }
-        .navbar-links a { color: white; font-size: 14px; font-weight: 500; opacity: 0.9; }
-        .navbar-actions { display: flex; align-items: center; gap: 12px; }
-        .btn-cart { background-color: var(--pink); color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; }
-        .btn-login { border: 1.5px solid white; color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; }
+        body { background: var(--cream); }
         .page { max-width: 960px; margin: 0 auto; padding: 40px 24px 60px; }
         .success-header { background: var(--white); border-radius: 20px; padding: 48px 32px; text-align: center; margin-bottom: 24px; border: 1px solid #EDE0D4; }
-        .success-icon { width: 72px; height: 72px; border-radius: 50%; border: 3px solid var(--teal); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; color: var(--teal); animation: popIn 0.5s ease; }
+        .success-icon { width: 72px; height: 72px; border-radius: 50%; background: var(--pink); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; color: var(--cream); animation: popIn 0.5s ease; }
         @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 70% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
         .success-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; margin-bottom: 10px; }
         .success-desc { font-size: 14px; color: var(--gray); line-height: 1.7; max-width: 420px; margin: 0 auto 24px; }
@@ -43,25 +34,30 @@
         .price-total { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--cream); border-radius: 10px; margin-top: 12px; }
         .price-total span:first-child { font-size: 14px; font-weight: 600; }
         .price-total span:last-child { font-size: 18px; font-weight: 800; }
-        .info-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #F0E8E0; font-size: 13px; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid #F0E8E0; font-size: 13px; gap: 12px; }
         .info-row:last-child { border-bottom: none; }
-        .info-row span:first-child { color: var(--gray); flex-shrink: 0; }
-        .info-row span:last-child { font-weight: 600; text-align: right; max-width: 60%; }
-        .info-row .highlight { color: var(--pink); }
-        .badge-status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .info-row .info-label { color: var(--gray); flex-shrink: 0; }
+        .info-row .info-value { font-weight: 600; text-align: right; }
+        .info-row .info-value.wrap { max-width: 58%; line-height: 1.5; }
+        .badge-status { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; line-height: 1.4; }
         .badge-pending { background: #FEF3C7; color: #D97706; }
-        .badge-paid { background: #DCFCE7; color: #16A34A; }
+        .badge-dp      { background: #FFF7ED; color: #C2410C; }
+        .badge-paid    { background: #DCFCE7; color: #16A34A; }
+
+        /* Timeline status */
         .status-list { display: flex; flex-direction: column; }
-        .status-item { display: flex; align-items: flex-start; gap: 12px; position: relative; padding-bottom: 20px; }
-        .status-item:last-child { padding-bottom: 0; }
-        .status-item::before { content: ''; position: absolute; left: 10px; top: 24px; bottom: 0; width: 2px; background: #E5D5C5; }
-        .status-item:last-child::before { display: none; }
-        .status-item.done::before { background: var(--teal); }
-        .status-item.active::before { background: linear-gradient(to bottom, var(--pink), #E5D5C5); }
-        .status-dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #E5D5C5; background: var(--white); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 11px; z-index: 1; }
-        .status-dot.done { background: var(--teal); border-color: var(--teal); color: white; }
-        .status-dot.active { background: var(--pink); border-color: var(--pink); color: white; font-size: 8px; }
-        .status-content p { font-size: 13px; font-weight: 600; }
+        .status-item { display: flex; align-items: flex-start; gap: 14px; position: relative; }
+        .status-item:not(:last-child) { padding-bottom: 24px; }
+        .status-track { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+        .status-dot { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #D1C0B8; background: var(--white); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+        .status-dot.done  { background: #10B981; border-color: #10B981; color: white; }
+        .status-dot.active { background: var(--pink); border-color: var(--pink); color: white; }
+        .status-line { width: 2px; flex: 1; min-height: 24px; background: #E5D5C5; margin-top: 4px; }
+        .status-line.done   { background: #10B981; }
+        .status-line.active { background: linear-gradient(to bottom, var(--pink), #E5D5C5); }
+        .status-content { padding-top: 2px; }
+        .status-content p { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+        .status-content p.muted { color: var(--gray); font-weight: 500; }
         .status-content small { font-size: 12px; color: var(--gray); }
         .wa-banner { background: var(--white); border-radius: 16px; border: 1px solid #EDE0D4; padding: 20px 24px; display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
         .wa-icon { width: 44px; height: 44px; border-radius: 50%; background: #22C55E; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
@@ -71,23 +67,12 @@
         .btn-action { padding: 14px; border-radius: 10px; font-size: 14px; font-weight: 600; text-align: center; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; border: none; display: block; }
         .btn-action.pink { background: var(--pink); color: white; }
         .btn-action.outline { background: var(--white); color: var(--text-dark); border: 1.5px solid #D1C0B8; }
-        .footer { background-color: var(--brown-dark); color: white; padding: 56px 24px; }
-        .footer-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 40px; }
-        .footer-logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 800; color: var(--pink); margin-bottom: 8px; }
-        .footer-desc { font-size: 13px; opacity: 0.6; margin-bottom: 20px; line-height: 1.6; }
-        .footer-heading { font-size: 14px; font-weight: 700; margin-bottom: 16px; }
-        .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-        .footer-links a { color: white; font-size: 13px; opacity: 0.6; }
-        .footer-contact { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-        .footer-contact li { font-size: 13px; opacity: 0.6; line-height: 1.5; }
-        @media (max-width: 768px) { .navbar-links { display: none; } .detail-grid { grid-template-columns: 1fr; } .action-buttons { grid-template-columns: 1fr; } .footer-inner { grid-template-columns: 1fr 1fr; } .wa-banner { flex-direction: column; text-align: center; } }
-    </style>
-    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @endif
-</head>
+        @media (max-width: 768px) {
+ .detail-grid { grid-template-columns: 1fr; } .action-buttons { grid-template-columns: 1fr; }
+ .wa-banner { flex-direction: column; text-align: center; } }
+    </style></head>
 <body>
-<nav class="navbar"><div class="navbar-inner"><a href="/" class="navbar-logo">Jagoan Kue</a><ul class="navbar-links"><li><a href="/">Beranda</a></li><li><a href="/products">Katalog</a></li><li><a href="/orders">Pemesanan</a></li></ul><div class="navbar-actions"><a href="/cart" class="btn-cart">🛒 Keranjang</a>@auth<a href="/profile" class="btn-login">{{ auth()->user()->name }}</a>@else<a href="/login" class="btn-login">Login</a>@endauth</div></div></nav>
+@include('partials.navbar')
 
 <div class="page">
     <div class="success-header">
@@ -114,40 +99,95 @@
             </div>
             @endforeach
 
-            <div class="price-row"><span>Subtotal</span><span>Rp {{ number_format($order->total_price, 0, ',', '.') }}</span></div>
-            <div class="price-total"><span>Total</span><span>Rp {{ number_format($order->total_price, 0, ',', '.') }}</span></div>
+            @php
+                $subtotalItems  = $order->orderItems->sum(fn($i) => $i->price * $i->quantity);
+                $isTransferBank = ($order->payment->payment_method ?? '') === 'transfer_bank';
+                $uniqueCode     = $isTransferBank ? 1000 : 0;
+            @endphp
+            <div class="price-row"><span>Subtotal Produk</span><span>Rp {{ number_format($subtotalItems, 0, ',', '.') }}</span></div>
+            <div class="price-row"><span>Ongkos Kirim</span><span>{{ $order->shipping_cost > 0 ? 'Rp ' . number_format($order->shipping_cost, 0, ',', '.') : 'Gratis' }}</span></div>
+            @if($order->discount_amount > 0)
+            <div class="price-row"><span>Diskon Voucher</span><span style="color:#059669;">-Rp {{ number_format($order->discount_amount, 0, ',', '.') }}</span></div>
+            @endif
+            @if($isTransferBank)
+            <div class="price-row"><span>Biaya Layanan (Kode Unik)</span><span>Rp {{ number_format($uniqueCode, 0, ',', '.') }}</span></div>
+            @endif
+            <div class="price-total"><span>Total Harga</span><span>Rp {{ number_format($order->total_price + $uniqueCode, 0, ',', '.') }}</span></div>
         </div>
 
         <div>
             <div class="card" style="margin-bottom: 20px;">
                 <p class="card-label">INFO PENGIRIMAN</p>
-                <div class="info-row"><span>Penerima</span><span>{{ auth()->user()->name }}</span></div>
-                <div class="info-row"><span>Alamat</span><span>{{ $order->shipping_address }}</span></div>
-                <div class="info-row"><span>Pembayaran</span><span>{{ ucfirst($order->payment->payment_method ?? '-') }}</span></div>
-                <div class="info-row"><span>Status bayar</span><span><span class="badge-status badge-{{ $order->payment->status ?? 'pending' }}">{{ ucfirst($order->payment->status ?? 'unpaid') }}</span></span></div>
+                <div class="info-row">
+                    <span class="info-label">Penerima</span>
+                    <span class="info-value">{{ auth()->user()->name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Alamat</span>
+                    <span class="info-value wrap">{{ $order->shipping_address }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Pembayaran</span>
+                    <span class="info-value">{{ ['transfer_bank'=>'Transfer Bank','ewallet'=>'E-Wallet','qris'=>'QRIS','cod'=>'COD'][$order->payment->payment_method ?? ''] ?? ucfirst($order->payment->payment_method ?? '-') }}</span>
+                </div>
+                @php
+                    $pStatus = $order->payment->status ?? 'unpaid';
+                @endphp
+                <div class="info-row">
+                    <span class="info-label">Status Bayar</span>
+                    <span class="info-value"><span class="badge-status badge-{{ $pStatus }}">{{ $order->payment?->status_label ?? 'Belum Bayar' }}</span></span>
+                </div>
                 @if($order->notes)
-                <div class="info-row"><span>Catatan</span><span>{{ $order->notes }}</span></div>
+                <div class="info-row">
+                    <span class="info-label">Catatan</span>
+                    <span class="info-value wrap">{{ $order->notes }}</span>
+                </div>
                 @endif
             </div>
 
             <div class="card">
                 <p class="card-label">STATUS PESANAN</p>
                 <div class="status-list">
-                    <div class="status-item done">
-                        <div class="status-dot done">✓</div>
-                        <div class="status-content"><p>Pesanan Diterima</p><small>{{ $order->created_at->format('d M Y, H:i') }}</small></div>
-                    </div>
-                    <div class="status-item active">
-                        <div class="status-dot active">●</div>
-                        <div class="status-content"><p>Sedang dipersiapkan</p><small>Kue sedang dibuat oleh tim kami</small></div>
-                    </div>
+                    {{-- Step 1: Pesanan Diterima (done) --}}
                     <div class="status-item">
-                        <div class="status-dot"></div>
-                        <div class="status-content"><p style="color: var(--gray);">Dalam pengiriman</p></div>
+                        <div class="status-track">
+                            <div class="status-dot done">✓</div>
+                            <div class="status-line done"></div>
+                        </div>
+                        <div class="status-content">
+                            <p>Pesanan Diterima</p>
+                            <small>{{ $order->created_at->format('d M Y, H:i') }}</small>
+                        </div>
                     </div>
+                    {{-- Step 2: Sedang dipersiapkan (active) --}}
                     <div class="status-item">
-                        <div class="status-dot"></div>
-                        <div class="status-content"><p style="color: var(--gray);">Pesanan diterima</p></div>
+                        <div class="status-track">
+                            <div class="status-dot active"><i class="fas fa-circle" style="font-size:7px;"></i></div>
+                            <div class="status-line active"></div>
+                        </div>
+                        <div class="status-content">
+                            <p>Sedang Dipersiapkan</p>
+                            <small>Kue sedang dibuat oleh tim kami</small>
+                        </div>
+                    </div>
+                    {{-- Step 3: Dalam pengiriman (pending) --}}
+                    <div class="status-item">
+                        <div class="status-track">
+                            <div class="status-dot"></div>
+                            <div class="status-line"></div>
+                        </div>
+                        <div class="status-content">
+                            <p class="muted">Dalam Pengiriman</p>
+                        </div>
+                    </div>
+                    {{-- Step 4: Pesanan diterima (pending) --}}
+                    <div class="status-item">
+                        <div class="status-track">
+                            <div class="status-dot"></div>
+                        </div>
+                        <div class="status-content">
+                            <p class="muted">Pesanan Diterima</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -155,7 +195,7 @@
     </div>
 
     <div class="wa-banner">
-        <div class="wa-icon">💬</div>
+        <div class="wa-icon"><i class="fab fa-whatsapp" style="color:white"></i></div>
         <p class="wa-text">Ada pertanyaan tentang pesananmu? Tim kami siap membantu via WhatsApp.</p>
         <a href="https://wa.me/6282283203385" target="_blank" class="btn-wa">Chat WhatsApp</a>
     </div>
@@ -167,6 +207,7 @@
     </div>
 </div>
 
-<footer class="footer"><div class="footer-inner"><div><p class="footer-logo">Jagoan Kue</p><p class="footer-desc">Menyediakan kue dengan cinta sejak 2023</p></div><div><p class="footer-heading">Layanan</p><ul class="footer-links"><li><a href="#">Katalog Kue</a></li><li><a href="#">Kue Custom</a></li></ul></div><div><p class="footer-heading">Selengkapnya</p><ul class="footer-links"><li><a href="#">Tentang Kami</a></li><li><a href="#">Blog</a></li></ul></div><div><p class="footer-heading">Kontak</p><ul class="footer-contact"><li>0822-8320-3385</li><li>muhammadzidane253@gmail.com</li><li>Payakumbuh, Sumatera Barat</li></ul></div></div></footer>
+@include('partials.footer')
+<script src="{{ asset('js/app.js') }}" defer></script>
 </body>
 </html>

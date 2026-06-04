@@ -9,21 +9,19 @@ class CartController extends Controller
 {
     public function index()
     {
-        $cart = session()->get('cart', []);
-        $cartItems = [];
-        foreach ($cart as $id => $item) {
-            $product = Product::find($id);
-            if ($product) {
-                $cartItems[] = [
-                    'product' => $product,
-                    'quantity' => $item['quantity'],
-                    'note' => $item['note'] ?? null,
-                ];
-            }
-        }
+        $cart      = session()->get('cart', []);
+        $cartItems = $this->resolveCartItems($cart);
+
         return view('cart.index', compact('cartItems'));
     }
 
+    /**
+     * Tambah produk ke keranjang (disimpan di session).
+     * Jika produk sudah ada, jumlahnya ditambahkan.
+     *
+     * @param  Request $request  Input: product_id (wajib), quantity (default 1)
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function add(Request $request)
     {
         $request->validate([
@@ -50,9 +48,26 @@ class CartController extends Controller
         }
 
         session()->put('cart', $cart);
+
+        $cartCount = collect(session()->get('cart', []))->sum('quantity');
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Produk ditambahkan ke keranjang!',
+                'cart_count' => $cartCount,
+            ]);
+        }
+
         return redirect()->route('cart.index')->with('success', 'Produk ditambahkan ke keranjang!');
     }
 
+    /**
+     * Perbarui jumlah atau catatan item di keranjang.
+     *
+     * @param  Request $request  Input: product_id (wajib), quantity (opsional), note (opsional)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updateItem(Request $request)
     {
         $request->validate([
@@ -81,6 +96,12 @@ class CartController extends Controller
         return response()->json(['success' => true]);
     }
 
+    /**
+     * Hapus satu atau beberapa item dari keranjang berdasarkan product ID.
+     *
+     * @param  Request $request  Input: ids[] array product ID yang dihapus
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function remove(Request $request)
     {
         $cart = session()->get('cart', []);
@@ -96,6 +117,11 @@ class CartController extends Controller
         return response()->json(['success' => true]);
     }
 
+    /**
+     * Kosongkan seluruh isi keranjang belanja dari session.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function clear()
     {
         session()->forget('cart');
@@ -109,11 +135,12 @@ class CartController extends Controller
             return redirect()->route('cart.index')->with('error', 'Keranjang kosong!');
         }
 
-        $cartItems = [];
+        $products      = Product::whereIn('id', array_keys($cart))->get()->keyBy('id');
+        $cartItems     = [];
         $stockWarnings = [];
 
         foreach ($cart as $id => $item) {
-            $product = Product::find($id);
+            $product = $products->get($id);
             if (!$product) {
                 continue;
             }
@@ -133,6 +160,33 @@ class CartController extends Controller
             return redirect()->route('cart.index')->withErrors($stockWarnings);
         }
 
-        return view('orders.create', compact('cartItems'));
+        $savedAddresses = auth()->user()->addresses()->latest()->get();
+        $dpMinAmount    = config('app.dp_min_amount', 200000);
+        $dpPercentage   = config('app.dp_percentage', 50);
+
+        return view('orders.create', compact('cartItems', 'savedAddresses', 'dpMinAmount', 'dpPercentage'));
+    }
+
+    private function resolveCartItems(array $cart): array
+    {
+        if (empty($cart)) {
+            return [];
+        }
+
+        $products = Product::whereIn('id', array_keys($cart))->get()->keyBy('id');
+        $items    = [];
+
+        foreach ($cart as $id => $item) {
+            $product = $products->get($id);
+            if ($product) {
+                $items[] = [
+                    'product'  => $product,
+                    'quantity' => $item['quantity'],
+                    'note'     => $item['note'] ?? null,
+                ];
+            }
+        }
+
+        return $items;
     }
 }

@@ -1,59 +1,166 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Jagoan Kue
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+E-commerce toko kue berbasis Laravel. Final project mata kuliah Pemrograman Web,
+Informatika UNP 2025.
 
-## About Laravel
+**Nama:** Muhammad Zidane | **NIM:** 25343071 | **Kelas:** Informatika A
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Fitur Utama
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Customer
+- Registrasi & Login (Laravel Breeze)
+- Katalog produk dengan filter kategori, harga, dan pencarian
+- Detail produk + kustomisasi (rasa, ukuran, tulisan, dll)
+- Keranjang belanja (AJAX, tanpa redirect)
+- Checkout dengan pilihan pengiriman / ambil di toko
+- Pembayaran DP 50% atau lunas
+- Upload bukti pembayaran
+- Lacak status pesanan
+- Riwayat & detail pesanan
+- Ulasan produk
+- Voucher diskon
 
-## Learning Laravel
+### Admin
+- Dashboard ringkasan (pendapatan, pesanan, produk)
+- CRUD produk + upload gambar
+- CRUD kategori
+- Manajemen pesanan & update status
+- Manajemen user/pelanggan
+- CRUD voucher diskon
+- Kustomisasi per kategori produk
+- Analitik & laporan penjualan (filter tanggal, grafik Chart.js, export Excel)
+- Manajemen zona pengiriman & ongkir
+- Manajemen banner homepage
+- Kalender produksi
+- Notifikasi pesanan baru
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Tech Stack
 
-## Laravel Sponsors
+| Komponen    | Teknologi                        |
+|-------------|----------------------------------|
+| Backend     | PHP 8.2+, Laravel 12             |
+| Frontend    | Blade Template, vanilla JS       |
+| Auth        | Laravel Breeze                   |
+| Database    | MySQL                            |
+| ORM         | Eloquent                         |
+| Storage     | Laravel Storage (lokal)          |
+| Export      | Maatwebsite/Excel (PhpSpreadsheet)|
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## Cara Menjalankan
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Prasyarat
+- PHP >= 8.2 (dengan extension: `gd`, `zip`, `fileinfo`, `pdo_mysql`)
+- Composer
+- Node.js & NPM
+- MySQL
 
-## Contributing
+### Langkah Instalasi
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+git clone <url-repository> jagoan-kue
+cd jagoan-kue
 
-## Code of Conduct
+composer install
+npm install
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+cp .env.example .env
+php artisan key:generate
 
-## Security Vulnerabilities
+# Isi konfigurasi DB di .env:
+# DB_DATABASE=jagoan_kue
+# DB_USERNAME=root
+# DB_PASSWORD=
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+php artisan migrate:fresh --seed
+php artisan storage:link
 
-## License
+npm run build
+php artisan serve
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Buka `http://127.0.0.1:8000`
+
+---
+
+## Akun Demo
+
+| Role     | Email                    | Password |
+|----------|--------------------------|----------|
+| Admin    | admin@jagoankue.test     | password |
+| Customer | budi@mail.test           | password |
+| Customer | siti@mail.test           | password |
+| Customer | dian@mail.test           | password |
+
+---
+
+## Struktur Folder Penting
+
+```
+app/
+├── Exports/                        # Export Excel (LaporanPenjualanExport)
+├── Http/
+│   ├── Controllers/
+│   │   ├── AdminController.php     # Dashboard & semua fitur admin
+│   │   ├── Admin/
+│   │   │   └── CustomizationController.php
+│   │   ├── CartController.php      # Keranjang (session-based, AJAX)
+│   │   ├── OrderController.php     # Pemesanan & pembayaran
+│   │   └── ProductController.php  # CRUD produk (admin)
+│   └── Middleware/
+│       └── IsAdmin.php             # Guard admin routes
+└── Models/                         # Eloquent models
+
+database/seeders/
+├── AdminSeeder.php                 # Akun admin
+├── CategorySeeder.php              # 5 kategori
+├── ProductSeeder.php               # 10 produk dasar
+├── ShippingZoneSeeder.php          # Zona ongkir
+└── DemoSeeder.php                  # 3 customer + 6 produk extra + voucher + 10 pesanan
+
+resources/views/
+├── admin/                          # Semua tampilan admin
+├── orders/                         # Checkout, payment, success, detail
+├── products/                       # Katalog & detail produk
+└── partials/navbar.blade.php       # Navbar dengan cart badge
+
+routes/web.php                      # Semua route (public + auth + admin)
+```
+
+---
+
+## ERD
+
+Lihat `docs/ERD.png` (jika ada) atau jalankan `php artisan db:show`.
+
+Relasi utama:
+- `users` → hasMany `orders`, `cart_items`, `addresses`
+- `categories` → hasMany `products`, `customization_options`
+- `products` → belongsTo `category`, hasMany `order_items`, `product_reviews`
+- `orders` → belongsTo `user`, hasMany `order_items`, hasOne `payment`
+- `order_items` → belongsTo `order`, `product`, hasMany `order_item_customizations`
+
+---
+
+## Screenshots
+
+> Lihat folder `docs/screenshots/` untuk screenshot halaman utama.
+
+---
+
+## Quick Reference
+
+```bash
+php artisan serve                    # Jalankan dev server
+php artisan migrate:fresh --seed     # Reset DB + isi data demo
+php artisan tinker                   # REPL Laravel
+php artisan route:list --except-vendor
+php artisan optimize:clear           # Clear semua cache
+npm run dev                          # Asset dev mode
+npm run build                        # Asset production
+```

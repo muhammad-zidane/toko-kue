@@ -6,26 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jagoan Kue - Detail Pesanan {{ $order->order_code }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --pink: #F0507A; --brown-dark: #2C1810; --cream: #FFF8EE; --cream-dark: #F5EDD8; --white: #FFFFFF; --gray: #6B7280; --text-dark: #1A1A1A; --green: #22C55E; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text-dark); background: var(--cream); }
-        a { text-decoration: none; }
-        .navbar { background-color: var(--brown-dark); padding: 16px 24px; position: sticky; top: 0; z-index: 100; }
-        .navbar-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
-        .navbar-logo { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; color: var(--pink); }
-        .navbar-links { display: flex; gap: 32px; list-style: none; }
-        .navbar-links a { color: white; font-size: 14px; font-weight: 500; opacity: 0.9; }
-        .navbar-actions { display: flex; align-items: center; gap: 12px; }
-        .btn-cart { background-color: var(--pink); color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; }
-        .btn-login { border: 1.5px solid white; color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; }
 
+        body { background-color: var(--cream); }
         .page { max-width: 900px; margin: 0 auto; padding: 32px 24px 60px; }
         .page-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; margin-bottom: 8px; }
         .page-subtitle { font-size: 14px; color: var(--gray); margin-bottom: 24px; }
 
-        .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; align-items: stretch; }
         .card { background: var(--white); border-radius: 16px; border: 1px solid #EDE0D4; padding: 24px; margin-bottom: 20px; }
+        .detail-grid > .card { margin-bottom: 0; }
+        .info-col { display: flex; flex-direction: column; }
+        .card-info { flex: 1; margin-bottom: 0; }
         .card-label { font-size: 13px; font-weight: 700; color: var(--pink); margin-bottom: 16px; letter-spacing: 0.5px; }
 
         .order-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--cream); border-radius: 10px; margin-bottom: 12px; }
@@ -36,12 +30,12 @@
         .item-note { margin-top: 6px; font-size: 12px; color: var(--brown-dark); line-height: 1.5; background: #FFF4E6; border-radius: 6px; padding: 6px 8px; }
         .order-item-price { font-size: 14px; font-weight: 600; }
 
-        .info-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #F0E8E0; font-size: 13px; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #F0E8E0; font-size: 13px; }
         .info-row:last-child { border-bottom: none; }
-        .info-row span:first-child { color: var(--gray); }
-        .info-row span:last-child { font-weight: 600; text-align: right; max-width: 60%; }
+        .info-row span:first-child { color: var(--gray); flex-shrink: 0; }
+        .info-row span:last-child { font-weight: 600; text-align: right; }
 
-        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
         .badge-pending { background: #FEF3C7; color: #D97706; }
         .badge-processing { background: #DBEAFE; color: #2563EB; }
         .badge-completed { background: #DCFCE7; color: #16A34A; }
@@ -60,14 +54,12 @@
 
         .btn-back-page { display: inline-block; background: var(--brown-dark); color: white; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 700; }
 
-        @media (max-width: 768px) { .navbar-links { display: none; } .detail-grid { grid-template-columns: 1fr; } }
-    </style>
-    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @endif
-</head>
+        @media (max-width: 768px) {
+ .detail-grid { grid-template-columns: 1fr; }
+ }
+    </style></head>
 <body>
-<nav class="navbar"><div class="navbar-inner"><a href="/" class="navbar-logo">Jagoan Kue</a><ul class="navbar-links"><li><a href="/">Beranda</a></li><li><a href="/products">Katalog</a></li><li><a href="/orders">Pemesanan</a></li></ul><div class="navbar-actions"><a href="/cart" class="btn-cart">🛒 Keranjang</a>@auth<a href="/profile" class="btn-login">{{ auth()->user()->name }}</a>@else<a href="/login" class="btn-login">Login</a>@endauth</div></div></nav>
+@include('partials.navbar')
 
 <div class="page">
     <h1 class="page-title">Detail Pesanan</h1>
@@ -90,8 +82,16 @@
             </div>
             @endforeach
 
+            @php $subtotalItems = $order->orderItems->sum(fn($i) => $i->price * $i->quantity); @endphp
+            <div style="margin-top:12px;">
+                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span style="color:var(--gray);">Subtotal Produk</span><span>Rp {{ number_format($subtotalItems, 0, ',', '.') }}</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span style="color:var(--gray);">Ongkos Kirim</span><span>{{ $order->shipping_cost > 0 ? 'Rp ' . number_format($order->shipping_cost, 0, ',', '.') : 'Gratis' }}</span></div>
+                @if($order->discount_amount > 0)
+                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span style="color:var(--gray);">Diskon Voucher</span><span style="color:#059669;">-Rp {{ number_format($order->discount_amount, 0, ',', '.') }}</span></div>
+                @endif
+            </div>
             <div class="price-total">
-                <span>Total</span>
+                <span>Total Harga</span>
                 <span>Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
             </div>
 
@@ -120,19 +120,26 @@
             @endforeach
         </div>
 
-        <div>
-            <div class="card">
+        <div class="info-col">
+            <div class="card card-info">
                 <p class="card-label">INFO PESANAN</p>
                 <div class="info-row"><span>Status</span><span><span class="badge badge-{{ $order->status }}">{{ ucfirst($order->status) }}</span></span></div>
-                <div class="info-row"><span>Pembayaran</span><span><span class="badge badge-{{ $order->payment->status ?? 'unpaid' }}">{{ ucfirst($order->payment->status ?? 'unpaid') }}</span></span></div>
-                <div class="info-row"><span>Metode</span><span>{{ ucfirst($order->payment->payment_method ?? '-') }}</span></div>
+                @php
+                    $payStatus = $order->payment->status ?? 'unpaid';
+                @endphp
+                <div class="info-row"><span>Pembayaran</span><span><span class="badge badge-{{ $payStatus }}">{{ $order->payment?->status_label ?? 'Belum Bayar' }}</span></span></div>
+                @if(($order->payment_status ?? '') === 'dp')
+                <div class="info-row"><span>DP Dibayar</span><span>Rp {{ number_format($order->paid_amount, 0, ',', '.') }}</span></div>
+                <div class="info-row"><span>Sisa Pembayaran</span><span style="color:#C2410C;font-weight:700;">Rp {{ number_format($order->total_price - $order->paid_amount, 0, ',', '.') }}</span></div>
+                @endif
+                <div class="info-row"><span>Metode</span><span>{{ ['transfer_bank'=>'Transfer Bank','ewallet'=>'E-Wallet','qris'=>'QRIS','cod'=>'COD'][$order->payment->payment_method ?? ''] ?? ucfirst($order->payment->payment_method ?? '-') }}</span></div>
                 <div class="info-row"><span>Alamat</span><span>{{ $order->shipping_address }}</span></div>
                 @if($order->notes)
                 <div class="info-row"><span>Catatan</span><span>{{ $order->notes }}</span></div>
                 @endif
             </div>
 
-            @if($order->status === 'pending' && $order->payment && $order->payment->status === 'unpaid')
+            @if($order->status === 'pending' && $order->payment && $order->payment->status === 'unpaid' && !$order->payment->proof_image)
             <a href="{{ route('orders.payment', $order) }}" class="btn-back-page" style="width:100%;text-align:center;display:block;margin-bottom:20px;background:var(--pink);">Bayar Sekarang</a>
             @endif
         </div>
@@ -140,5 +147,7 @@
 
     <a href="{{ route('orders.index') }}" class="btn-back-page">← Kembali ke Daftar Pesanan</a>
 </div>
+@include('partials.footer')
+<script src="{{ asset('js/app.js') }}" defer></script>
 </body>
 </html>
