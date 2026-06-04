@@ -65,7 +65,7 @@
                 @forelse($customers as $i => $customer)
                 @php $totalSpent = $customer->orders->sum('total_price'); @endphp
                 <tr>
-                    <td style="font-weight:600;color:var(--gray);">{{ $i + 1 }}</td>
+                    <td style="font-weight:600;color:var(--gray);">{{ $loop->iteration + ($customers->currentPage() - 1) * $customers->perPage() }}</td>
                     <td>
                         <div style="display:flex;align-items:center;gap:12px;">
                             <div class="avatar" style="background:{{ $colors[$i % count($colors)] }};">
@@ -93,6 +93,9 @@
             </tbody>
         </table>
     </div>
+    @if($customers->hasPages())
+    <div style="padding:16px;">{{ $customers->links() }}</div>
+    @endif
 </div>
 @endsection
 
