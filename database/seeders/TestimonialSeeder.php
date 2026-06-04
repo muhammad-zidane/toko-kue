@@ -16,7 +16,7 @@ class TestimonialSeeder extends Seeder
         ];
 
         foreach ($testimonials as $t) {
-            Testimonial::create($t);
+            Testimonial::firstOrCreate(['name' => $t['name']], $t);
         }
     }
 }
