@@ -90,12 +90,13 @@ Buka `http://127.0.0.1:8000`
 
 ## Akun Demo
 
-| Role     | Email                    | Password |
-|----------|--------------------------|----------|
-| Admin    | admin@jagoankue.test     | password |
-| Customer | budi@mail.test           | password |
-| Customer | siti@mail.test           | password |
-| Customer | dian@mail.test           | password |
+| Role     | Email                        | Password |
+|----------|------------------------------|----------|
+| Admin    | admin@jagoankue.test         | password |
+| Customer | customer@jagoan-kue.test     | password |
+| Customer | budi@mail.test               | password |
+| Customer | siti@mail.test               | password |
+| Customer | dian@mail.test               | password |
 
 ---
 
@@ -106,26 +107,37 @@ app/
 ├── Exports/                        # Export Excel (LaporanPenjualanExport)
 ├── Http/
 │   ├── Controllers/
-│   │   ├── AdminController.php     # Dashboard & semua fitur admin
+│   │   ├── AdminController.php          # Dashboard & semua fitur admin
 │   │   ├── Admin/
 │   │   │   └── CustomizationController.php
-│   │   ├── CartController.php      # Keranjang (session-based, AJAX)
-│   │   ├── OrderController.php     # Pemesanan & pembayaran
-│   │   └── ProductController.php  # CRUD produk (admin)
+│   │   ├── AccountController.php        # Ganti password
+│   │   ├── AddressController.php        # Alamat tersimpan
+│   │   ├── CartController.php           # Keranjang (session-based, AJAX)
+│   │   ├── HomeController.php           # Halaman utama
+│   │   ├── OrderController.php          # Pemesanan, pembayaran, invoice
+│   │   ├── ProductController.php        # CRUD produk (admin)
+│   │   ├── ProductReviewController.php  # Ulasan produk
+│   │   ├── ProfileController.php        # Profil pengguna
+│   │   └── VoucherController.php        # Validasi voucher
 │   └── Middleware/
-│       └── IsAdmin.php             # Guard admin routes
-└── Models/                         # Eloquent models
+│       └── EnsureUserIsAdmin.php        # Guard admin routes (alias: admin)
+└── Models/                              # Eloquent models
 
 database/seeders/
 ├── AdminSeeder.php                 # Akun admin
-├── CategorySeeder.php              # 5 kategori
-├── ProductSeeder.php               # 10 produk dasar
+├── CategorySeeder.php              # Kategori produk
+├── ProductSeeder.php               # Produk dasar
 ├── ShippingZoneSeeder.php          # Zona ongkir
-└── DemoSeeder.php                  # 3 customer + 6 produk extra + voucher + 10 pesanan
+├── TestimonialSeeder.php           # Testimoni homepage
+├── BannerSeeder.php                # Banner homepage
+├── CustomizationOptionSeeder.php   # Opsi kustomisasi
+├── VoucherSeeder.php               # Voucher diskon
+├── DemoSeeder.php                  # 4 customer + 6 produk extra + 10 pesanan
+└── ProductReviewSeeder.php         # Ulasan demo
 
 resources/views/
 ├── admin/                          # Semua tampilan admin
-├── orders/                         # Checkout, payment, success, detail
+├── orders/                         # Checkout, payment, success, detail, invoice
 ├── products/                       # Katalog & detail produk
 └── partials/navbar.blade.php       # Navbar dengan cart badge
 
@@ -136,20 +148,21 @@ routes/web.php                      # Semua route (public + auth + admin)
 
 ## ERD
 
-Lihat `docs/ERD.png` (jika ada) atau jalankan `php artisan db:show`.
+Jalankan `php artisan db:show` untuk melihat skema lengkap, atau lihat `docs/database.md`.
 
 Relasi utama:
-- `users` → hasMany `orders`, `cart_items`, `addresses`
+- `users` → hasMany `orders`, `addresses`, `product_reviews`
 - `categories` → hasMany `products`, `customization_options`
 - `products` → belongsTo `category`, hasMany `order_items`, `product_reviews`
-- `orders` → belongsTo `user`, hasMany `order_items`, hasOne `payment`
+- `orders` → belongsTo `user`, hasMany `order_items`, `payments`, `product_reviews`
 - `order_items` → belongsTo `order`, `product`, hasMany `order_item_customizations`
+- `product_reviews` → belongsTo `user`, `product`, `order`, hasMany `product_review_images`
 
 ---
 
 ## Screenshots
 
-> Lihat folder `docs/screenshots/` untuk screenshot halaman utama.
+> Screenshot belum tersedia.
 
 ---
 
