@@ -49,7 +49,11 @@
         .btn-mini { background: #B91C1C; color: white; border: none; border-radius: 8px; font-size: 11px; padding: 5px 8px; cursor: pointer; }
 
         @media (max-width: 768px) {
- }
+            .page { padding: 20px 16px 48px; }
+            .stars label { font-size: 28px; }
+            .action-row { flex-direction: column; }
+            .action-row button, .action-row .inline-form, .action-row .inline-form button { width: 100%; }
+        }
     </style>
 </head>
 <body>

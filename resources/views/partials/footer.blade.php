@@ -13,27 +13,26 @@
         <div>
             <p class="footer-heading">Layanan</p>
             <ul class="footer-links">
-                <li><a href="#">Katalog Kue</a></li>
-                <li><a href="#">Kue Custom</a></li>
-                <li><a href="#">Hampers</a></li>
-                <li><a href="#">Catering</a></li>
+                <li><a href="{{ route('products.index') }}">Katalog Kue</a></li>
+                <li><a href="{{ route('products.index') }}">Kue Custom</a></li>
             </ul>
         </div>
         <div>
             <p class="footer-heading">Selengkapnya</p>
             <ul class="footer-links">
-                <li><a href="#">Tentang Kami</a></li>
-                <li><a href="#">Blog</a></li>
-                <li><a href="#">Karir</a></li>
+                <li><a href="{{ route('about') }}">Tentang Kami</a></li>
             </ul>
         </div>
         <div>
             <p class="footer-heading">Kontak Kami</p>
             <ul class="footer-contact">
-                <li>0822-8320-3385</li>
-                <li>muhammadzidane253@gmail.com</li>
+                <li><a href="tel:081234567890">081234567890</a></li>
+                <li><a href="mailto:muhammadzidane@student.unp.ac.id">muhammadzidane@student.unp.ac.id</a></li>
                 <li>Payakumbuh, Sumatera Barat</li>
             </ul>
         </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© {{ date('Y') }} Jagoan Kue. All rights reserved.</p>
     </div>
 </footer>
