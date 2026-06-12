@@ -6,25 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jagoan Kue - Keranjang</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --pink: #F0507A; --brown-dark: #2C1810; --cream: #FFF8EE; --cream-dark: #F5EDD8; --white: #FFFFFF; --gray: #6B7280; --text-dark: #1A1A1A; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text-dark); background: var(--cream); }
-        a { text-decoration: none; }
-        .navbar { background-color: var(--brown-dark); padding: 16px 24px; position: sticky; top: 0; z-index: 100; }
-        .navbar-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
-        .navbar-logo { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; color: var(--pink); }
-        .navbar-links { display: flex; gap: 32px; list-style: none; }
-        .navbar-links a { color: white; font-size: 14px; font-weight: 500; opacity: 0.9; }
-        .navbar-actions { display: flex; align-items: center; gap: 12px; }
-        .btn-cart { background-color: var(--pink); color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; }
-        .btn-login { border: 1.5px solid white; color: white; padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; transition: all 0.2s; }
-        .btn-login:hover { background: white; color: var(--brown-dark); }
+        body { background: var(--cream); }
         .page { max-width: 1100px; margin: 0 auto; padding: 32px 24px 60px; }
         .page-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
         .cart-layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
-        .cart-box { background: var(--white); border-radius: 16px; border: 1px solid #EDE0D4; overflow: hidden; }
+        .cart-box { background: var(--white); border-radius: 16px; border: 1px solid #EDE0D4; overflow: hidden; min-height: 290px;}
         .select-all-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #F0E8E0; }
         .select-all-left { display: flex; align-items: center; gap: 12px; }
         .custom-check { width: 20px; height: 20px; accent-color: var(--brown-dark); cursor: pointer; }
@@ -38,6 +28,8 @@
         .item-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
         .item-price { font-size: 15px; font-weight: 700; }
         .item-actions { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+        .item-note-label { font-size: 12px; color: var(--gray); margin-top: 8px; margin-bottom: 4px; display: block; }
+        .item-note-input { width: 100%; border: 1px solid #D1C0B8; border-radius: 8px; padding: 8px 10px; font-size: 12px; font-family: 'Plus Jakarta Sans', sans-serif; background: #FFFDF9; }
         .action-btn { background: none; border: none; cursor: pointer; font-size: 16px; padding: 4px; color: var(--gray); transition: color 0.2s; }
         .action-btn:hover { color: var(--pink); }
         .qty-control { display: flex; align-items: center; border: 1.5px solid #D1C0B8; border-radius: 6px; overflow: hidden; }
@@ -54,21 +46,12 @@
         .summary-row span:last-child { font-size: 16px; font-weight: 700; }
         .btn-beli { width: 100%; background: var(--pink); color: white; border: none; border-radius: 10px; padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: opacity 0.2s; }
         .btn-beli:hover { opacity: 0.85; }
-        .footer { background-color: var(--brown-dark); color: white; padding: 56px 24px; }
-        .footer-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 40px; }
-        .footer-logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 800; color: var(--pink); margin-bottom: 8px; }
-        .footer-desc { font-size: 13px; opacity: 0.6; margin-bottom: 20px; line-height: 1.6; }
-        .footer-heading { font-size: 14px; font-weight: 700; margin-bottom: 16px; }
-        .footer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-        .footer-links a { color: white; font-size: 13px; opacity: 0.6; }
-        .footer-contact { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-        .footer-contact li { font-size: 13px; opacity: 0.6; line-height: 1.5; }
-        @media (max-width: 768px) { .navbar-links { display: none; } .cart-layout { grid-template-columns: 1fr; } .footer-inner { grid-template-columns: 1fr 1fr; } }
-    </style>
-</head>
+        @media (max-width: 768px) {
+ .cart-layout { grid-template-columns: 1fr; }
+ }
+    </style></head>
 <body>
-
-<nav class="navbar"><div class="navbar-inner"><a href="/" class="navbar-logo">Jagoan Kue</a><ul class="navbar-links"><li><a href="/">Beranda</a></li><li><a href="/products">Katalog</a></li><li><a href="/orders">Pemesanan</a></li></ul><div class="navbar-actions"><a href="/cart" class="btn-cart">🛒 Keranjang</a>@auth<a href="/profile" class="btn-login">{{ auth()->user()->name }}</a>@else<a href="/login" class="btn-login">Login</a>@endauth</div></div></nav>
+@include('partials.navbar')
 
 <div class="page">
     <p class="page-title">Keranjang</p>
@@ -91,8 +74,10 @@
                 <div class="item-info">
                     <p class="item-name">{{ $item['product']->name }}</p>
                     <p class="item-price" id="price-{{ $item['product']->id }}">Rp{{ number_format($item['product']->price * $item['quantity'], 0, ',', '.') }}</p>
+                    <label class="item-note-label">Catatan Produk</label>
+                    <textarea class="item-note-input" id="note-{{ $item['product']->id }}" rows="2" placeholder="Contoh: tulisan ucapan, warna, request khusus..." oninput="queueNoteSave({{ $item['product']->id }})">{{ $item['note'] ?? '' }}</textarea>
                     <div class="item-actions">
-                        <button class="action-btn" title="Hapus" onclick="hapusItem({{ $item['product']->id }})">🗑</button>
+                        <button class="action-btn" title="Hapus" onclick="hapusItem({{ $item['product']->id }})"><i class="fas fa-trash" style="color:var(--pink)"></i></button>
                         <div class="qty-control">
                             <button class="qty-btn" onclick="changeItemQty({{ $item['product']->id }}, -1)">−</button>
                             <input type="number" class="qty-num" id="qty-{{ $item['product']->id }}" value="{{ $item['quantity'] }}" min="1" onchange="updateItemPrice({{ $item['product']->id }}, {{ $item['product']->price }})">
@@ -104,7 +89,7 @@
             @endforeach
             @else
             <div class="empty-cart">
-                <p>Keranjang kamu masih kosong 🛒</p>
+                <p>Keranjang kamu masih kosong <i class="fas fa-shopping-cart" style="color:var(--pink)"></i></p>
                 <a href="/products" class="btn-shop">Belanja Sekarang</a>
             </div>
             @endif
@@ -116,12 +101,23 @@
                 <span>Total</span>
                 <span id="total-price">Rp0</span>
             </div>
+            <p id="cart-error" style="display:none;color:#DC2626;font-size:13px;font-weight:600;margin-bottom:8px;text-align:center;"></p>
+            @guest
+            {{-- Guest: arahkan ke /cart/checkout agar auth middleware simpan intended URL --}}
+            <a href="{{ route('cart.checkout') }}" style="text-decoration:none;">
+                <button class="btn-beli" type="button">
+                    <i class="fas fa-lock" style="margin-right:6px;font-size:13px;"></i>Login untuk Checkout
+                </button>
+            </a>
+            <p style="text-align:center;font-size:12px;color:var(--gray);margin-top:8px;">Silakan login untuk melanjutkan pemesanan</p>
+            @else
             <button class="btn-beli" onclick="beliSekarang()">Beli (<span id="beli-count">{{ isset($cartItems) ? count($cartItems) : 0 }}</span>)</button>
+            @endguest
         </div>
     </div>
 </div>
 
-<footer class="footer"><div class="footer-inner"><div><p class="footer-logo">Jagoan Kue</p><p class="footer-desc">Menyediakan kue dengan cinta sejak 2023</p></div><div><p class="footer-heading">Layanan</p><ul class="footer-links"><li><a href="#">Katalog Kue</a></li><li><a href="#">Kue Custom</a></li></ul></div><div><p class="footer-heading">Selengkapnya</p><ul class="footer-links"><li><a href="#">Tentang Kami</a></li><li><a href="#">Blog</a></li></ul></div><div><p class="footer-heading">Kontak</p><ul class="footer-contact"><li>0822-8320-3385</li><li>muhammadzidane253@gmail.com</li><li>Payakumbuh, Sumatera Barat</li></ul></div></div></footer>
+@include('partials.footer')
 
 <script>
     const products = @json(isset($cartItems) ? collect($cartItems)->mapWithKeys(fn($i) => [$i['product']->id => $i['product']->price]) : []);
@@ -158,7 +154,33 @@
     function updateItemPrice(id, price) {
         const qty = parseInt(document.getElementById('qty-' + id).value);
         document.getElementById('price-' + id).textContent = 'Rp' + (price * qty).toLocaleString('id-ID');
+        syncCartItem(id);
         updateTotal();
+    }
+
+    let noteSaveTimers = {};
+
+    function queueNoteSave(id) {
+        if (noteSaveTimers[id]) {
+            clearTimeout(noteSaveTimers[id]);
+        }
+        noteSaveTimers[id] = setTimeout(() => {
+            syncCartItem(id);
+            delete noteSaveTimers[id];
+        }, 400);
+    }
+
+    function syncCartItem(id) {
+        const qtyEl = document.getElementById('qty-' + id);
+        const noteEl = document.getElementById('note-' + id);
+        const qty = qtyEl ? parseInt(qtyEl.value || 1) : 1;
+        const note = noteEl ? noteEl.value : '';
+
+        return fetch('/cart/update-item', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+            body: JSON.stringify({ product_id: id, quantity: qty, note: note })
+        });
     }
 
     function hapusItem(id) {
@@ -191,12 +213,25 @@
 
     function beliSekarang() {
         const checked = document.querySelectorAll('.item-check:checked');
-        if (checked.length === 0) { alert('Pilih produk terlebih dahulu!'); return; }
-        // Checkout semua item di keranjang
-        window.location.href = '/cart/checkout';
+        const errEl = document.getElementById('cart-error');
+        if (checked.length === 0) {
+            if (errEl) { errEl.textContent = 'Pilih produk terlebih dahulu!'; errEl.style.display = 'block'; }
+            return;
+        }
+        if (errEl) errEl.style.display = 'none';
+
+        const ids = [];
+        checked.forEach(check => ids.push(check.dataset.id));
+
+        Promise.all(ids.map(id => syncCartItem(id)))
+            .catch(() => null)
+            .finally(() => {
+                window.location.href = '/cart/checkout';
+            });
     }
 
     updateTotal();
 </script>
+<script src="{{ asset('js/app.js') }}" defer></script>
 </body>
 </html>

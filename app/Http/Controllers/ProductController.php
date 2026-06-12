@@ -2,24 +2,78 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CustomizationOption;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    public function index()
-{
-    $categories = \App\Models\Category::with('products')->get();
-    return view('products.index', compact('categories'));
-}
+    /**
+     * Tampilkan semua produk dikelompokkan per kategori (halaman publik).
+     *
+     * @return \Illuminate\View\View
+     */
+    public function index(Request $request)
+    {
+        $search   = $request->input('search');
+        $sort     = $request->input('sort');
+        $minPrice = $request->input('min_price');
+        $maxPrice = $request->input('max_price');
+        $categorySlug = $request->input('category');
 
+        $categories = Category::all();
+
+        $query = Product::with('category')
+            ->where('is_available', true)
+            ->when($search, fn ($q) => $q->where('name', 'like', '%' . $search . '%'))
+            ->when($categorySlug, fn ($q) => $q->whereHas('category', fn ($c) => $c->where('slug', $categorySlug)))
+            ->when($minPrice, fn ($q) => $q->where('price', '>=', (int) $minPrice))
+            ->when($maxPrice, fn ($q) => $q->where('price', '<=', (int) $maxPrice));
+
+        $query = match ($sort) {
+            'price_asc'  => $query->orderBy('price', 'asc'),
+            'price_desc' => $query->orderBy('price', 'desc'),
+            'newest'     => $query->orderBy('created_at', 'desc'),
+            default      => $query->orderBy('name', 'asc'),
+        };
+
+        $products = $query->paginate(12)->withQueryString();
+
+        $isFiltered = $search || $sort || $minPrice || $maxPrice || $categorySlug;
+
+        return view('products.index', compact('categories', 'products', 'isFiltered'));
+    }
+
+    /**
+     * Tampilkan halaman detail produk (diakses via slug).
+     *
+     * @param  Product $product  Produk yang ditampilkan
+     * @return \Illuminate\View\View
+     */
     public function show(Product $product)
-{
-    return view('products.show', compact('product'));
-}
+    {
+        $product->load([
+            'reviews' => fn ($q) => $q->with(['user', 'images'])->latest(),
+        ]);
 
+        $customizationOptions = CustomizationOption::where('is_active', true)
+            ->where('category_id', $product->category_id)
+            ->orderBy('type')
+            ->orderBy('sort_order')
+            ->get()
+            ->groupBy('type');
+
+        return view('products.show', compact('product', 'customizationOptions'));
+    }
+
+    /**
+     * Tampilkan form tambah produk baru (admin).
+     *
+     * @return \Illuminate\View\View
+     */
     public function create()
     {
         $categories = Category::all();
@@ -28,26 +82,26 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name'        => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'description' => 'nullable|string',
-            'price'       => 'required|numeric|min:0',
-            'stock'       => 'required|integer|min:0',
-            'image'       => 'nullable|image|max:2048',
-        ]);
+        $request->validate($this->productValidationRules());
 
-        $data = $request->all();
-        $data['slug'] = Str::slug($request->name);
+        $data = $request->only(['name', 'category_id', 'description', 'price', 'stock']);
+        $data['slug']  = $this->generateUniqueSlug($request->name);
+        $data['badge'] = $request->badge ?: null;
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('products', 'public');
         }
 
         Product::create($data);
-        return redirect()->route('products.index')->with('success', 'Produk berhasil ditambahkan!');
+        return redirect()->route('admin.products.index')->with('success', 'Produk berhasil ditambahkan!');
     }
 
+    /**
+     * Tampilkan form edit produk (admin).
+     *
+     * @param  Product $product  Produk yang akan diedit
+     * @return \Illuminate\View\View
+     */
     public function edit(Product $product)
     {
         $categories = Category::all();
@@ -56,29 +110,61 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
-        $request->validate([
+        $request->validate($this->productValidationRules());
+
+        $data = $request->only(['name', 'category_id', 'description', 'price', 'stock']);
+        $data['slug']  = $this->generateUniqueSlug($request->name, $product->id);
+        $data['badge'] = $request->badge ?: null;
+
+        if ($request->hasFile('image')) {
+            if ($product->image) {
+                Storage::disk('public')->delete($product->image);
+            }
+            $data['image'] = $request->file('image')->store('products', 'public');
+        }
+
+        $product->update($data);
+        return redirect()->route('admin.products.index')->with('success', 'Produk berhasil diperbarui!');
+    }
+
+    private function productValidationRules(): array
+    {
+        return [
             'name'        => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'description' => 'nullable|string',
             'price'       => 'required|numeric|min:0',
             'stock'       => 'required|integer|min:0',
             'image'       => 'nullable|image|max:2048',
-        ]);
-
-        $data = $request->all();
-        $data['slug'] = Str::slug($request->name);
-
-        if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('products', 'public');
-        }
-
-        $product->update($data);
-        return redirect()->route('products.index')->with('success', 'Produk berhasil diperbarui!');
+            'badge'       => 'nullable|in:best_seller,new,sale',
+        ];
     }
 
+    private function generateUniqueSlug(string $name, ?int $excludeId = null): string
+    {
+        $base = Str::slug($name);
+        $slug = $base;
+        $counter = 1;
+
+        while (Product::where('slug', $slug)->when($excludeId, fn($q) => $q->where('id', '!=', $excludeId))->exists()) {
+            $slug = $base . '-' . $counter++;
+        }
+
+        return $slug;
+    }
+
+    /**
+     * Hapus produk dari database (admin).
+     *
+     * @param  Product $product  Produk yang akan dihapus
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroy(Product $product)
     {
+        if ($product->image) {
+            Storage::disk('public')->delete($product->image);
+        }
         $product->delete();
-        return redirect()->route('products.index')->with('success', 'Produk berhasil dihapus!');
+        return redirect()->route('admin.products.index')->with('success', 'Produk berhasil dihapus!');
     }
 }

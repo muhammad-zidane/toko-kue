@@ -9,38 +9,105 @@ class CartController extends Controller
 {
     public function index()
     {
-        $cart = session()->get('cart', []);
-        $cartItems = [];
-        foreach ($cart as $id => $item) {
-            $product = Product::find($id);
-            if ($product) {
-                $cartItems[] = ['product' => $product, 'quantity' => $item['quantity']];
-            }
-        }
+        $cart      = session()->get('cart', []);
+        $cartItems = $this->resolveCartItems($cart);
+
         return view('cart.index', compact('cartItems'));
     }
 
+    /**
+     * Tambah produk ke keranjang (disimpan di session).
+     * Jika produk sudah ada, jumlahnya ditambahkan.
+     *
+     * @param  Request $request  Input: product_id (wajib), quantity (default 1)
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function add(Request $request)
     {
         $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'quantity'   => 'nullable|integer|min:1',
+            'product_id'        => 'required|exists:products,id',
+            'quantity'          => 'nullable|integer|min:1',
+            'note'              => 'nullable|string',
+            'customizations_json' => 'nullable|string',
         ]);
 
         $cart = session()->get('cart', []);
         $productId = $request->product_id;
         $quantity = $request->quantity ?? 1;
+        $note = $request->note;
+        $customizations = json_decode($request->customizations_json ?? '[]', true) ?: [];
 
         if (isset($cart[$productId])) {
             $cart[$productId]['quantity'] += $quantity;
+            if ($request->has('note')) {
+                $cart[$productId]['note'] = $note;
+            }
+            if ($request->has('customizations_json')) {
+                $cart[$productId]['customizations'] = $customizations;
+            }
         } else {
-            $cart[$productId] = ['quantity' => $quantity];
+            $cart[$productId] = [
+                'quantity'       => $quantity,
+                'note'           => $note,
+                'customizations' => $customizations,
+            ];
         }
 
         session()->put('cart', $cart);
+
+        $cartCount = collect(session()->get('cart', []))->sum('quantity');
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Produk ditambahkan ke keranjang!',
+                'cart_count' => $cartCount,
+            ]);
+        }
+
         return redirect()->route('cart.index')->with('success', 'Produk ditambahkan ke keranjang!');
     }
 
+    /**
+     * Perbarui jumlah atau catatan item di keranjang.
+     *
+     * @param  Request $request  Input: product_id (wajib), quantity (opsional), note (opsional)
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateItem(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|integer',
+            'quantity' => 'nullable|integer|min:1',
+            'note' => 'nullable|string',
+        ]);
+
+        $cart = session()->get('cart', []);
+        $productId = (string) $request->product_id;
+
+        if (!isset($cart[$productId])) {
+            return response()->json(['success' => false, 'message' => 'Item tidak ditemukan di keranjang.'], 404);
+        }
+
+        if ($request->filled('quantity')) {
+            $cart[$productId]['quantity'] = (int) $request->quantity;
+        }
+
+        if ($request->has('note')) {
+            $cart[$productId]['note'] = $request->note;
+        }
+
+        session()->put('cart', $cart);
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Hapus satu atau beberapa item dari keranjang berdasarkan product ID.
+     *
+     * @param  Request $request  Input: ids[] array product ID yang dihapus
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function remove(Request $request)
     {
         $cart = session()->get('cart', []);
@@ -56,6 +123,11 @@ class CartController extends Controller
         return response()->json(['success' => true]);
     }
 
+    /**
+     * Kosongkan seluruh isi keranjang belanja dari session.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function clear()
     {
         session()->forget('cart');
@@ -69,15 +141,58 @@ class CartController extends Controller
             return redirect()->route('cart.index')->with('error', 'Keranjang kosong!');
         }
 
-        // Ambil semua produk di keranjang
-        $cartItems = [];
+        $products      = Product::whereIn('id', array_keys($cart))->get()->keyBy('id');
+        $cartItems     = [];
+        $stockWarnings = [];
+
         foreach ($cart as $id => $item) {
-            $product = Product::find($id);
+            $product = $products->get($id);
+            if (!$product) {
+                continue;
+            }
+
+            if (!$product->is_available || $product->stock < $item['quantity']) {
+                $stockWarnings[] = "Stok \"{$product->name}\" tidak mencukupi (tersedia: {$product->stock}).";
+            }
+
+            $cartItems[] = [
+                'product'  => $product,
+                'quantity' => $item['quantity'],
+                'note'     => $item['note'] ?? null,
+            ];
+        }
+
+        if (!empty($stockWarnings)) {
+            return redirect()->route('cart.index')->withErrors($stockWarnings);
+        }
+
+        $savedAddresses = auth()->user()->addresses()->latest()->get();
+        $dpMinAmount    = config('app.dp_min_amount', 200000);
+        $dpPercentage   = config('app.dp_percentage', 50);
+
+        return view('orders.create', compact('cartItems', 'savedAddresses', 'dpMinAmount', 'dpPercentage'));
+    }
+
+    private function resolveCartItems(array $cart): array
+    {
+        if (empty($cart)) {
+            return [];
+        }
+
+        $products = Product::whereIn('id', array_keys($cart))->get()->keyBy('id');
+        $items    = [];
+
+        foreach ($cart as $id => $item) {
+            $product = $products->get($id);
             if ($product) {
-                $cartItems[] = ['product' => $product, 'quantity' => $item['quantity']];
+                $items[] = [
+                    'product'  => $product,
+                    'quantity' => $item['quantity'],
+                    'note'     => $item['note'] ?? null,
+                ];
             }
         }
 
-        return view('orders.create', compact('cartItems'));
+        return $items;
     }
 }

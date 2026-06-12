@@ -2,27 +2,56 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'user_id', 'order_code', 'status',
-        'shipping_address', 'total_price', 'notes'
+        'shipping_address', 'total_price', 'notes',
+        'delivery_method', 'delivery_date', 'delivery_slot',
+        'shipping_cost', 'voucher_code', 'discount_amount',
+        'payment_status', 'dp_amount', 'paid_amount',
     ];
 
+    protected $casts = [
+        'delivery_date' => 'date',
+    ];
+
+    /**
+     * Pengguna yang membuat pesanan ini.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Semua item (produk) yang termasuk dalam pesanan ini.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
     }
 
+    /**
+     * Data pembayaran untuk pesanan ini.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
     public function payment()
     {
         return $this->hasOne(Payment::class);
+    }
+
+    public function productReviews()
+    {
+        return $this->hasMany(ProductReview::class);
     }
 }

@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class OrderItem extends Model
 {
-    protected $fillable = ['order_id', 'product_id', 'quantity', 'price'];
+    use HasFactory;
+    protected $fillable = ['order_id', 'product_id', 'quantity', 'price', 'note'];
 
     public function order()
     {
@@ -16,5 +18,10 @@ class OrderItem extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function customizations()
+    {
+        return $this->hasMany(OrderItemCustomization::class);
     }
 }
