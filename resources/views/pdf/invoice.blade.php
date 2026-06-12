@@ -266,8 +266,8 @@
             <div class="logo-text">Jagoan Kue</div>
             <div class="logo-sub">Toko Kue Premium</div>
             <address>
-                Jl. Mawar No. 12, Sukamaju<br>
-                Kota Bandung, Jawa Barat<br>
+                Jl. Imam Bonjol No. 139, Padangdata Tanahmati<br>
+                Kota Payakumbuh, Sumatera Barat<br>
                 halo@jagoan-kue.id &bull; +62 812-3456-7890
             </address>
         </div>
