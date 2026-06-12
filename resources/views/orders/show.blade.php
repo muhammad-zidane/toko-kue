@@ -126,8 +126,9 @@
                 <div class="info-row"><span>Status</span><span><span class="badge badge-{{ $order->status }}">{{ ucfirst($order->status) }}</span></span></div>
                 @php
                     $payStatus = $order->payment_status ?? $order->payment?->status ?? 'unpaid';
+                    $payLabel  = $payStatus === 'dp' ? 'DP 50%' : ($order->payment?->status_label ?? 'Belum Bayar');
                 @endphp
-                <div class="info-row"><span>Pembayaran</span><span><span class="badge badge-{{ $payStatus }}">{{ $order->payment?->status_label ?? 'Belum Bayar' }}</span></span></div>
+                <div class="info-row"><span>Pembayaran</span><span><span class="badge badge-{{ $payStatus }}">{{ $payLabel }}</span></span></div>
                 @if(($order->payment_status ?? '') === 'dp')
                 <div class="info-row"><span>DP Dibayar</span><span>Rp {{ number_format($order->paid_amount, 0, ',', '.') }}</span></div>
                 <div class="info-row"><span>Sisa Pembayaran</span><span style="color:#C2410C;font-weight:700;">Rp {{ number_format($order->total_price - $order->paid_amount, 0, ',', '.') }}</span></div>

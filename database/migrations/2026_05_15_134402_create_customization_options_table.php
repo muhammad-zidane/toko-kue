@@ -28,6 +28,5 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('customization_options');
-        Schema::dropIfExists('order_item_customizations');
     }
 };

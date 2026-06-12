@@ -227,7 +227,7 @@ class OrderController extends Controller
             \Illuminate\Support\Facades\Mail::to(auth()->user()->email)
                 ->queue(new \App\Mail\OrderConfirmationMail($order));
 
-            User::where('role', 'admin')->each(function ($admin) use ($order) {
+            User::admins()->each(function ($admin) use ($order) {
                 $admin->notify(new NewOrderNotification($order));
             });
         } catch (\Throwable) {}
@@ -267,6 +267,10 @@ class OrderController extends Controller
         $request->validate([
             'proof_image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'mimetypes:image/jpeg,image/png', 'max:2048'],
         ]);
+
+        if ($order->payment?->proof_image) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($order->payment->proof_image);
+        }
 
         $path = $request->file('proof_image')->store('payment_proofs', 'public');
 

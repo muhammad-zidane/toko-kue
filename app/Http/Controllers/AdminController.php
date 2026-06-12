@@ -186,6 +186,7 @@ class AdminController extends Controller
             return back()->withErrors(['status' => 'Status tidak valid.']);
         }
 
+        $order->load(['user', 'payment']);
         $order->update(['status' => $status]);
 
         try {
@@ -295,7 +296,7 @@ class AdminController extends Controller
     {
         $startOfThisMonth = Carbon::now()->startOfMonth();
 
-        $stats = User::where('role', '!=', 'admin')
+        $stats = User::customers()
             ->selectRaw('
                 COUNT(*) as total,
                 SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as new_this_month
@@ -304,9 +305,9 @@ class AdminController extends Controller
 
         $totalCustomers = (int) $stats->total;
         $newCustomers   = (int) $stats->new_this_month;
-        $totalOrders    = (int) Order::whereHas('user', fn ($q) => $q->where('role', '!=', 'admin'))->count();
+        $totalOrders    = (int) Order::whereHas('user', fn ($q) => $q->customers())->count();
 
-        $customers = User::where('role', '!=', 'admin')
+        $customers = User::customers()
             ->withCount('orders')
             ->with(['orders' => fn ($q) => $q->select('id', 'user_id', 'status', 'created_at')])
             ->latest()

@@ -34,7 +34,7 @@
                         <a href="/akun/ganti-password" style="display:block;padding:10px 16px;font-size:13px;color:var(--text-dark);text-decoration:none;border-bottom:1px solid #F0E8E0;">
                             <i class="fas fa-lock" style="color:var(--pink);margin-right:8px;"></i> Ganti Password
                         </a>
-                        @if(auth()->user()->role === 'admin')
+                        @if(auth()->user()->isAdmin())
                         <a href="/admin/dashboard" style="display:block;padding:10px 16px;font-size:13px;color:var(--text-dark);text-decoration:none;border-bottom:1px solid #F0E8E0;">
                             <i class="fas fa-cog" style="color:var(--pink);margin-right:8px;"></i> Admin Panel
                         </a>

@@ -67,7 +67,7 @@
     <div class="grid">
         @forelse ($orders as $order)
             @php
-                $paymentStatus = $order->payment->status ?? 'unpaid';
+                $paymentStatus = $order->payment?->status ?? 'unpaid';
                 $status = $order->status ?? 'pending';
                 $firstItem = $order->orderItems->first();
                 $thumbPath = $firstItem?->product?->image ? asset('storage/' . $firstItem->product->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=200&q=80';
