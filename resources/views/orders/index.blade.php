@@ -31,7 +31,7 @@
         .total { margin-top: 10px; font-size: 13px; color: var(--gray); }
         .total strong { color: var(--brown-dark); }
         .badges { width: 120px; display: flex; flex-direction: column; gap: 8px; align-items: center; text-align: center; flex-shrink: 0; }
-        .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #F3F4F6; color: #111827; white-space: nowrap; max-width: 110px; text-align: center; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #F3F4F6; color: #111827; white-space: nowrap; text-align: center; }
         .badge-warn { background: #FEF3C7; color: #92400E; }
         .badge-success { background: #DCFCE7; color: #166534; }
         .actions { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; }

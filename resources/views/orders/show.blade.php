@@ -19,7 +19,7 @@
         .card { background: var(--white); border-radius: 16px; border: 1px solid #EDE0D4; padding: 24px; margin-bottom: 20px; }
         .detail-grid > .card { margin-bottom: 0; }
         .info-col { display: flex; flex-direction: column; }
-        .card-info { flex: 1; margin-bottom: 0; }
+        .card-info { flex: 1; margin-bottom: 10; }
         .card-label { font-size: 13px; font-weight: 700; color: var(--pink); margin-bottom: 16px; letter-spacing: 0.5px; }
 
         .order-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--cream); border-radius: 10px; margin-bottom: 12px; }

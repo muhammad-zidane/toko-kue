@@ -24,7 +24,7 @@
     .btn-cancelled { background: #FEE2E2; color: #DC2626; }
     .btn-detail { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; background: #F3F4F6; color: var(--text-dark); }
     .btn-detail:hover { opacity: 0.8; }
-    .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 24px; }
+    .pagination { display: flex; justify-content: center; gap: 30px; margin-top: 24px; margin-bottom: 20px;}
     .pagination a, .pagination span { padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; }
     .pagination a { background: var(--cream-dark); color: var(--text-dark); }
     .pagination a:hover { background: var(--pink); color: white; }
