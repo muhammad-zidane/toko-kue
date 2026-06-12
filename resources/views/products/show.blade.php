@@ -57,6 +57,8 @@
         .price-total-label { font-size: 15px; font-weight: 700; color: var(--text-dark); }
         .btn-add-cart { width: 100%; background-color: var(--pink); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: opacity 0.2s; }
         .btn-add-cart:hover { opacity: 0.85; }
+        .btn-buy-now { width: 100%; background-color: var(--brown-dark); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: opacity 0.2s; margin-top: 8px; display: block; text-align: center; }
+        .btn-buy-now:hover { opacity: 0.85; }
         .reviews-section { max-width: 1100px; margin: 24px auto 0; padding: 0 0 60px; }
         .reviews-card { background: white; border-radius: 16px; border: 1px solid #EDE0D4; padding: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
         .reviews-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
@@ -190,6 +192,7 @@
                     <input type="hidden" name="customizations_json" id="form-customizations-json" value="[]">
                     <button type="submit" id="btn-add-cart" class="btn-add-cart">+ Keranjang</button>
                 </form>
+            <a href="{{ route('orders.create', $product) }}" class="btn-buy-now">Beli Sekarang</a>
             <div id="cart-toast" style="display:none;margin-top:10px;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:8px;padding:10px 14px;font-size:13px;color:#065F46;font-weight:600;">
                 ✓ Produk berhasil ditambahkan ke keranjang!
             </div>

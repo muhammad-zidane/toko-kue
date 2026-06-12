@@ -74,6 +74,12 @@
                 <div class="order-item-info">
                     <p>{{ $item->product->name ?? 'Produk dihapus' }}</p>
                     <small>{{ $item->quantity }}x · Rp {{ number_format($item->price, 0, ',', '.') }}</small>
+                    @if($item->customizations->isNotEmpty())
+                        <p class="item-note" style="background:#F3E8FF;color:#6B21A8;">
+                            <i class="fas fa-paint-brush" style="margin-right:4px;"></i>
+                            {{ $item->customizations->map(fn($c) => $c->option?->name)->filter()->join(', ') }}
+                        </p>
+                    @endif
                     @if(!empty($item->note))
                         <p class="item-note">Catatan: {{ $item->note }}</p>
                     @endif
@@ -142,6 +148,12 @@
 
             @if($order->status === 'pending' && $order->payment && $order->payment->status === 'unpaid' && !$order->payment->proof_image)
             <a href="{{ route('orders.payment', $order) }}" class="btn-back-page" style="width:100%;text-align:center;display:block;margin-bottom:20px;background:var(--pink);">Bayar Sekarang</a>
+            @endif
+
+            @if(in_array($order->status, ['processing', 'completed']))
+            <a href="{{ route('orders.invoice', $order) }}" class="btn-back-page" style="width:100%;text-align:center;display:block;margin-bottom:20px;">
+                <i class="fas fa-file-pdf" style="margin-right:6px;"></i> Unduh Invoice (PDF)
+            </a>
             @endif
         </div>
     </div>

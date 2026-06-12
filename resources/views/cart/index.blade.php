@@ -74,6 +74,12 @@
                 <div class="item-info">
                     <p class="item-name">{{ $item['product']->name }}</p>
                     <p class="item-price" id="price-{{ $item['product']->id }}">Rp{{ number_format($item['product']->price * $item['quantity'], 0, ',', '.') }}</p>
+                    @if(!empty($item['customizationOptions']) && $item['customizationOptions']->isNotEmpty())
+                    <p style="font-size:12px;color:var(--brown-dark);margin:4px 0 6px;">
+                        <i class="fas fa-paint-brush" style="color:var(--pink);margin-right:4px;"></i>
+                        {{ $item['customizationOptions']->map(fn($o) => $o->name)->join(', ') }}
+                    </p>
+                    @endif
                     <label class="item-note-label">Catatan Produk</label>
                     <textarea class="item-note-input" id="note-{{ $item['product']->id }}" rows="2" placeholder="Contoh: tulisan ucapan, warna, request khusus..." oninput="queueNoteSave({{ $item['product']->id }})">{{ $item['note'] ?? '' }}</textarea>
                     <div class="item-actions">

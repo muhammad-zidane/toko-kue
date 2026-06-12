@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CustomizationOption;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -142,6 +143,7 @@ class CartController extends Controller
         }
 
         $products      = Product::whereIn('id', array_keys($cart))->get()->keyBy('id');
+        $optionsMap    = $this->loadOptionsFromCart($cart);
         $cartItems     = [];
         $stockWarnings = [];
 
@@ -155,10 +157,13 @@ class CartController extends Controller
                 $stockWarnings[] = "Stok \"{$product->name}\" tidak mencukupi (tersedia: {$product->stock}).";
             }
 
+            $customizationIds = $item['customizations'] ?? [];
             $cartItems[] = [
-                'product'  => $product,
-                'quantity' => $item['quantity'],
-                'note'     => $item['note'] ?? null,
+                'product'             => $product,
+                'quantity'            => $item['quantity'],
+                'note'                => $item['note'] ?? null,
+                'customizations'      => $customizationIds,
+                'customizationOptions'=> collect($customizationIds)->map(fn($oid) => $optionsMap->get($oid))->filter()->values(),
             ];
         }
 
@@ -179,20 +184,33 @@ class CartController extends Controller
             return [];
         }
 
-        $products = Product::whereIn('id', array_keys($cart))->get()->keyBy('id');
-        $items    = [];
+        $products   = Product::whereIn('id', array_keys($cart))->get()->keyBy('id');
+        $optionsMap = $this->loadOptionsFromCart($cart);
+        $items      = [];
 
         foreach ($cart as $id => $item) {
             $product = $products->get($id);
             if ($product) {
+                $customizationIds = $item['customizations'] ?? [];
                 $items[] = [
-                    'product'  => $product,
-                    'quantity' => $item['quantity'],
-                    'note'     => $item['note'] ?? null,
+                    'product'             => $product,
+                    'quantity'            => $item['quantity'],
+                    'note'                => $item['note'] ?? null,
+                    'customizations'      => $customizationIds,
+                    'customizationOptions'=> collect($customizationIds)->map(fn($oid) => $optionsMap->get($oid))->filter()->values(),
                 ];
             }
         }
 
         return $items;
+    }
+
+    private function loadOptionsFromCart(array $cart)
+    {
+        $ids = collect($cart)->pluck('customizations')->flatten()->filter()->unique()->values()->all();
+        if (empty($ids)) {
+            return collect();
+        }
+        return CustomizationOption::whereIn('id', $ids)->get()->keyBy('id');
     }
 }

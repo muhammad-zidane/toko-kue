@@ -150,12 +150,18 @@
                     <h4>{{ $item['product']->name }}</h4>
                     <p>Rp {{ number_format($item['product']->price, 0, ',', '.') }}</p>
                     <small>Jumlah: {{ $item['quantity'] }}</small>
+                    @if(!empty($item['customizationOptions']) && $item['customizationOptions']->isNotEmpty())
+                    <small style="display:block;color:var(--brown-dark);">Kustomisasi:
+                        {{ $item['customizationOptions']->map(fn($o) => $o->name)->join(', ') }}
+                    </small>
+                    @endif
                     @if(!empty($item['note']))<small style="display:block;color:var(--pink);">Catatan: {{ $item['note'] }}</small>@endif
                 </div>
             </div>
             <input type="hidden" name="items[{{ $idx }}][product_id]" value="{{ $item['product']->id }}">
             <input type="hidden" name="items[{{ $idx }}][quantity]"   value="{{ $item['quantity'] }}">
             <input type="hidden" name="items[{{ $idx }}][note]"       value="{{ $item['note'] ?? '' }}">
+            <input type="hidden" name="items[{{ $idx }}][customizations]" value="{{ json_encode($item['customizations'] ?? []) }}">
             @endforeach
         </div>
 

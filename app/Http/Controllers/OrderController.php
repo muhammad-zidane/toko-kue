@@ -250,7 +250,7 @@ class OrderController extends Controller
     public function show(Order $order)
     {
         $this->authorizeOwner($order);
-        $order->load('orderItems.product', 'payment', 'productReviews.product', 'productReviews.images');
+        $order->load('orderItems.product', 'orderItems.customizations.option', 'payment', 'productReviews.product', 'productReviews.images');
 
         return view('orders.show', compact('order'));
     }

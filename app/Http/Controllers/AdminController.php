@@ -145,7 +145,7 @@ class AdminController extends Controller
      */
     public function orderDetail(Order $order)
     {
-        $order->load(['user', 'orderItems.product', 'payment']);
+        $order->load(['user', 'orderItems.product', 'orderItems.customizations.option', 'payment']);
 
         return view('admin.order-detail', compact('order'));
     }

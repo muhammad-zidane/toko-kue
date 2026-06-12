@@ -63,6 +63,15 @@
                 <div>
                     <div class="item-name">{{ $item->product->name }}</div>
                     <div class="item-qty">{{ $item->quantity }} x Rp {{ number_format($item->price, 0, ',', '.') }}</div>
+                    @if($item->customizations->isNotEmpty())
+                    <div style="font-size:12px;color:#6B21A8;margin-top:4px;">
+                        <i class="fas fa-paint-brush" style="margin-right:4px;"></i>
+                        {{ $item->customizations->map(fn($c) => $c->option?->name)->filter()->join(', ') }}
+                    </div>
+                    @endif
+                    @if(!empty($item->note))
+                    <div style="font-size:12px;color:var(--brown-dark);margin-top:4px;">Catatan: {{ $item->note }}</div>
+                    @endif
                 </div>
                 <div class="item-price">Rp {{ number_format($item->price * $item->quantity, 0, ',', '.') }}</div>
             </div>
