@@ -74,7 +74,7 @@
         }
     </style>
 </head>
-<body class="bg-white">
+<body>
         {{-- NAVBAR --}}
         @include('partials.navbar')
 
@@ -84,9 +84,14 @@
             @foreach($banners as $i => $banner)
             <div class="banner-slide" style="display:{{ $i === 0 ? 'block' : 'none' }};position:relative;">
                 <a href="{{ $banner->link ?? '#' }}">
-                    <img src="{{ asset('storage/' . $banner->image) }}"
-                         alt="{{ $banner->title }}"
-                         style="width:100%;max-height:480px;object-fit:cover;display:block;" loading="lazy">
+                    @if($banner->image)
+                        <img src="{{ asset('storage/' . $banner->image) }}"
+                             alt="{{ $banner->title }}"
+                             style="width:100%;max-height:480px;object-fit:cover;display:block;" loading="lazy">
+                    @else
+                        <div style="width:100%;height:480px;background:linear-gradient(135deg,var(--cream) 0%,var(--pink-light,#fde8ef) 100%);display:flex;align-items:center;justify-content:center;">
+                        </div>
+                    @endif
                 </a>
                 @if($banner->title)
                 <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.55));padding:24px 32px;">
@@ -114,13 +119,13 @@
         const dots   = document.querySelectorAll('.banner-dot');
         function goToBanner(n) {
             slides[bannerIdx].style.display = 'none';
-            dots[bannerIdx].style.background = 'rgba(255,255,255,0.5)';
+            if (dots[bannerIdx]) dots[bannerIdx].style.background = 'rgba(255,255,255,0.5)';
             bannerIdx = (n + slides.length) % slides.length;
             slides[bannerIdx].style.display = 'block';
-            dots[bannerIdx].style.background = 'white';
+            if (dots[bannerIdx]) dots[bannerIdx].style.background = 'white';
         }
         function slideBanner(dir) { goToBanner(bannerIdx + dir); }
-        setInterval(() => slideBanner(1), 5000);
+        if (slides.length > 1) setInterval(() => slideBanner(1), 5000);
         </script>
         @endif
 

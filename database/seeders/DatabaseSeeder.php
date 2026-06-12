@@ -12,6 +12,13 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             CategorySeeder::class,
             ProductSeeder::class,
+            ShippingZoneSeeder::class,
+            TestimonialSeeder::class,
+            BannerSeeder::class,
+            CustomizationOptionSeeder::class,
+            VoucherSeeder::class,
+            DemoSeeder::class,
+            ProductReviewSeeder::class,
         ]);
     }
 }

@@ -1,4 +1,4 @@
-@extends('admin.layout')
+﻿@extends('admin.layout')
 @section('title', 'Kelola Banner')
 @section('page-title', 'Kelola Banner')
 @section('page-subtitle', 'Atur banner yang tampil di halaman utama')
@@ -109,7 +109,13 @@
                         </td>
                         <td>
                             <div class="action-group">
-                                <button class="btn-edit" onclick="openEditModal({{ $banner->id }}, '{{ addslashes($banner->title) }}', '{{ addslashes($banner->subtitle) }}', '{{ addslashes($banner->link) }}', {{ $banner->order }})">
+                                <button type="button" class="btn-edit"
+                                    data-url="{{ route('admin.banners.update', $banner) }}"
+                                    data-title="{{ $banner->title }}"
+                                    data-subtitle="{{ $banner->subtitle }}"
+                                    data-link="{{ $banner->link }}"
+                                    data-order="{{ $banner->order }}"
+                                    onclick="openEditModal(this.dataset)">
                                     <i class="fas fa-pen"></i> Edit
                                 </button>
                                 <form method="POST" action="{{ route('admin.banners.destroy', $banner) }}" onsubmit="return confirm('Hapus banner ini?')">
@@ -150,7 +156,8 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Gambar Banner</label>
-                <input type="file" name="image" accept="image/*" class="form-input" style="padding:8px;">
+                <input type="file" name="image" accept="image/*" class="form-input" style="padding:8px;" onchange="previewImage(this, 'addPreview')">
+                <img id="addPreview" src="" alt="Preview" style="display:none;margin-top:8px;width:100%;max-height:120px;object-fit:cover;border-radius:8px;border:1px solid #EDE0D4;">
             </div>
             <div class="form-group">
                 <label class="form-label">Link (opsional)</label>
@@ -191,7 +198,8 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Ganti Gambar (opsional)</label>
-                <input type="file" name="image" accept="image/*" class="form-input" style="padding:8px;">
+                <input type="file" name="image" accept="image/*" class="form-input" style="padding:8px;" onchange="previewImage(this, 'editPreview')">
+                <img id="editPreview" src="" alt="Preview" style="display:none;margin-top:8px;width:100%;max-height:120px;object-fit:cover;border-radius:8px;border:1px solid #EDE0D4;">
             </div>
             <div class="form-group">
                 <label class="form-label">Link</label>
@@ -209,19 +217,32 @@
 
 @push('scripts')
 <script>
-function openEditModal(id, title, subtitle, link, order) {
-    document.getElementById('editTitle').value = title;
-    document.getElementById('editSubtitle').value = subtitle;
-    document.getElementById('editLink').value = link;
-    document.getElementById('editOrder').value = order;
-    document.getElementById('editForm').action = '/admin/banners/' + id;
+function previewImage(input, previewId) {
+    const preview = document.getElementById(previewId);
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => { preview.src = e.target.result; preview.style.display = 'block'; };
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        preview.style.display = 'none';
+    }
+}
+
+function openEditModal(data) {
+    document.getElementById('editTitle').value = data.title || '';
+    document.getElementById('editSubtitle').value = data.subtitle || '';
+    document.getElementById('editLink').value = data.link || '';
+    document.getElementById('editOrder').value = data.order || '';
+    document.getElementById('editForm').action = data.url;
     document.getElementById('editModal').classList.add('open');
 }
 function closeEditModal() {
     document.getElementById('editModal').classList.remove('open');
+    document.getElementById('editPreview').style.display = 'none';
 }
 document.getElementById('editModal').addEventListener('click', function(e) {
     if (e.target === this) closeEditModal();
 });
 </script>
 @endpush
+

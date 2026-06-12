@@ -132,11 +132,10 @@
                 </div>
                 @php
                     $pStatus = $order->payment->status ?? 'unpaid';
-                    $pLabel  = match($pStatus) { 'paid' => 'Lunas', 'dp' => 'DP 50%', default => 'Belum Bayar' };
                 @endphp
                 <div class="info-row">
                     <span class="info-label">Status Bayar</span>
-                    <span class="info-value"><span class="badge-status badge-{{ $pStatus }}">{{ $pLabel }}</span></span>
+                    <span class="info-value"><span class="badge-status badge-{{ $pStatus }}">{{ $order->payment?->status_label ?? 'Belum Bayar' }}</span></span>
                 </div>
                 @if($order->notes)
                 <div class="info-row">

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\LaporanPenjualanExport;
 use App\Models\Banner;
 use App\Models\Category;
 use App\Models\Order;
@@ -16,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AdminController extends Controller
 {
@@ -30,25 +32,50 @@ class AdminController extends Controller
      */
     public function dashboard()
     {
-        $now = Carbon::now();
-        $startOfThisMonth = $now->copy()->startOfMonth();
-        $startOfLastMonth = $now->copy()->subMonth()->startOfMonth();
-        $endOfLastMonth   = $now->copy()->subMonth()->endOfMonth();
+        ['now' => $now, 'startOfThisMonth' => $startOfThisMonth, 'startOfLastMonth' => $startOfLastMonth, 'endOfLastMonth' => $endOfLastMonth]
+            = $this->monthBoundaries();
 
-        $ordersThisMonth = Order::where('created_at', '>=', $startOfThisMonth)->count();
-        $ordersLastMonth = Order::whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])->count();
-        $orderGrowth     = $this->calculateGrowthPercent($ordersThisMonth, $ordersLastMonth);
+        $orderStats = Order::selectRaw('
+                COUNT(*) as total,
+                SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as this_month,
+                SUM(CASE WHEN created_at BETWEEN ? AND ? THEN 1 ELSE 0 END) as last_month,
+                SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) as pending
+            ', [$startOfThisMonth, $startOfLastMonth, $endOfLastMonth, 'pending'])
+            ->first();
 
-        $revenueThisMonth = Payment::where('status', 'paid')->where('created_at', '>=', $startOfThisMonth)->sum('amount');
-        $revenueLastMonth = Payment::where('status', 'paid')->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])->sum('amount');
+        $totalOrders        = (int) $orderStats->total;
+        $ordersThisMonth    = (int) $orderStats->this_month;
+        $ordersLastMonth    = (int) $orderStats->last_month;
+        $pendingOrdersCount = (int) $orderStats->pending;
+        $orderGrowth        = $this->calculateGrowthPercent($ordersThisMonth, $ordersLastMonth);
+
+        $revenueStats = Payment::where('status', 'paid')
+            ->selectRaw('
+                COALESCE(SUM(amount), 0) as total,
+                COALESCE(SUM(CASE WHEN created_at >= ? THEN amount ELSE 0 END), 0) as this_month,
+                COALESCE(SUM(CASE WHEN created_at BETWEEN ? AND ? THEN amount ELSE 0 END), 0) as last_month
+            ', [$startOfThisMonth, $startOfLastMonth, $endOfLastMonth])
+            ->first();
+
+        $totalRevenue     = (float) $revenueStats->total;
+        $revenueThisMonth = (float) $revenueStats->this_month;
+        $revenueLastMonth = (float) $revenueStats->last_month;
         $revenueGrowth    = $this->calculateGrowthPercent($revenueThisMonth, $revenueLastMonth);
 
-        $customersThisMonth = User::where('role', 'customer')->where('created_at', '>=', $startOfThisMonth)->count();
-        $customersLastMonth = User::where('role', 'customer')->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])->count();
+        $customerStats = User::where('role', 'customer')
+            ->selectRaw('
+                COUNT(*) as total,
+                SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as this_month,
+                SUM(CASE WHEN created_at BETWEEN ? AND ? THEN 1 ELSE 0 END) as last_month
+            ', [$startOfThisMonth, $startOfLastMonth, $endOfLastMonth])
+            ->first();
+
+        $totalCustomers     = (int) $customerStats->total;
+        $customersThisMonth = (int) $customerStats->this_month;
+        $customersLastMonth = (int) $customerStats->last_month;
         $customerGrowth     = $this->calculateGrowthPercent($customersThisMonth, $customersLastMonth);
 
-        $pendingOrdersCount = Order::where('status', 'pending')->count();
-        $latestOrders       = Order::with('user', 'orderItems.product')->latest()->take(5)->get();
+        $latestOrders = Order::with('user', 'orderItems.product')->latest()->take(5)->get();
 
         $dailyRevenue    = $this->buildDailyRevenue();
         $maxDaily        = max(array_column($dailyRevenue, 'amount') ?: [1]) ?: 1;
@@ -83,10 +110,7 @@ class AdminController extends Controller
             ];
         });
 
-        $totalOrders    = Order::count();
-        $totalProducts  = Product::count();
-        $totalCustomers = User::where('role', 'customer')->count();
-        $totalRevenue   = Payment::where('status', 'paid')->sum('amount');
+        $totalProducts = Product::count();
 
         return view('admin.dashboard', compact(
             'totalOrders', 'totalProducts', 'totalCustomers', 'totalRevenue',
@@ -230,17 +254,24 @@ class AdminController extends Controller
      */
     public function customers()
     {
+        $startOfThisMonth = Carbon::now()->startOfMonth();
+
+        $stats = User::where('role', '!=', 'admin')
+            ->selectRaw('
+                COUNT(*) as total,
+                SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as new_this_month
+            ', [$startOfThisMonth])
+            ->first();
+
+        $totalCustomers = (int) $stats->total;
+        $newCustomers   = (int) $stats->new_this_month;
+        $totalOrders    = (int) Order::whereHas('user', fn ($q) => $q->where('role', '!=', 'admin'))->count();
+
         $customers = User::where('role', '!=', 'admin')
             ->withCount('orders')
             ->with(['orders' => fn ($q) => $q->select('id', 'user_id', 'status', 'created_at')])
             ->latest()
-            ->get();
-
-        $totalCustomers = $customers->count();
-        $newCustomers   = $customers->filter(
-            fn ($c) => $c->created_at->month === now()->month && $c->created_at->year === now()->year
-        )->count();
-        $totalOrders = $customers->sum('orders_count');
+            ->paginate(20);
 
         return view('admin.customers', compact('customers', 'totalCustomers', 'newCustomers', 'totalOrders'));
     }
@@ -251,13 +282,19 @@ class AdminController extends Controller
      *
      * @return \Illuminate\View\View
      */
-    public function analytics()
+    public function analytics(Request $request)
     {
-        $now              = Carbon::now();
-        $startOfThisMonth = $now->copy()->startOfMonth();
-        $startOfLastMonth = $now->copy()->subMonth()->startOfMonth();
-        $endOfLastMonth   = $now->copy()->subMonth()->endOfMonth();
+        ['now' => $now, 'startOfThisMonth' => $startOfThisMonth, 'startOfLastMonth' => $startOfLastMonth, 'endOfLastMonth' => $endOfLastMonth]
+            = $this->monthBoundaries();
 
+        // Filter tanggal dari request
+        $dari   = $request->filled('dari')   ? $request->dari   : $startOfThisMonth->format('Y-m-d');
+        $sampai = $request->filled('sampai') ? $request->sampai : $now->format('Y-m-d');
+
+        $dariCarbon   = Carbon::parse($dari)->startOfDay();
+        $sampaiCarbon = Carbon::parse($sampai)->endOfDay();
+
+        // Stats bulan ini (tetap untuk kartu ringkasan)
         $revenueThisMonth = (float) Payment::where('status', 'paid')->where('created_at', '>=', $startOfThisMonth)->sum('amount');
         $revenueLastMonth = (float) Payment::where('status', 'paid')->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])->sum('amount');
         $growthPercent    = $this->calculateGrowthPercent($revenueThisMonth, $revenueLastMonth, 1);
@@ -265,10 +302,26 @@ class AdminController extends Controller
         $ordersThisMonth = Order::where('created_at', '>=', $startOfThisMonth)->count();
         $avgOrderValue   = $ordersThisMonth > 0 ? round($revenueThisMonth / $ordersThisMonth) : 0;
 
+        // Data berdasarkan filter tanggal
+        $filteredOrders  = Order::whereBetween('created_at', [$dariCarbon, $sampaiCarbon]);
+        $totalFilterOrders   = (clone $filteredOrders)->count();
+        $totalFilterRevenue  = (float) Payment::where('status', 'paid')
+            ->whereBetween('created_at', [$dariCarbon, $sampaiCarbon])->sum('amount');
+        $totalItemsTerjual   = \App\Models\OrderItem::whereHas('order', fn($q) =>
+            $q->whereBetween('created_at', [$dariCarbon, $sampaiCarbon]))->sum('quantity');
+        $avgFilterOrder = $totalFilterOrders > 0 ? round($totalFilterRevenue / $totalFilterOrders) : 0;
+
+        // Grafik penjualan per hari (untuk Chart.js)
+        $penjualanPerHari = Order::whereBetween('created_at', [$dariCarbon, $sampaiCarbon])
+            ->selectRaw('DATE(created_at) as tanggal, COUNT(*) as jumlah_pesanan, SUM(total_price) as total')
+            ->groupBy('tanggal')
+            ->orderBy('tanggal')
+            ->get();
+
         $dailyRevenue = $this->buildDailyRevenue();
         $maxDaily     = max(array_column($dailyRevenue, 'amount') ?: [1]) ?: 1;
 
-        $topProducts = Product::withCount('orderItems')->with('category')->orderByDesc('order_items_count')->take(5)->get();
+        $topProducts = Product::withCount('orderItems')->with('category')->orderByDesc('order_items_count')->take(10)->get();
         $maxSold     = max($topProducts->first()->order_items_count ?? 0, 1);
 
         $statusCounts  = Order::selectRaw('status, count(*) as count')->groupBy('status')->pluck('count', 'status')->toArray();
@@ -283,24 +336,38 @@ class AdminController extends Controller
             'dailyRevenue', 'maxDaily',
             'topProducts', 'maxSold',
             'statusCounts', 'totalOrdersAll',
-            'categories', 'maxProd'
+            'categories', 'maxProd',
+            'dari', 'sampai',
+            'totalFilterOrders', 'totalFilterRevenue', 'totalItemsTerjual', 'avgFilterOrder',
+            'penjualanPerHari'
         ));
     }
 
-    /**
-     * Tampilkan halaman keuangan: daftar semua pembayaran, total pendapatan,
-     * dan rekapitulasi pembayaran yang belum dilunasi.
-     *
-     * @return \Illuminate\View\View
-     */
+    public function exportLaporan(Request $request)
+    {
+        $request->validate([
+            'dari'   => 'required|date',
+            'sampai' => 'required|date|after_or_equal:dari',
+        ]);
+
+        $filename = 'laporan-penjualan-' . $request->dari . '-sd-' . $request->sampai . '.xlsx';
+        return Excel::download(new LaporanPenjualanExport($request->dari, $request->sampai), $filename);
+    }
+
     public function finance()
     {
-        $payments = Payment::with('order.user')->latest()->get();
+        $payments = Payment::with('order.user')->latest()->paginate(50);
 
-        $totalRevenue    = $payments->where('status', 'paid')->sum('amount');
-        $pendingPayments = $payments->where('status', 'unpaid')->sum('amount');
-        $paidCount       = $payments->where('status', 'paid')->count();
-        $pendingCount    = $payments->where('status', 'unpaid')->count();
+        $stats = Payment::selectRaw('status, COUNT(*) as cnt, COALESCE(SUM(amount), 0) as total')
+            ->whereIn('status', ['paid', 'unpaid'])
+            ->groupBy('status')
+            ->get()
+            ->keyBy('status');
+
+        $totalRevenue    = (float) ($stats['paid']->total   ?? 0);
+        $pendingPayments = (float) ($stats['unpaid']->total ?? 0);
+        $paidCount       = (int)   ($stats['paid']->cnt     ?? 0);
+        $pendingCount    = (int)   ($stats['unpaid']->cnt   ?? 0);
 
         return view('admin.finance', compact('payments', 'totalRevenue', 'pendingPayments', 'paidCount', 'pendingCount'));
     }
@@ -354,18 +421,35 @@ class AdminController extends Controller
         return view('admin.products', compact('products'));
     }
 
+    private function monthBoundaries(): array
+    {
+        $now = Carbon::now();
+        return [
+            'now'              => $now,
+            'startOfThisMonth' => $now->copy()->startOfMonth(),
+            'startOfLastMonth' => $now->copy()->subMonth()->startOfMonth(),
+            'endOfLastMonth'   => $now->copy()->subMonth()->endOfMonth(),
+        ];
+    }
+
     private function buildDailyRevenue(): array
     {
         $dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-        $result   = [];
+        $start    = Carbon::now()->subDays(6)->startOfDay();
 
+        $totals = Payment::where('status', 'paid')
+            ->where('created_at', '>=', $start)
+            ->selectRaw('DATE(created_at) as day, SUM(amount) as total')
+            ->groupBy('day')
+            ->pluck('total', 'day');
+
+        $result = [];
         for ($i = 6; $i >= 0; $i--) {
-            $date   = Carbon::now()->subDays($i);
-            $amount = (float) Payment::where('status', 'paid')
-                ->whereBetween('created_at', [$date->copy()->startOfDay(), $date->copy()->endOfDay()])
-                ->sum('amount');
-
-            $result[] = ['day' => $dayNames[$date->dayOfWeek], 'amount' => $amount];
+            $date     = Carbon::now()->subDays($i);
+            $result[] = [
+                'day'    => $dayNames[$date->dayOfWeek],
+                'amount' => (float) ($totals[$date->format('Y-m-d')] ?? 0),
+            ];
         }
 
         return $result;
@@ -408,7 +492,7 @@ class AdminController extends Controller
             'title'    => 'required|string|max:255',
             'subtitle' => 'nullable|string|max:255',
             'image'    => 'required|image|max:3072',
-            'link'     => 'nullable|url',
+            'link'     => 'nullable|string|max:255',
             'order'    => 'nullable|integer',
         ]);
 
@@ -426,7 +510,7 @@ class AdminController extends Controller
             'title'     => 'required|string|max:255',
             'subtitle'  => 'nullable|string|max:255',
             'image'     => 'nullable|image|max:3072',
-            'link'      => 'nullable|url',
+            'link'      => 'nullable|string|max:255',
             'order'     => 'nullable|integer',
             'is_active' => 'nullable|boolean',
         ]);
@@ -435,7 +519,9 @@ class AdminController extends Controller
         $data['is_active'] = $request->boolean('is_active');
 
         if ($request->hasFile('image')) {
-            Storage::disk('public')->delete($banner->image);
+            if ($banner->image) {
+                Storage::disk('public')->delete($banner->image);
+            }
             $data['image'] = $request->file('image')->store('banners', 'public');
         }
 
@@ -541,7 +627,7 @@ class AdminController extends Controller
         $zone->update([
             'area_name'    => $request->area_name,
             'cost'         => $request->cost,
-            'is_available' => $request->boolean('is_available', true),
+            'is_available' => $request->has('is_available'),
         ]);
 
         return back()->with('success', 'Zona pengiriman diperbarui.');
@@ -572,16 +658,31 @@ class AdminController extends Controller
 
     // ─── REVIEWS MODERATION ─────────────────────────────────────────────────────
 
-    public function reviews()
+    public function reviews(Request $request)
     {
-        $reviews = ProductReview::with('user', 'product')->latest()->paginate(20);
-        return view('admin.reviews', compact('reviews'));
+        $query = ProductReview::with('user', 'product')->latest();
+
+        if ($request->filled('status')) {
+            $query->where('is_approved', $request->status === 'approved');
+        }
+
+        if ($request->filled('rating')) {
+            $query->where('rating', $request->integer('rating'));
+        }
+
+        $reviews  = $query->paginate(20)->withQueryString();
+        $counts   = ProductReview::selectRaw('is_approved, COUNT(*) as cnt')->groupBy('is_approved')->pluck('cnt', 'is_approved');
+        $pendingCount  = (int) ($counts[0] ?? 0);
+        $approvedCount = (int) ($counts[1] ?? 0);
+
+        return view('admin.reviews', compact('reviews', 'pendingCount', 'approvedCount'));
     }
 
     public function approveReview(ProductReview $review)
     {
         $review->update(['is_approved' => !$review->is_approved]);
-        return back()->with('success', 'Status ulasan diperbarui.');
+        $label = $review->is_approved ? 'disetujui' : 'dibatalkan persetujuannya';
+        return back()->with('success', "Ulasan berhasil {$label}.");
     }
 
     public function destroyReview(ProductReview $review)
@@ -594,8 +695,20 @@ class AdminController extends Controller
 
     public function confirmPayment(Request $request, Order $order)
     {
-        $order->payment?->update(['status' => 'paid', 'paid_at' => now()]);
-        $order->update(['status' => 'processing']);
+        $payment = $order->payment;
+        if (!$payment) {
+            return back()->withErrors(['error' => 'Pembayaran tidak ditemukan.']);
+        }
+
+        $payment->update(['status' => 'paid', 'paid_at' => now()]);
+
+        $isFullyPaid = (float) $payment->amount >= (float) $order->total_price;
+        $order->update([
+            'status'         => 'processing',
+            'paid_amount'    => $payment->amount,
+            'payment_status' => $isFullyPaid ? 'paid' : 'dp',
+        ]);
+
         return back()->with('success', 'Pembayaran dikonfirmasi.');
     }
 
@@ -603,7 +716,12 @@ class AdminController extends Controller
     {
         $request->validate(['reason' => 'nullable|string|max:500']);
         $order->payment?->update(['status' => 'failed']);
-        $order->update(['status' => 'pending', 'notes' => $request->reason ? '[Pembayaran Ditolak] ' . $request->reason : $order->notes]);
+        $order->update([
+            'status'         => 'pending',
+            'payment_status' => 'unpaid',
+            'paid_amount'    => 0,
+            'notes'          => $request->reason ? '[Pembayaran Ditolak] ' . $request->reason : $order->notes,
+        ]);
         return back()->with('success', 'Pembayaran ditolak.');
     }
 }
