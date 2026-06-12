@@ -14,7 +14,8 @@
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <style>
         .product-page { background-color: var(--cream); padding: 60px 24px; min-height: 70vh; }
-        .product-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1.2fr 0.8fr; gap: 40px; align-items: start; }
+        .product-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1.2fr 0.8fr; gap: 40px; align-items: stretch; }
+        .product-image { align-self: start; }
         .product-image img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
         .product-info { background: white; border-radius: 16px; border: 1px solid #EDE0D4; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
         .product-info h1 { font-size: 22px; font-weight: 700; color: var(--text-dark); margin-bottom: 6px; }
@@ -22,6 +23,9 @@
         .product-price { font-size: 22px; font-weight: 700; color: var(--text-dark); margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1.5px solid #E5B8C2; }
         .product-detail-label { font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 10px; }
         .product-description { font-size: 14px; color: var(--gray); line-height: 1.8; }
+        .product-detail-block { background: var(--cream); border-radius: 10px; padding: 14px 16px; margin-top: 4px; }
+        .product-detail-label { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
+        .product-detail-label::before { content: ''; display: inline-block; width: 3px; height: 14px; background: var(--pink); border-radius: 2px; flex-shrink: 0; }
         .product-widget { background: var(--white); border-radius: 12px; border: 1px solid #E5D5C5; padding: 20px; }
         .widget-title { font-size: 14px; font-weight: 700; color: var(--text-dark); margin-bottom: 16px; }
         .quantity-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
@@ -53,7 +57,7 @@
         .price-total-label { font-size: 15px; font-weight: 700; color: var(--text-dark); }
         .btn-add-cart { width: 100%; background-color: var(--pink); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: opacity 0.2s; }
         .btn-add-cart:hover { opacity: 0.85; }
-        .reviews-section { max-width: 1100px; margin: 24px auto 0; padding: 0 24px 60px; }
+        .reviews-section { max-width: 1100px; margin: 24px auto 0; padding: 0 0 60px; }
         .reviews-card { background: white; border-radius: 16px; border: 1px solid #EDE0D4; padding: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
         .reviews-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
         .reviews-count { font-size: 13px; color: var(--gray); margin-bottom: 20px; }
@@ -86,8 +90,10 @@
             <h1>{{ $product->name }}</h1>
             <p class="product-sold">30+ Barang Telah Terjual</p>
             <p class="product-price">Rp{{ number_format($product->price, 0, ',', '.') }}</p>
-            <p class="product-detail-label">Detail Produk:</p>
-            <p class="product-description">{{ $product->description ?? 'Tidak ada deskripsi untuk produk ini.' }}</p>
+            <div class="product-detail-block">
+                <p class="product-detail-label">Detail Produk</p>
+                <p class="product-description">{{ $product->description ?? 'Tidak ada deskripsi untuk produk ini.' }}</p>
+            </div>
         </div>
 
         {{-- Widget Keranjang --}}
@@ -182,8 +188,11 @@
                     <input type="hidden" name="quantity" id="qty-hidden" value="1">
                     <input type="hidden" name="note" id="note-hidden" value="">
                     <input type="hidden" name="customizations_json" id="form-customizations-json" value="[]">
-                    <button type="submit" class="btn-add-cart">+ Keranjang</button>
+                    <button type="submit" id="btn-add-cart" class="btn-add-cart">+ Keranjang</button>
                 </form>
+            <div id="cart-toast" style="display:none;margin-top:10px;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:8px;padding:10px 14px;font-size:13px;color:#065F46;font-weight:600;">
+                ✓ Produk berhasil ditambahkan ke keranjang!
+            </div>
         @else
             <a href="/login">
                 <button class="btn-add-cart">+ Keranjang</button>
@@ -322,5 +331,50 @@
 </script>
 
 <script src="{{ asset('js/app.js') }}" defer></script>
+@auth
+<script>
+document.getElementById('add-to-cart-form')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btn-add-cart');
+    const toast = document.getElementById('cart-toast');
+    const form = this;
+
+    btn.disabled = true;
+    btn.textContent = 'Menambahkan...';
+
+    try {
+        const resp = await fetch(form.action, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': form.querySelector('[name=_token]').value },
+            body: new FormData(form),
+        });
+        const data = await resp.json();
+
+        if (data.success) {
+            toast.style.display = 'block';
+            btn.textContent = '✓ Ditambahkan';
+            btn.style.background = '#22C55E';
+
+            const badge = document.getElementById('cart-badge');
+            if (badge) {
+                badge.textContent = data.cart_count;
+                badge.style.display = 'flex';
+            }
+
+            setTimeout(() => {
+                toast.style.display = 'none';
+                btn.disabled = false;
+                btn.textContent = '+ Keranjang';
+                btn.style.background = '';
+            }, 2500);
+        }
+    } catch {
+        btn.disabled = false;
+        btn.textContent = '+ Keranjang';
+        form.submit();
+    }
+});
+</script>
+@endauth
 </body>
 </html>

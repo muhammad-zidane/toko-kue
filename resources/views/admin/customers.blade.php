@@ -1,9 +1,9 @@
-@extends('admin.layout')
+﻿@extends('admin.layout')
 @section('title', 'Data Pelanggan')
 @section('page-title', 'Data Pelanggan')
 @section('page-subtitle', 'Lihat semua pelanggan terdaftar')
 
-@section('styles')
+@push('styles')
 <style>
     .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
     .stat-card { background: white; border-radius: 16px; padding: 20px; border: 1px solid #EDE0D4; transition: transform 0.2s; }
@@ -22,7 +22,7 @@
     .order-badge { background: var(--cream); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; color: var(--brown-dark); }
     @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr; } }
 </style>
-@endsection
+@endpush
 
 @section('content')
 @php
@@ -65,7 +65,7 @@
                 @forelse($customers as $i => $customer)
                 @php $totalSpent = $customer->orders->sum('total_price'); @endphp
                 <tr>
-                    <td style="font-weight:600;color:var(--gray);">{{ $i + 1 }}</td>
+                    <td style="font-weight:600;color:var(--gray);">{{ $loop->iteration + ($customers->currentPage() - 1) * $customers->perPage() }}</td>
                     <td>
                         <div style="display:flex;align-items:center;gap:12px;">
                             <div class="avatar" style="background:{{ $colors[$i % count($colors)] }};">
@@ -93,5 +93,9 @@
             </tbody>
         </table>
     </div>
+    @if($customers->hasPages())
+    <div style="padding:16px;">{{ $customers->links() }}</div>
+    @endif
 </div>
 @endsection
+

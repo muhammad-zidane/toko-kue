@@ -10,12 +10,16 @@
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <style>
 
+        body { background-color: var(--cream); }
         .page { max-width: 900px; margin: 0 auto; padding: 32px 24px 60px; }
         .page-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; margin-bottom: 8px; }
         .page-subtitle { font-size: 14px; color: var(--gray); margin-bottom: 24px; }
 
-        .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; align-items: stretch; }
         .card { background: var(--white); border-radius: 16px; border: 1px solid #EDE0D4; padding: 24px; margin-bottom: 20px; }
+        .detail-grid > .card { margin-bottom: 0; }
+        .info-col { display: flex; flex-direction: column; }
+        .card-info { flex: 1; margin-bottom: 0; }
         .card-label { font-size: 13px; font-weight: 700; color: var(--pink); margin-bottom: 16px; letter-spacing: 0.5px; }
 
         .order-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--cream); border-radius: 10px; margin-bottom: 12px; }
@@ -31,7 +35,7 @@
         .info-row span:first-child { color: var(--gray); flex-shrink: 0; }
         .info-row span:last-child { font-weight: 600; text-align: right; }
 
-        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
         .badge-pending { background: #FEF3C7; color: #D97706; }
         .badge-processing { background: #DBEAFE; color: #2563EB; }
         .badge-completed { background: #DCFCE7; color: #16A34A; }
@@ -78,8 +82,16 @@
             </div>
             @endforeach
 
+            @php $subtotalItems = $order->orderItems->sum(fn($i) => $i->price * $i->quantity); @endphp
+            <div style="margin-top:12px;">
+                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span style="color:var(--gray);">Subtotal Produk</span><span>Rp {{ number_format($subtotalItems, 0, ',', '.') }}</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span style="color:var(--gray);">Ongkos Kirim</span><span>{{ $order->shipping_cost > 0 ? 'Rp ' . number_format($order->shipping_cost, 0, ',', '.') : 'Gratis' }}</span></div>
+                @if($order->discount_amount > 0)
+                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span style="color:var(--gray);">Diskon Voucher</span><span style="color:#059669;">-Rp {{ number_format($order->discount_amount, 0, ',', '.') }}</span></div>
+                @endif
+            </div>
             <div class="price-total">
-                <span>Total</span>
+                <span>Total Harga</span>
                 <span>Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
             </div>
 
@@ -108,11 +120,18 @@
             @endforeach
         </div>
 
-        <div>
-            <div class="card">
+        <div class="info-col">
+            <div class="card card-info">
                 <p class="card-label">INFO PESANAN</p>
                 <div class="info-row"><span>Status</span><span><span class="badge badge-{{ $order->status }}">{{ ucfirst($order->status) }}</span></span></div>
-                <div class="info-row"><span>Pembayaran</span><span><span class="badge badge-{{ $order->payment->status ?? 'unpaid' }}">{{ ucfirst($order->payment->status ?? 'unpaid') }}</span></span></div>
+                @php
+                    $payStatus = $order->payment->status ?? 'unpaid';
+                @endphp
+                <div class="info-row"><span>Pembayaran</span><span><span class="badge badge-{{ $payStatus }}">{{ $order->payment?->status_label ?? 'Belum Bayar' }}</span></span></div>
+                @if(($order->payment_status ?? '') === 'dp')
+                <div class="info-row"><span>DP Dibayar</span><span>Rp {{ number_format($order->paid_amount, 0, ',', '.') }}</span></div>
+                <div class="info-row"><span>Sisa Pembayaran</span><span style="color:#C2410C;font-weight:700;">Rp {{ number_format($order->total_price - $order->paid_amount, 0, ',', '.') }}</span></div>
+                @endif
                 <div class="info-row"><span>Metode</span><span>{{ ['transfer_bank'=>'Transfer Bank','ewallet'=>'E-Wallet','qris'=>'QRIS','cod'=>'COD'][$order->payment->payment_method ?? ''] ?? ucfirst($order->payment->payment_method ?? '-') }}</span></div>
                 <div class="info-row"><span>Alamat</span><span>{{ $order->shipping_address }}</span></div>
                 @if($order->notes)
@@ -120,7 +139,7 @@
                 @endif
             </div>
 
-            @if($order->status === 'pending' && $order->payment && $order->payment->status === 'unpaid')
+            @if($order->status === 'pending' && $order->payment && $order->payment->status === 'unpaid' && !$order->payment->proof_image)
             <a href="{{ route('orders.payment', $order) }}" class="btn-back-page" style="width:100%;text-align:center;display:block;margin-bottom:20px;background:var(--pink);">Bayar Sekarang</a>
             @endif
         </div>

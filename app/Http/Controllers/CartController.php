@@ -7,25 +7,11 @@ use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
-    /**
-     * Tampilkan isi keranjang belanja dari session.
-     *
-     * @return \Illuminate\View\View
-     */
     public function index()
     {
-        $cart = session()->get('cart', []);
-        $cartItems = [];
-        foreach ($cart as $id => $item) {
-            $product = Product::find($id);
-            if ($product) {
-                $cartItems[] = [
-                    'product' => $product,
-                    'quantity' => $item['quantity'],
-                    'note' => $item['note'] ?? null,
-                ];
-            }
-        }
+        $cart      = session()->get('cart', []);
+        $cartItems = $this->resolveCartItems($cart);
+
         return view('cart.index', compact('cartItems'));
     }
 
@@ -68,6 +54,17 @@ class CartController extends Controller
         }
 
         session()->put('cart', $cart);
+
+        $cartCount = collect(session()->get('cart', []))->sum('quantity');
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Produk ditambahkan ke keranjang!',
+                'cart_count' => $cartCount,
+            ]);
+        }
+
         return redirect()->route('cart.index')->with('success', 'Produk ditambahkan ke keranjang!');
     }
 
@@ -137,13 +134,6 @@ class CartController extends Controller
         return redirect()->route('cart.index');
     }
 
-    /**
-     * Tampilkan form checkout dengan item-item dari keranjang session.
-     * Redirect ke keranjang jika keranjang kosong.
-     *
-     * @param  Request $request
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\View\View
-     */
     public function checkout(Request $request)
     {
         $cart = session()->get('cart', []);
@@ -151,11 +141,12 @@ class CartController extends Controller
             return redirect()->route('cart.index')->with('error', 'Keranjang kosong!');
         }
 
-        $cartItems = [];
+        $products      = Product::whereIn('id', array_keys($cart))->get()->keyBy('id');
+        $cartItems     = [];
         $stockWarnings = [];
 
         foreach ($cart as $id => $item) {
-            $product = Product::find($id);
+            $product = $products->get($id);
             if (!$product) {
                 continue;
             }
@@ -180,5 +171,28 @@ class CartController extends Controller
         $dpPercentage   = config('app.dp_percentage', 50);
 
         return view('orders.create', compact('cartItems', 'savedAddresses', 'dpMinAmount', 'dpPercentage'));
+    }
+
+    private function resolveCartItems(array $cart): array
+    {
+        if (empty($cart)) {
+            return [];
+        }
+
+        $products = Product::whereIn('id', array_keys($cart))->get()->keyBy('id');
+        $items    = [];
+
+        foreach ($cart as $id => $item) {
+            $product = $products->get($id);
+            if ($product) {
+                $items[] = [
+                    'product'  => $product,
+                    'quantity' => $item['quantity'],
+                    'note'     => $item['note'] ?? null,
+                ];
+            }
+        }
+
+        return $items;
     }
 }

@@ -101,7 +101,18 @@
                 <span>Total</span>
                 <span id="total-price">Rp0</span>
             </div>
+            <p id="cart-error" style="display:none;color:#DC2626;font-size:13px;font-weight:600;margin-bottom:8px;text-align:center;"></p>
+            @guest
+            {{-- Guest: arahkan ke /cart/checkout agar auth middleware simpan intended URL --}}
+            <a href="{{ route('cart.checkout') }}" style="text-decoration:none;">
+                <button class="btn-beli" type="button">
+                    <i class="fas fa-lock" style="margin-right:6px;font-size:13px;"></i>Login untuk Checkout
+                </button>
+            </a>
+            <p style="text-align:center;font-size:12px;color:var(--gray);margin-top:8px;">Silakan login untuk melanjutkan pemesanan</p>
+            @else
             <button class="btn-beli" onclick="beliSekarang()">Beli (<span id="beli-count">{{ isset($cartItems) ? count($cartItems) : 0 }}</span>)</button>
+            @endguest
         </div>
     </div>
 </div>
@@ -202,7 +213,12 @@
 
     function beliSekarang() {
         const checked = document.querySelectorAll('.item-check:checked');
-        if (checked.length === 0) { alert('Pilih produk terlebih dahulu!'); return; }
+        const errEl = document.getElementById('cart-error');
+        if (checked.length === 0) {
+            if (errEl) { errEl.textContent = 'Pilih produk terlebih dahulu!'; errEl.style.display = 'block'; }
+            return;
+        }
+        if (errEl) errEl.style.display = 'none';
 
         const ids = [];
         checked.forEach(check => ids.push(check.dataset.id));

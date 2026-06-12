@@ -1,9 +1,9 @@
-@extends('admin.layout')
+﻿@extends('admin.layout')
 @section('title', 'Keuangan')
 @section('page-title', 'Keuangan')
 @section('page-subtitle', 'Pantau arus kas dan riwayat pembayaran')
 
-@section('styles')
+@push('styles')
 <style>
     .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
     .stat-card { background: white; border-radius: 16px; padding: 20px; border: 1px solid #EDE0D4; }
@@ -23,7 +23,7 @@
     @media (max-width: 1024px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 640px) { .stats-grid { grid-template-columns: 1fr; } }
 </style>
-@endsection
+@endpush
 
 @section('content')
 {{-- STATS --}}
@@ -66,21 +66,22 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($payments as $i => $payment)
+                @forelse($payments as $payment)
                 <tr>
-                    <td style="font-weight:600;color:var(--gray);">{{ $i + 1 }}</td>
+                    <td style="font-weight:600;color:var(--gray);">{{ $loop->iteration + ($payments->currentPage() - 1) * $payments->perPage() }}</td>
                     <td style="font-weight:700;">#{{ $payment->order->order_code ?? '-' }}</td>
                     <td>{{ $payment->order->user->name ?? '-' }}</td>
                     <td><span class="method-badge">{{ ['transfer_bank'=>'Transfer Bank','ewallet'=>'E-Wallet','qris'=>'QRIS','cod'=>'COD'][$payment->payment_method ?? ''] ?? ($payment->payment_method ?? '-') }}</span></td>
                     <td style="font-weight:700;color:var(--brown-dark);">Rp {{ number_format($payment->amount, 0, ',', '.') }}</td>
                     <td>
-                        @if($payment->status === 'paid')
-                            <span class="badge badge-paid">Lunas</span>
-                        @elseif($payment->status === 'unpaid')
-                            <span class="badge badge-unpaid">Menunggu</span>
-                        @else
-                            <span class="badge badge-failed">Gagal</span>
-                        @endif
+                        @php
+                            $badgeClass = match($payment->status) {
+                                'paid'   => 'badge-paid',
+                                'failed' => 'badge-failed',
+                                default  => 'badge-unpaid',
+                            };
+                        @endphp
+                        <span class="badge {{ $badgeClass }}">{{ $payment->status_label }}</span>
                     </td>
                     <td style="font-size:12px;color:var(--gray);">{{ $payment->created_at->format('d M Y, H:i') }}</td>
                 </tr>
@@ -96,5 +97,9 @@
             </tbody>
         </table>
     </div>
+    @if($payments->hasPages())
+    <div style="padding:16px;">{{ $payments->links() }}</div>
+    @endif
 </div>
 @endsection
+
