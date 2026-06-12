@@ -172,6 +172,23 @@
                     <i class="fas fa-download" style="color:white;"></i> Unduh Bukti
                 </a>
             </div>
+            @if($order->payment->status === 'unpaid')
+            <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
+                <form method="POST" action="{{ route('admin.orders.confirmPayment', $order) }}">
+                    @csrf
+                    <button type="submit" class="btn-status btn-completed" onclick="return confirm('Konfirmasi pembayaran ini?')">
+                        <i class="fas fa-check"></i> Konfirmasi Pembayaran
+                    </button>
+                </form>
+                <form method="POST" action="{{ route('admin.orders.rejectPayment', $order) }}">
+                    @csrf
+                    <input type="text" name="reason" placeholder="Alasan penolakan (opsional)" style="font-size:12px;padding:6px 10px;border:1px solid #EDE0D4;border-radius:6px;width:100%;margin-bottom:6px;font-family:inherit;">
+                    <button type="submit" class="btn-status btn-cancelled" onclick="return confirm('Tolak pembayaran ini?')">
+                        <i class="fas fa-times"></i> Tolak Pembayaran
+                    </button>
+                </form>
+            </div>
+            @endif
             @endif
             @else
             <p style="font-size:13px;color:var(--gray);">Belum ada data pembayaran.</p>
