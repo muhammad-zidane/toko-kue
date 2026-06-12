@@ -15,6 +15,11 @@ class StrongPassword implements ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
+        if (! is_string($value)) {
+            $fail('Password harus berupa teks.');
+            return;
+        }
+
         if (strlen($value) < 8) {
             $fail('Password minimal 8 karakter.');
         }

@@ -1,4 +1,4 @@
-@extends('admin.layout')
+﻿@extends('admin.layout')
 @section('title', 'Kalender Produksi')
 @section('page-title', 'Kalender Produksi')
 @section('page-subtitle', 'Lihat jadwal pesanan per tanggal')
@@ -186,3 +186,4 @@ function hideDetail() {
 }
 </script>
 @endsection
+

@@ -21,10 +21,10 @@
         .stat-icon { font-size: 24px; margin-bottom: 4px; }
         .stat-value { font-size: 24px; font-weight: 800; }
         .stat-label { font-size: 12px; color: var(--gray); }
-        .profile-layout { display: flex; gap: 20px; }
-        .profile-sidebar { width: 220px; flex-shrink: 0; }
+        .profile-layout { display: flex; gap: 20px; align-items: stretch; }
+        .profile-sidebar { width: 220px; flex-shrink: 0; display: flex; flex-direction: column; }
         .profile-main { flex: 1; }
-        .avatar-card { background: white; border-radius: 16px; border: 1px solid #F3F4F6; padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .avatar-card { background: white; border-radius: 16px; border: 1px solid #F3F4F6; padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 10px; flex: 1; }
         .avatar { width: 80px; height: 80px; border-radius: 50%; background: #F9C5D1; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; color: #5C3D2E; }
         .user-name { font-size: 14px; font-weight: 700; text-align: center; }
         .user-email { font-size: 12px; color: var(--gray); text-align: center; word-break: break-all; }
@@ -102,9 +102,8 @@
                         <i class="fas fa-cog" style="color:white"></i> Admin Dashboard <span class="sidebar-link-arrow">→</span>
                     </a>
                     @endif
-                    <a href="{{ route('orders.index') }}" class="sidebar-link"><i class="fas fa-clipboard-list" style="color:var(--brown-dark)"></i> Riwayat Pesanan <span class="sidebar-link-arrow">→</span></a>
-                    <a href="{{ route('cart.index') }}" class="sidebar-link"><i class="fas fa-shopping-cart" style="color:var(--brown-dark)"></i> Keranjang <span class="sidebar-link-arrow">→</span></a>
-                    <a href="{{ route('products.index') }}" class="sidebar-link"><i class="fas fa-birthday-cake" style="color:var(--brown-dark)"></i> Katalog Produk <span class="sidebar-link-arrow">→</span></a>
+                    <a href="{{ route('profile.index') }}" class="sidebar-link sidebar-link-active"><i class="fas fa-user" style="color:#92400E"></i> Info Akun <span class="sidebar-link-arrow">→</span></a>
+                    <a href="{{ route('account.addresses.index') }}" class="sidebar-link"><i class="fas fa-map-marker-alt" style="color:var(--brown-dark)"></i> Alamat Tersimpan <span class="sidebar-link-arrow">→</span></a>
                     <a href="{{ route('account.change-password') }}" class="sidebar-link"><i class="fas fa-lock" style="color:var(--brown-dark)"></i> Ganti Password <span class="sidebar-link-arrow">→</span></a>
                 </div>
 

@@ -60,6 +60,7 @@ class ProductController extends Controller
         ]);
 
         $customizationOptions = CustomizationOption::where('is_active', true)
+            ->where('category_id', $product->category_id)
             ->orderBy('type')
             ->orderBy('sort_order')
             ->get()
@@ -79,24 +80,9 @@ class ProductController extends Controller
         return view('products.create', compact('categories'));
     }
 
-    /**
-     * Simpan produk baru ke database. Slug dibuat otomatis dari nama.
-     * Gambar disimpan ke storage/products jika diupload.
-     *
-     * @param  Request $request  Input: name, category_id, description, price, stock, image (opsional)
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function store(Request $request)
     {
-        $request->validate([
-            'name'        => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'description' => 'nullable|string',
-            'price'       => 'required|numeric|min:0',
-            'stock'       => 'required|integer|min:0',
-            'image'       => 'nullable|image|max:2048',
-            'badge'       => 'nullable|in:best_seller,new,sale',
-        ]);
+        $request->validate($this->productValidationRules());
 
         $data = $request->only(['name', 'category_id', 'description', 'price', 'stock']);
         $data['slug']  = $this->generateUniqueSlug($request->name);
@@ -122,24 +108,9 @@ class ProductController extends Controller
         return view('products.edit', compact('product', 'categories'));
     }
 
-    /**
-     * Simpan perubahan data produk. Gambar lama tidak dihapus otomatis.
-     *
-     * @param  Request $request  Input: name, category_id, description, price, stock, image (opsional)
-     * @param  Product $product  Produk yang diperbarui
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function update(Request $request, Product $product)
     {
-        $request->validate([
-            'name'        => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'description' => 'nullable|string',
-            'price'       => 'required|numeric|min:0',
-            'stock'       => 'required|integer|min:0',
-            'image'       => 'nullable|image|max:2048',
-            'badge'       => 'nullable|in:best_seller,new,sale',
-        ]);
+        $request->validate($this->productValidationRules());
 
         $data = $request->only(['name', 'category_id', 'description', 'price', 'stock']);
         $data['slug']  = $this->generateUniqueSlug($request->name, $product->id);
@@ -154,6 +125,19 @@ class ProductController extends Controller
 
         $product->update($data);
         return redirect()->route('admin.products.index')->with('success', 'Produk berhasil diperbarui!');
+    }
+
+    private function productValidationRules(): array
+    {
+        return [
+            'name'        => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'description' => 'nullable|string',
+            'price'       => 'required|numeric|min:0',
+            'stock'       => 'required|integer|min:0',
+            'image'       => 'nullable|image|max:2048',
+            'badge'       => 'nullable|in:best_seller,new,sale',
+        ];
     }
 
     private function generateUniqueSlug(string $name, ?int $excludeId = null): string

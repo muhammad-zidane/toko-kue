@@ -1,9 +1,9 @@
-@extends('admin.layout')
+﻿@extends('admin.layout')
 @section('title', 'Pengaturan')
 @section('page-title', 'Pengaturan')
 @section('page-subtitle', 'Kelola profil admin dan informasi toko')
 
-@section('styles')
+@push('styles')
 <style>
     .settings-form { max-width: 720px; }
     .card { background: white; border-radius: 16px; border: 1px solid #EDE0D4; padding: 28px; margin-bottom: 20px; }
@@ -26,7 +26,7 @@
     .btn-save:hover { background: var(--pink-hover); transform: translateY(-1px); }
     @media (max-width: 640px) { .form-grid, .info-grid { grid-template-columns: 1fr; } }
 </style>
-@endsection
+@endpush
 
 @section('content')
 <form method="POST" action="{{ route('admin.settings.update') }}" class="settings-form">
@@ -109,3 +109,4 @@
     </div>
 </form>
 @endsection
+
