@@ -41,9 +41,9 @@
         .badge-cancelled { background: #FEE2E2; color: var(--red); }
         .empty { grid-column: 1 / -1; text-align: center; padding: 28px; }
 
-        @media (max-width: 860px) { .grid { grid-template-columns: 1fr; }
- }
-    </style></head>
+        @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
 <body>
 @include('partials.navbar')
 
