@@ -28,7 +28,7 @@
     .btn-edit:hover { opacity: 0.8; }
     .btn-delete { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; background: #FEE2E2; color: #DC2626; border: none; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; }
     .btn-delete:hover { opacity: 0.8; }
-    .pagination { display: flex; justify-content: center; gap: 8px; padding: 16px; }
+    .pagination { display: flex; justify-content: center; gap: 30px; padding: 16px; }
 </style>
 @endpush
 

@@ -1,6 +1,6 @@
 @if ($paginator->hasPages())
 <style>
-    .pgn { display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; margin-top: 24px; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .pgn { display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 24px; font-family: 'Plus Jakarta Sans', sans-serif; }
     .pgn-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1.5px solid #D1C0B8; background: #fff; color: #3D2B1F; text-decoration: none; transition: all 0.2s; cursor: pointer; }
     .pgn-btn:hover { border-color: #E4849A; color: #E4849A; }
     .pgn-btn.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }

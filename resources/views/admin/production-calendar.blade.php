@@ -7,7 +7,7 @@
 <style>
     .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
     .cal-month-label { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--text-dark); }
-    .cal-nav-btns { display: flex; gap: 8px; }
+    .cal-nav-btns { display: flex; gap: 20px; }
     .btn-nav { padding: 8px 16px; border-radius: 8px; border: 1.5px solid #EDE0D4; background: white; color: var(--brown-dark); font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s; }
     .btn-nav:hover { background: var(--cream); }
     .calendar-card { background: white; border-radius: 16px; border: 1px solid #EDE0D4; overflow: hidden; margin-bottom: 24px; }
