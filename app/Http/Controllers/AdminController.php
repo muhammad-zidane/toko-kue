@@ -267,6 +267,7 @@ class AdminController extends Controller
         return back()->with('success', 'Kategori berhasil diperbarui!');
     }
 
+
     /**
      * Hapus kategori dari database.
      *
@@ -278,6 +279,7 @@ class AdminController extends Controller
         if ($category->image) {
             Storage::disk('public')->delete($category->image);
         }
+
 
         $category->delete();
 

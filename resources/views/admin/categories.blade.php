@@ -1,4 +1,4 @@
-@extends('admin.layout')
+﻿@extends('admin.layout')
 @section('title', 'Kelola Kategori')
 @section('page-title', 'Kelola Kategori')
 @section('page-subtitle', 'Tambah, lihat, dan hapus kategori produk')
