@@ -396,7 +396,7 @@
             <div class="summary-total">
                 <div class="summary-total-row">
                     <span class="summary-total-label">Total Pembayaran</span>
-                    <span class="summary-total-val">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</span>
+                    <span class="summary-total-val">Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
                 </div>
             </div>
         </div>
@@ -409,7 +409,7 @@
         <div class="payment-grid">
             <div class="payment-col">
                 <div class="payment-label">Metode</div>
-                <div class="payment-val">{{ ucfirst(str_replace('_', ' ', $order->payment->method ?? 'Transfer Bank')) }}</div>
+                <div class="payment-val">{{ ucfirst(str_replace('_', ' ', $order->payment->payment_method ?? 'Transfer Bank')) }}</div>
             </div>
             <div class="payment-col">
                 <div class="payment-label">Status</div>

@@ -36,7 +36,12 @@ class CartController extends Controller
         $productId = $request->product_id;
         $quantity = $request->quantity ?? 1;
         $note = $request->note;
-        $customizations = json_decode($request->customizations_json ?? '[]', true) ?: [];
+        $rawCustomizations = json_decode($request->customizations_json ?? '[]', true) ?: [];
+        // Frontend sends [{id: "7", price: 0}, ...], extract only the IDs as integers
+        $customizations = array_values(array_filter(
+            array_map(fn($c) => is_array($c) ? (int)($c['id'] ?? 0) : (int)$c, $rawCustomizations),
+            fn($id) => $id > 0
+        ));
 
         if (isset($cart[$productId])) {
             $cart[$productId]['quantity'] += $quantity;
@@ -157,13 +162,21 @@ class CartController extends Controller
                 $stockWarnings[] = "Stok \"{$product->name}\" tidak mencukupi (tersedia: {$product->stock}).";
             }
 
-            $customizationIds = $item['customizations'] ?? [];
+            $rawIds = $item['customizations'] ?? [];
+            // Normalize: session may store plain ints or legacy {id,price} objects
+            $customizationIds = array_values(array_filter(
+                array_map(fn($c) => is_array($c) ? (int)($c['id'] ?? 0) : (int)$c, $rawIds),
+                fn($id) => $id > 0
+            ));
             $cartItems[] = [
-                'product'             => $product,
-                'quantity'            => $item['quantity'],
-                'note'                => $item['note'] ?? null,
-                'customizations'      => $customizationIds,
-                'customizationOptions'=> collect($customizationIds)->map(fn($oid) => $optionsMap->get($oid))->filter()->values(),
+                'product'              => $product,
+                'quantity'             => $item['quantity'],
+                'note'                 => $item['note'] ?? null,
+                'customizations'       => $customizationIds,
+                'customizationOptions' => collect($customizationIds)
+                    ->map(fn($oid) => $optionsMap->get($oid))
+                    ->filter()
+                    ->values(),
             ];
         }
 
@@ -191,13 +204,21 @@ class CartController extends Controller
         foreach ($cart as $id => $item) {
             $product = $products->get($id);
             if ($product) {
-                $customizationIds = $item['customizations'] ?? [];
+                $rawIds = $item['customizations'] ?? [];
+                // Normalize: session may store plain ints or legacy {id,price} objects
+                $customizationIds = array_values(array_filter(
+                    array_map(fn($c) => is_array($c) ? (int)($c['id'] ?? 0) : (int)$c, $rawIds),
+                    fn($id) => $id > 0
+                ));
                 $items[] = [
-                    'product'             => $product,
-                    'quantity'            => $item['quantity'],
-                    'note'                => $item['note'] ?? null,
-                    'customizations'      => $customizationIds,
-                    'customizationOptions'=> collect($customizationIds)->map(fn($oid) => $optionsMap->get($oid))->filter()->values(),
+                    'product'              => $product,
+                    'quantity'             => $item['quantity'],
+                    'note'                 => $item['note'] ?? null,
+                    'customizations'       => $customizationIds,
+                    'customizationOptions' => collect($customizationIds)
+                        ->map(fn($oid) => $optionsMap->get($oid))
+                        ->filter()
+                        ->values(),
                 ];
             }
         }
@@ -207,7 +228,15 @@ class CartController extends Controller
 
     private function loadOptionsFromCart(array $cart)
     {
-        $ids = collect($cart)->pluck('customizations')->flatten()->filter()->unique()->values()->all();
+        $ids = collect($cart)
+            ->pluck('customizations')
+            ->flatten()
+            ->map(fn($c) => is_array($c) ? (int)($c['id'] ?? 0) : (int)$c)
+            ->filter(fn($id) => $id > 0)
+            ->unique()
+            ->values()
+            ->all();
+
         if (empty($ids)) {
             return collect();
         }

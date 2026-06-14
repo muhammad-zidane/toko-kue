@@ -101,7 +101,12 @@
     } elseif (isset($product)) {
         $items = [['product' => $product, 'quantity' => 1, 'note' => '']];
     }
-    $subtotal = collect($items)->sum(fn($i) => $i['product']->price * $i['quantity']);
+    $subtotal = collect($items)->sum(function($i) {
+        $extraPrice = isset($i['customizationOptions'])
+            ? $i['customizationOptions']->sum(fn($o) => $o->extra_price ?? 0)
+            : 0;
+        return ($i['product']->price + $extraPrice) * $i['quantity'];
+    });
     $leadDays = config('app.lead_time_days', 2);
     $minDate  = now()->addDays($leadDays)->format('Y-m-d');
     $shippingZones = \App\Models\ShippingZone::where('is_available', true)->orderBy('area_name')->get();
@@ -148,7 +153,15 @@
                      alt="{{ $item['product']->name }}" loading="lazy">
                 <div>
                     <h4>{{ $item['product']->name }}</h4>
-                    <p>Rp {{ number_format($item['product']->price, 0, ',', '.') }}</p>
+                    @php
+                        $itemExtraPrice = isset($item['customizationOptions']) ? $item['customizationOptions']->sum(fn($o) => $o->extra_price ?? 0) : 0;
+                        $itemUnitPrice  = $item['product']->price + $itemExtraPrice;
+                    @endphp
+                    <p>Rp {{ number_format($itemUnitPrice, 0, ',', '.') }}
+                        @if($itemExtraPrice > 0)
+                        <small style="color:var(--brown-dark);font-weight:500;"> (termasuk kustomisasi +Rp {{ number_format($itemExtraPrice, 0, ',', '.') }})</small>
+                        @endif
+                    </p>
                     <small>Jumlah: {{ $item['quantity'] }}</small>
                     @if(!empty($item['customizationOptions']) && $item['customizationOptions']->isNotEmpty())
                     <small style="display:block;color:var(--brown-dark);">Kustomisasi:
@@ -338,7 +351,7 @@
                     <p>{{ $item['product']->name }}</p>
                     <small>{{ $item['quantity'] }}x</small>
                 </div>
-                <span class="summary-item-price">Rp {{ number_format($item['product']->price * $item['quantity'], 0, ',', '.') }}</span>
+                <span class="summary-item-price">Rp {{ number_format((($item['product']->price + (isset($item['customizationOptions']) ? $item['customizationOptions']->sum(fn($o) => $o->extra_price ?? 0) : 0)) * $item['quantity']), 0, ',', '.') }}</span>
             </div>
             @endforeach
 

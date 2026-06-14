@@ -202,7 +202,7 @@
 
     <div class="action-buttons">
         <a href="/orders" class="btn-action pink">Lihat Riwayat Pesanan</a>
-        <button class="btn-action outline" onclick="window.print()">Unduh Bukti Pesanan</button>
+        <a href="{{ route('orders.invoice', $order) }}" target="_blank" class="btn-action outline">Unduh Bukti Pesanan</a>
         <a href="/" class="btn-action outline">Kembali ke Beranda</a>
     </div>
 </div>
