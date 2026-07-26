@@ -2,14 +2,22 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\Admin\BannerController as AdminBannerController;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\CustomizationController;
+use App\Http\Controllers\Admin\NotificationController as AdminNotificationController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
+use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
+use App\Http\Controllers\Admin\ShippingZoneController as AdminShippingZoneController;
+use App\Http\Controllers\Admin\VoucherController as AdminVoucherController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\Admin\CustomizationController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductReviewController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\VoucherController;
 use Illuminate\Support\Facades\Route;
 
@@ -85,62 +93,62 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
     // Orders
-    Route::get('/orders', [AdminController::class, 'orders'])->name('orders.index');
-    Route::get('/orders/{order}', [AdminController::class, 'orderDetail'])->name('orders.show');
-    Route::get('/orders/{order}/download-proof', [AdminController::class, 'downloadProof'])->name('orders.downloadProof');
-    Route::patch('/orders/{order}/status/{status}', [AdminController::class, 'updateOrderStatus'])->name('orders.status');
+    Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
+    Route::get('/orders/{order}/download-proof', [AdminOrderController::class, 'downloadProof'])->name('orders.downloadProof');
+    Route::patch('/orders/{order}/status/{status}', [AdminOrderController::class, 'updateStatus'])->name('orders.status');
 
     // Products
     Route::resource('products', ProductController::class)->except(['index', 'show']);
     Route::get('/products-list', [AdminController::class, 'adminProducts'])->name('products.index');
 
     // Categories
-    Route::get('/categories', [AdminController::class, 'categories'])->name('categories.index');
-    Route::post('/categories', [AdminController::class, 'storeCategory'])->name('categories.store');
-    Route::put('/categories/{category}', [AdminController::class, 'updateCategory'])->name('categories.update');
-    Route::delete('/categories/{category}', [AdminController::class, 'destroyCategory'])->name('categories.destroy');
+    Route::get('/categories', [AdminCategoryController::class, 'index'])->name('categories.index');
+    Route::post('/categories', [AdminCategoryController::class, 'store'])->name('categories.store');
+    Route::put('/categories/{category}', [AdminCategoryController::class, 'update'])->name('categories.update');
+    Route::delete('/categories/{category}', [AdminCategoryController::class, 'destroy'])->name('categories.destroy');
 
     // Other pages
     Route::get('/customers', [AdminController::class, 'customers'])->name('customers.index');
     Route::get('/analytics', [AdminController::class, 'analytics'])->name('analytics.index');
     Route::get('/analytics/export', [AdminController::class, 'exportLaporan'])->name('analytics.export');
     Route::get('/finance', [AdminController::class, 'finance'])->name('finance.index');
-    Route::get('/settings', [AdminController::class, 'settings'])->name('settings.index');
-    Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
+    Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
+    Route::post('/settings', [AdminSettingsController::class, 'update'])->name('settings.update');
 
     // Banners
-    Route::get('/banners', [AdminController::class, 'banners'])->name('banners.index');
-    Route::post('/banners', [AdminController::class, 'storeBanner'])->name('banners.store');
-    Route::put('/banners/{banner}', [AdminController::class, 'updateBanner'])->name('banners.update');
-    Route::delete('/banners/{banner}', [AdminController::class, 'destroyBanner'])->name('banners.destroy');
+    Route::get('/banners', [AdminBannerController::class, 'index'])->name('banners.index');
+    Route::post('/banners', [AdminBannerController::class, 'store'])->name('banners.store');
+    Route::put('/banners/{banner}', [AdminBannerController::class, 'update'])->name('banners.update');
+    Route::delete('/banners/{banner}', [AdminBannerController::class, 'destroy'])->name('banners.destroy');
 
     // Vouchers
-    Route::get('/vouchers', [AdminController::class, 'vouchers'])->name('vouchers.index');
-    Route::post('/vouchers', [AdminController::class, 'storeVoucher'])->name('vouchers.store');
-    Route::put('/vouchers/{voucher}', [AdminController::class, 'updateVoucher'])->name('vouchers.update');
-    Route::delete('/vouchers/{voucher}', [AdminController::class, 'destroyVoucher'])->name('vouchers.destroy');
+    Route::get('/vouchers', [AdminVoucherController::class, 'index'])->name('vouchers.index');
+    Route::post('/vouchers', [AdminVoucherController::class, 'store'])->name('vouchers.store');
+    Route::put('/vouchers/{voucher}', [AdminVoucherController::class, 'update'])->name('vouchers.update');
+    Route::delete('/vouchers/{voucher}', [AdminVoucherController::class, 'destroy'])->name('vouchers.destroy');
 
     // Shipping Zones
-    Route::get('/shipping-zones', [AdminController::class, 'shippingZones'])->name('shipping-zones.index');
-    Route::post('/shipping-zones', [AdminController::class, 'storeShippingZone'])->name('shipping-zones.store');
-    Route::put('/shipping-zones/{zone}', [AdminController::class, 'updateShippingZone'])->name('shipping-zones.update');
-    Route::delete('/shipping-zones/{zone}', [AdminController::class, 'destroyShippingZone'])->name('shipping-zones.destroy');
+    Route::get('/shipping-zones', [AdminShippingZoneController::class, 'index'])->name('shipping-zones.index');
+    Route::post('/shipping-zones', [AdminShippingZoneController::class, 'store'])->name('shipping-zones.store');
+    Route::put('/shipping-zones/{zone}', [AdminShippingZoneController::class, 'update'])->name('shipping-zones.update');
+    Route::delete('/shipping-zones/{zone}', [AdminShippingZoneController::class, 'destroy'])->name('shipping-zones.destroy');
 
     // Production Calendar
     Route::get('/production-calendar', [AdminController::class, 'productionCalendar'])->name('production-calendar.index');
 
     // Reviews moderation
-    Route::get('/reviews', [AdminController::class, 'reviews'])->name('reviews.index');
-    Route::patch('/reviews/{review}/approve', [AdminController::class, 'approveReview'])->name('reviews.approve');
-    Route::delete('/reviews/{review}', [AdminController::class, 'destroyReview'])->name('reviews.destroy');
+    Route::get('/reviews', [AdminReviewController::class, 'index'])->name('reviews.index');
+    Route::patch('/reviews/{review}/approve', [AdminReviewController::class, 'approve'])->name('reviews.approve');
+    Route::delete('/reviews/{review}', [AdminReviewController::class, 'destroy'])->name('reviews.destroy');
 
     // Payment confirm/reject
-    Route::post('/orders/{order}/confirm-payment', [AdminController::class, 'confirmPayment'])->name('orders.confirmPayment');
-    Route::post('/orders/{order}/reject-payment', [AdminController::class, 'rejectPayment'])->name('orders.rejectPayment');
+    Route::post('/orders/{order}/confirm-payment', [AdminOrderController::class, 'confirmPayment'])->name('orders.confirmPayment');
+    Route::post('/orders/{order}/reject-payment', [AdminOrderController::class, 'rejectPayment'])->name('orders.rejectPayment');
 
     // Notifications
-    Route::post('/notifications/read-all', [AdminController::class, 'markAllNotificationsRead'])->name('notifications.readAll');
-    Route::post('/notifications/{id}/read', [AdminController::class, 'markNotificationRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [AdminNotificationController::class, 'markAllRead'])->name('notifications.readAll');
+    Route::post('/notifications/{id}/read', [AdminNotificationController::class, 'markRead'])->name('notifications.read');
 
     // Customization options
     Route::get('/customizations', [CustomizationController::class, 'index'])->name('customizations.index');

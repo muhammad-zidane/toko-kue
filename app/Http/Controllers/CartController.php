@@ -2,46 +2,42 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CustomizationOption;
 use App\Models\Product;
+use App\Services\CartService;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
+    public function __construct(
+        protected CartService $cartService
+    ) {}
+
     public function index()
     {
         $cart      = session()->get('cart', []);
-        $cartItems = $this->resolveCartItems($cart);
+        $cartItems = $this->cartService->resolveItems($cart);
 
         return view('cart.index', compact('cartItems'));
     }
 
     /**
      * Tambah produk ke keranjang (disimpan di session).
-     * Jika produk sudah ada, jumlahnya ditambahkan.
-     *
-     * @param  Request $request  Input: product_id (wajib), quantity (default 1)
-     * @return \Illuminate\Http\RedirectResponse
      */
     public function add(Request $request)
     {
         $request->validate([
-            'product_id'        => 'required|exists:products,id',
-            'quantity'          => 'nullable|integer|min:1',
-            'note'              => 'nullable|string',
+            'product_id'          => 'required|exists:products,id',
+            'quantity'            => 'nullable|integer|min:1',
+            'note'                => 'nullable|string',
             'customizations_json' => 'nullable|string',
         ]);
 
-        $cart = session()->get('cart', []);
-        $productId = $request->product_id;
-        $quantity = $request->quantity ?? 1;
-        $note = $request->note;
+        $cart              = session()->get('cart', []);
+        $productId         = $request->product_id;
+        $quantity          = $request->quantity ?? 1;
+        $note              = $request->note;
         $rawCustomizations = json_decode($request->customizations_json ?? '[]', true) ?: [];
-        // Frontend sends [{id: "7", price: 0}, ...], extract only the IDs as integers
-        $customizations = array_values(array_filter(
-            array_map(fn($c) => is_array($c) ? (int)($c['id'] ?? 0) : (int)$c, $rawCustomizations),
-            fn($id) => $id > 0
-        ));
+        $customizations    = $this->cartService->normalizeCustomizationIds($rawCustomizations);
 
         if (isset($cart[$productId])) {
             $cart[$productId]['quantity'] += $quantity;
@@ -65,8 +61,8 @@ class CartController extends Controller
 
         if ($request->expectsJson()) {
             return response()->json([
-                'success' => true,
-                'message' => 'Produk ditambahkan ke keranjang!',
+                'success'    => true,
+                'message'    => 'Produk ditambahkan ke keranjang!',
                 'cart_count' => $cartCount,
             ]);
         }
@@ -76,19 +72,16 @@ class CartController extends Controller
 
     /**
      * Perbarui jumlah atau catatan item di keranjang.
-     *
-     * @param  Request $request  Input: product_id (wajib), quantity (opsional), note (opsional)
-     * @return \Illuminate\Http\JsonResponse
      */
     public function updateItem(Request $request)
     {
         $request->validate([
             'product_id' => 'required|integer',
-            'quantity' => 'nullable|integer|min:1',
-            'note' => 'nullable|string',
+            'quantity'   => 'nullable|integer|min:1',
+            'note'       => 'nullable|string',
         ]);
 
-        $cart = session()->get('cart', []);
+        $cart      = session()->get('cart', []);
         $productId = (string) $request->product_id;
 
         if (!isset($cart[$productId])) {
@@ -110,14 +103,11 @@ class CartController extends Controller
 
     /**
      * Hapus satu atau beberapa item dari keranjang berdasarkan product ID.
-     *
-     * @param  Request $request  Input: ids[] array product ID yang dihapus
-     * @return \Illuminate\Http\JsonResponse
      */
     public function remove(Request $request)
     {
         $cart = session()->get('cart', []);
-        $ids = $request->ids ?? [];
+        $ids  = $request->ids ?? [];
 
         if (is_array($ids)) {
             foreach ($ids as $id) {
@@ -131,8 +121,6 @@ class CartController extends Controller
 
     /**
      * Kosongkan seluruh isi keranjang belanja dari session.
-     *
-     * @return \Illuminate\Http\RedirectResponse
      */
     public function clear()
     {
@@ -148,7 +136,7 @@ class CartController extends Controller
         }
 
         $products      = Product::whereIn('id', array_keys($cart))->get()->keyBy('id');
-        $optionsMap    = $this->loadOptionsFromCart($cart);
+        $optionsMap    = $this->cartService->loadOptionsFromCart($cart);
         $cartItems     = [];
         $stockWarnings = [];
 
@@ -162,12 +150,7 @@ class CartController extends Controller
                 $stockWarnings[] = "Stok \"{$product->name}\" tidak mencukupi (tersedia: {$product->stock}).";
             }
 
-            $rawIds = $item['customizations'] ?? [];
-            // Normalize: session may store plain ints or legacy {id,price} objects
-            $customizationIds = array_values(array_filter(
-                array_map(fn($c) => is_array($c) ? (int)($c['id'] ?? 0) : (int)$c, $rawIds),
-                fn($id) => $id > 0
-            ));
+            $customizationIds = $this->cartService->normalizeCustomizationIds($item['customizations'] ?? []);
             $cartItems[] = [
                 'product'              => $product,
                 'quantity'             => $item['quantity'],
@@ -189,57 +172,5 @@ class CartController extends Controller
         $dpPercentage   = config('app.dp_percentage', 50);
 
         return view('orders.create', compact('cartItems', 'savedAddresses', 'dpMinAmount', 'dpPercentage'));
-    }
-
-    private function resolveCartItems(array $cart): array
-    {
-        if (empty($cart)) {
-            return [];
-        }
-
-        $products   = Product::whereIn('id', array_keys($cart))->get()->keyBy('id');
-        $optionsMap = $this->loadOptionsFromCart($cart);
-        $items      = [];
-
-        foreach ($cart as $id => $item) {
-            $product = $products->get($id);
-            if ($product) {
-                $rawIds = $item['customizations'] ?? [];
-                // Normalize: session may store plain ints or legacy {id,price} objects
-                $customizationIds = array_values(array_filter(
-                    array_map(fn($c) => is_array($c) ? (int)($c['id'] ?? 0) : (int)$c, $rawIds),
-                    fn($id) => $id > 0
-                ));
-                $items[] = [
-                    'product'              => $product,
-                    'quantity'             => $item['quantity'],
-                    'note'                 => $item['note'] ?? null,
-                    'customizations'       => $customizationIds,
-                    'customizationOptions' => collect($customizationIds)
-                        ->map(fn($oid) => $optionsMap->get($oid))
-                        ->filter()
-                        ->values(),
-                ];
-            }
-        }
-
-        return $items;
-    }
-
-    private function loadOptionsFromCart(array $cart)
-    {
-        $ids = collect($cart)
-            ->pluck('customizations')
-            ->flatten()
-            ->map(fn($c) => is_array($c) ? (int)($c['id'] ?? 0) : (int)$c)
-            ->filter(fn($id) => $id > 0)
-            ->unique()
-            ->values()
-            ->all();
-
-        if (empty($ids)) {
-            return collect();
-        }
-        return CustomizationOption::whereIn('id', $ids)->get()->keyBy('id');
     }
 }
