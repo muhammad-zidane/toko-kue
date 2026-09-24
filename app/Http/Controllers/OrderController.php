@@ -106,14 +106,22 @@ class OrderController extends Controller
                         ->get()
                         ->keyBy('id');
 
-                    $subtotal = 0;
-                    foreach ($request->items as $idx => $item) {
-                        $product = $products->get($item['product_id']);
-                        if ($product->stock < $item['quantity']) {
+                    $quantitiesByProduct = collect($request->items)
+                        ->groupBy('product_id')
+                        ->map(fn ($items) => $items->sum('quantity'));
+
+                    foreach ($quantitiesByProduct as $productId => $quantity) {
+                        $product = $products->get($productId);
+                        if ($product->stock < $quantity) {
                             throw \Illuminate\Validation\ValidationException::withMessages([
                                 'stock' => "Stok {$product->name} tidak mencukupi. Tersisa {$product->stock}.",
                             ]);
                         }
+                    }
+
+                    $subtotal = 0;
+                    foreach ($request->items as $idx => $item) {
+                        $product = $products->get($item['product_id']);
                         $extraTotal = collect($parsedCustomizations[$idx])
                             ->sum(fn($id) => $optionsMap->get($id)?->extra_price ?? 0);
                         $subtotal += ($product->price + $extraTotal) * $item['quantity'];
@@ -186,8 +194,10 @@ class OrderController extends Controller
                                 ]);
                             }
                         }
+                    }
 
-                        $product->decrement('stock', $item['quantity']);
+                    foreach ($quantitiesByProduct as $productId => $quantity) {
+                        $products->get($productId)->decrement('stock', $quantity);
                     }
 
                     $paymentMethod = $request->payment_method ?? 'transfer_bank';

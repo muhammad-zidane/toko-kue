@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\CustomizationOption;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
@@ -103,4 +104,53 @@ it('guest is redirected to login on checkout', function () {
     $response = $this->post('/orders', validCheckoutData($product));
 
     $response->assertRedirect('/login');
+});
+
+it('rejects duplicate product items when their total quantity exceeds stock', function () {
+    $user = User::factory()->create();
+    $product = Product::factory()->create(['stock' => 5, 'is_available' => true]);
+    $data = validCheckoutData($product);
+    $data['items'] = [
+        ['product_id' => $product->id, 'quantity' => 4],
+        ['product_id' => $product->id, 'quantity' => 4],
+    ];
+
+    $response = $this->actingAs($user)->post('/orders', $data);
+
+    $response->assertSessionHasErrors('stock');
+    $this->assertDatabaseCount('orders', 0);
+    $this->assertDatabaseCount('payments', 0);
+    $this->assertDatabaseCount('order_items', 0);
+    expect($product->fresh()->stock)->toBe(5);
+});
+
+it('keeps duplicate product items with different customizations separate when stock is sufficient', function () {
+    $user = User::factory()->create();
+    $product = Product::factory()->create(['stock' => 10, 'is_available' => true]);
+    $firstOption = CustomizationOption::create([
+        'type' => 'rasa',
+        'name' => 'Coklat',
+        'extra_price' => 1000,
+    ]);
+    $secondOption = CustomizationOption::create([
+        'type' => 'rasa',
+        'name' => 'Vanila',
+        'extra_price' => 2000,
+    ]);
+    $data = validCheckoutData($product);
+    $data['items'] = [
+        ['product_id' => $product->id, 'quantity' => 4, 'customizations' => json_encode([$firstOption->id])],
+        ['product_id' => $product->id, 'quantity' => 4, 'customizations' => json_encode([$secondOption->id])],
+    ];
+
+    $response = $this->actingAs($user)->post('/orders', $data);
+
+    $response->assertSessionHasNoErrors()->assertRedirect();
+    $order = Order::with('orderItems.customizations')->sole();
+    expect($order->orderItems)->toHaveCount(2);
+    expect($order->orderItems->pluck('quantity')->all())->toBe([4, 4]);
+    expect($order->orderItems->map(fn ($item) => $item->customizations->sole()->customization_option_id)->all())
+        ->toBe([$firstOption->id, $secondOption->id]);
+    $this->assertDatabaseCount('payments', 1);
+    expect($product->fresh()->stock)->toBe(2);
 });
