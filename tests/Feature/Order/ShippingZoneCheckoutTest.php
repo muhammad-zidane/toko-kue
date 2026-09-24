@@ -4,6 +4,8 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\ShippingZone;
 use App\Models\User;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Support\Facades\DB;
 
 function shippingZoneCheckoutData(Product $product, array $overrides = []): array
 {
@@ -34,6 +36,42 @@ it('rejects an unavailable shipping zone before creating checkout records or cha
     $this->assertDatabaseCount('payments', 0);
     $this->assertDatabaseCount('order_items', 0);
     expect($product->fresh()->stock)->toBe(10);
+});
+
+it('rejects a zone disabled after request validation but before the checkout transaction', function () {
+    $user = User::factory()->create();
+    $product = Product::factory()->create(['stock' => 10, 'is_available' => true]);
+    $zone = ShippingZone::create([
+        'area_name' => 'Kota Berubah',
+        'cost' => 17000,
+        'is_available' => true,
+    ]);
+    $disabledAfterValidation = false;
+    $lockedZoneRead = false;
+    DB::listen(function (QueryExecuted $query) use ($zone, &$disabledAfterValidation, &$lockedZoneRead) {
+        if (str_contains($query->sql, 'shipping_zones') && str_contains(strtolower($query->sql), 'for update')) {
+            $lockedZoneRead = true;
+        }
+        if (! $disabledAfterValidation
+            && str_contains($query->sql, 'shipping_zones')
+            && str_contains($query->sql, 'count(')) {
+            $disabledAfterValidation = true;
+            $zone->update(['is_available' => false]);
+        }
+    });
+
+    $response = $this->actingAs($user)->post('/orders', shippingZoneCheckoutData($product, [
+        'shipping_zone_id' => $zone->id,
+    ]));
+
+    $response->assertRedirect()->assertSessionHasErrors(['shipping_zone_id']);
+    $this->assertDatabaseCount('orders', 0);
+    $this->assertDatabaseCount('payments', 0);
+    $this->assertDatabaseCount('order_items', 0);
+    expect($disabledAfterValidation)->toBeTrue()
+        ->and($lockedZoneRead)->toBeTrue()
+        ->and((bool) $zone->fresh()->is_available)->toBeFalse()
+        ->and($product->fresh()->stock)->toBe(10);
 });
 
 it('uses the database shipping cost for an available delivery zone', function () {
