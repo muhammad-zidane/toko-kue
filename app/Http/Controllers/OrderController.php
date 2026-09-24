@@ -63,7 +63,7 @@ class OrderController extends Controller
             ? Rule::exists('shipping_zones', 'id')->where('is_available', true)
             : Rule::exists('shipping_zones', 'id');
 
-        $request->validate([
+        $validated = $request->validate([
             'delivery_method'              => 'required|in:pickup,delivery',
             'shipping_address'             => 'required_if:delivery_method,delivery|nullable|string',
             'shipping_zone_id'             => ['required_if:delivery_method,delivery', 'nullable', $shippingZoneExists],
@@ -77,6 +77,7 @@ class OrderController extends Controller
             'items.*.customizations'       => 'nullable|string',
             'voucher_code'                 => 'nullable|string',
             'use_dp'                       => 'nullable|boolean',
+            'payment_method'               => ['nullable', 'string', Rule::in(['transfer_bank', 'ewallet', 'qris', 'cod'])],
         ], [
             'shipping_zone_id.required_if' => 'Zona pengiriman wajib dipilih jika metode pengiriman adalah diantar.',
             'shipping_zone_id.exists'      => 'Zona pengiriman tidak valid.',
@@ -114,7 +115,7 @@ class OrderController extends Controller
 
         try {
             ['order' => $order, 'isCod' => $isCod] = DB::transaction(
-                function () use ($request, $parsedCustomizations, $optionsMap) {
+                function () use ($request, $validated, $parsedCustomizations, $optionsMap) {
                     $shippingZone = null;
                     if ($request->delivery_method === 'delivery') {
                         $shippingZone = ShippingZone::whereKey($request->shipping_zone_id)
@@ -248,7 +249,7 @@ class OrderController extends Controller
                         $products->get($productId)->decrement('stock', $quantity);
                     }
 
-                    $paymentMethod = $request->payment_method ?? 'transfer_bank';
+                    $paymentMethod = $validated['payment_method'] ?? 'transfer_bank';
                     $isCod         = $paymentMethod === 'cod';
                     $amountDue     = $useDp ? $dpAmount : $totalPrice;
 

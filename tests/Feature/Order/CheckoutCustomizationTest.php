@@ -14,7 +14,7 @@ function checkoutCustomizationData(Product $product, array $ids, int $quantity =
     return [
         'delivery_method' => 'pickup',
         'delivery_date' => now()->addDays(3)->format('Y-m-d'),
-        'payment_method' => 'transfer',
+        'payment_method' => 'transfer_bank',
         'items' => [
             [
                 'product_id' => $product->id,

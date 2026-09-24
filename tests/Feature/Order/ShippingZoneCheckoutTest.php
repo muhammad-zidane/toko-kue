@@ -13,7 +13,7 @@ function shippingZoneCheckoutData(Product $product, array $overrides = []): arra
         'delivery_method' => 'delivery',
         'shipping_address' => 'Jl. Mawar No. 10, Jakarta',
         'delivery_date' => now()->addDays(3)->format('Y-m-d'),
-        'payment_method' => 'transfer',
+        'payment_method' => 'transfer_bank',
         'items' => [['product_id' => $product->id, 'quantity' => 2]],
     ], $overrides);
 }

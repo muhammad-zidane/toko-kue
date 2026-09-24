@@ -15,7 +15,7 @@ test("Order: Berhasil melakukan checkout", async () => {
       shipping_address: "Jl. Test No. 123",
       notes: "Cepat ya",
       items: [{ product_id: 1, quantity: 1 }],
-      payment_method: "transfer",
+      payment_method: "transfer_bank",
     }),
   });
 

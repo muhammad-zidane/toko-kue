@@ -12,7 +12,7 @@ function validCheckoutData(Product $product): array
     return [
         'delivery_method' => 'pickup',
         'delivery_date'   => now()->addDays(3)->format('Y-m-d'),
-        'payment_method'  => 'transfer',
+        'payment_method'  => 'transfer_bank',
         'items'           => [
             ['product_id' => $product->id, 'quantity' => 1],
         ],
@@ -70,7 +70,7 @@ it('fails checkout with missing delivery method', function () {
 
     $response = $this->actingAs($user)->post('/orders', [
         'delivery_date'  => now()->addDays(3)->format('Y-m-d'),
-        'payment_method' => 'transfer',
+        'payment_method' => 'transfer_bank',
         'items'          => [['product_id' => $product->id, 'quantity' => 1]],
     ]);
 
@@ -83,7 +83,7 @@ it('fails checkout with missing delivery date', function () {
 
     $response = $this->actingAs($user)->post('/orders', [
         'delivery_method' => 'pickup',
-        'payment_method'  => 'transfer',
+        'payment_method'  => 'transfer_bank',
         'items'           => [['product_id' => $product->id, 'quantity' => 1]],
     ]);
 
@@ -97,7 +97,7 @@ it('fails checkout with delivery date too soon', function () {
     $response = $this->actingAs($user)->post('/orders', [
         'delivery_method' => 'pickup',
         'delivery_date'   => now()->format('Y-m-d'),
-        'payment_method'  => 'transfer',
+        'payment_method'  => 'transfer_bank',
         'items'           => [['product_id' => $product->id, 'quantity' => 1]],
     ]);
 
