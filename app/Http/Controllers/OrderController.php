@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
 {
@@ -80,16 +81,31 @@ class OrderController extends Controller
         $parsedCustomizations = [];
         foreach ($request->items as $idx => $item) {
             $parsed = [];
-            if (!empty($item['customizations'])) {
+            if (isset($item['customizations']) && $item['customizations'] !== '') {
                 $decoded = json_decode($item['customizations'], true);
-                if (is_array($decoded)) {
-                    $parsed = $decoded;
+                if (!is_array($decoded) || !array_is_list($decoded)) {
+                    throw ValidationException::withMessages([
+                        "items.$idx.customizations" => 'Pilihan kustomisasi tidak valid.',
+                    ]);
                 }
+                $parsed = $decoded;
+            }
+            foreach ($parsed as $id) {
+                if (!is_int($id) && !(is_string($id) && ctype_digit($id))) {
+                    throw ValidationException::withMessages([
+                        "items.$idx.customizations" => 'ID kustomisasi tidak valid.',
+                    ]);
+                }
+            }
+            if (count($parsed) !== count(array_unique($parsed))) {
+                throw ValidationException::withMessages([
+                    "items.$idx.customizations" => 'Pilihan kustomisasi tidak boleh duplikat.',
+                ]);
             }
             $parsedCustomizations[$idx] = $parsed;
         }
 
-        $optionIds  = collect($parsedCustomizations)->flatten()->filter()->unique()->values()->all();
+        $optionIds  = collect($parsedCustomizations)->flatten()->unique()->values()->all();
         $optionsMap = CustomizationOption::whereIn('id', $optionIds)->get()->keyBy('id');
 
         $shippingZone = $request->delivery_method === 'delivery' && $request->shipping_zone_id
@@ -127,6 +143,23 @@ class OrderController extends Controller
                     $subtotal = 0;
                     foreach ($request->items as $idx => $item) {
                         $product = $products->get($item['product_id']);
+                        $singleChoiceTypes = [];
+                        foreach ($parsedCustomizations[$idx] as $optionId) {
+                            $option = $optionsMap->get($optionId);
+                            if (!$option || !$option->is_active || $option->category_id !== $product->category_id) {
+                                throw ValidationException::withMessages([
+                                    "items.$idx.customizations" => 'Pilihan kustomisasi tidak tersedia untuk produk ini.',
+                                ]);
+                            }
+                            if ($option->type !== 'topping') {
+                                if (isset($singleChoiceTypes[$option->type])) {
+                                    throw ValidationException::withMessages([
+                                        "items.$idx.customizations" => 'Hanya satu pilihan diperbolehkan untuk setiap tipe kustomisasi.',
+                                    ]);
+                                }
+                                $singleChoiceTypes[$option->type] = true;
+                            }
+                        }
                         $extraTotal = collect($parsedCustomizations[$idx])
                             ->sum(fn($id) => $optionsMap->get($id)?->extra_price ?? 0);
                         $subtotal += ($product->price + $extraTotal) * $item['quantity'];
@@ -191,13 +224,11 @@ class OrderController extends Controller
 
                         foreach ($parsedCustomizations[$idx] as $optionId) {
                             $opt = $optionsMap->get($optionId);
-                            if ($opt) {
-                                OrderItemCustomization::create([
-                                    'order_item_id'           => $orderItem->id,
-                                    'customization_option_id' => $opt->id,
-                                    'extra_price'             => $opt->extra_price,
-                                ]);
-                            }
+                            OrderItemCustomization::create([
+                                'order_item_id'           => $orderItem->id,
+                                'customization_option_id' => $opt->id,
+                                'extra_price'             => $opt->extra_price,
+                            ]);
                         }
                     }
 
