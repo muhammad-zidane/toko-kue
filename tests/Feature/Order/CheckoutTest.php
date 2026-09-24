@@ -146,11 +146,13 @@ it('keeps duplicate product items with different customizations separate when st
     $user = User::factory()->create();
     $product = Product::factory()->create(['stock' => 10, 'is_available' => true]);
     $firstOption = CustomizationOption::create([
+        'category_id' => $product->category_id,
         'type' => 'rasa',
         'name' => 'Coklat',
         'extra_price' => 1000,
     ]);
     $secondOption = CustomizationOption::create([
+        'category_id' => $product->category_id,
         'type' => 'rasa',
         'name' => 'Vanila',
         'extra_price' => 2000,
