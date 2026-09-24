@@ -2,6 +2,8 @@
 
 use App\Models\CustomizationOption;
 use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Payment;
 use App\Models\Product;
 use App\Models\User;
 
@@ -44,6 +46,22 @@ it('creates order with valid data', function () {
 
     $response->assertRedirect();
     $this->assertDatabaseHas('orders', ['user_id' => $user->id]);
+    $this->assertDatabaseCount('order_items', 1);
+    $this->assertDatabaseCount('payments', 1);
+    $this->assertDatabaseHas('products', ['id' => $product->id, 'stock' => 9]);
+});
+
+it('rejects an unavailable product during checkout without changing order data or stock', function () {
+    $user    = User::factory()->create();
+    $product = Product::factory()->create(['stock' => 10, 'is_available' => false]);
+
+    $response = $this->actingAs($user)->post('/orders', validCheckoutData($product));
+
+    $response->assertSessionHasErrors(['availability' => "Produk {$product->name} tidak tersedia."]);
+    expect(Order::count())->toBe(0);
+    expect(OrderItem::count())->toBe(0);
+    expect(Payment::count())->toBe(0);
+    $this->assertDatabaseHas('products', ['id' => $product->id, 'stock' => 10]);
 });
 
 it('fails checkout with missing delivery method', function () {

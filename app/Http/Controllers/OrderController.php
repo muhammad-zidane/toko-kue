@@ -112,6 +112,11 @@ class OrderController extends Controller
 
                     foreach ($quantitiesByProduct as $productId => $quantity) {
                         $product = $products->get($productId);
+                        if (!$product->is_available) {
+                            throw \Illuminate\Validation\ValidationException::withMessages([
+                                'availability' => "Produk {$product->name} tidak tersedia.",
+                            ]);
+                        }
                         if ($product->stock < $quantity) {
                             throw \Illuminate\Validation\ValidationException::withMessages([
                                 'stock' => "Stok {$product->name} tidak mencukupi. Tersisa {$product->stock}.",
