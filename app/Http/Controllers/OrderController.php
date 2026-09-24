@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
@@ -58,11 +59,14 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $leadDays = config('app.lead_time_days', 2);
+        $shippingZoneExists = $request->input('delivery_method') === 'delivery'
+            ? Rule::exists('shipping_zones', 'id')->where('is_available', true)
+            : Rule::exists('shipping_zones', 'id');
 
         $request->validate([
             'delivery_method'              => 'required|in:pickup,delivery',
             'shipping_address'             => 'required_if:delivery_method,delivery|nullable|string',
-            'shipping_zone_id'             => 'required_if:delivery_method,delivery|nullable|exists:shipping_zones,id',
+            'shipping_zone_id'             => ['required_if:delivery_method,delivery', 'nullable', $shippingZoneExists],
             'delivery_date'                => ['required', 'date', 'after_or_equal:' . now()->addDays($leadDays)->format('Y-m-d')],
             'delivery_slot'                => 'nullable|string',
             'notes'                        => 'nullable|string|max:300',
@@ -108,13 +112,21 @@ class OrderController extends Controller
         $optionIds  = collect($parsedCustomizations)->flatten()->unique()->values()->all();
         $optionsMap = CustomizationOption::whereIn('id', $optionIds)->get()->keyBy('id');
 
-        $shippingZone = $request->delivery_method === 'delivery' && $request->shipping_zone_id
-            ? ShippingZone::find($request->shipping_zone_id)
-            : null;
-
         try {
             ['order' => $order, 'isCod' => $isCod] = DB::transaction(
-                function () use ($request, $parsedCustomizations, $optionsMap, $shippingZone) {
+                function () use ($request, $parsedCustomizations, $optionsMap) {
+                    $shippingZone = null;
+                    if ($request->delivery_method === 'delivery') {
+                        $shippingZone = ShippingZone::whereKey($request->shipping_zone_id)
+                            ->lockForUpdate()
+                            ->first();
+
+                        if (!$shippingZone || !$shippingZone->is_available) {
+                            throw ValidationException::withMessages([
+                                'shipping_zone_id' => 'Zona pengiriman tidak valid.',
+                            ]);
+                        }
+                    }
 
                     // lockForUpdate prevents stock race conditions
                     $products = Product::whereIn('id', array_column($request->items, 'product_id'))
