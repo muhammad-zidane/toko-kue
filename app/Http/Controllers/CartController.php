@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\CustomizationOption;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use JsonException;
 
 class CartController extends Controller
 {
@@ -32,14 +34,32 @@ class CartController extends Controller
             'customizations_json' => 'nullable|string',
         ]);
 
+        try {
+            $rawCustomizations = json_decode($request->customizations_json ?? '[]', false, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            throw ValidationException::withMessages(['customizations_json' => 'Format kustomisasi tidak valid.']);
+        }
+
+        if (!is_array($rawCustomizations) || !array_is_list($rawCustomizations)) {
+            throw ValidationException::withMessages(['customizations_json' => 'Format kustomisasi tidak valid.']);
+        }
+
+        foreach ($rawCustomizations as $customization) {
+            $id = $customization instanceof \stdClass ? ($customization->id ?? null) : $customization;
+            $validId = (is_int($id) || (is_string($id) && ctype_digit($id)))
+                && filter_var($id, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false;
+            if ((!is_int($customization) && !($customization instanceof \stdClass)) || !$validId) {
+                throw ValidationException::withMessages(['customizations_json' => 'Format kustomisasi tidak valid.']);
+            }
+        }
+
         $cart = session()->get('cart', []);
         $productId = $request->product_id;
         $quantity = $request->quantity ?? 1;
         $note = $request->note;
-        $rawCustomizations = json_decode($request->customizations_json ?? '[]', true) ?: [];
         // Frontend sends [{id: "7", price: 0}, ...], extract only the IDs as integers
         $customizations = array_values(array_filter(
-            array_map(fn($c) => is_array($c) ? (int)($c['id'] ?? 0) : (int)$c, $rawCustomizations),
+            array_map(fn($c) => $c instanceof \stdClass ? (int)$c->id : $c, $rawCustomizations),
             fn($id) => $id > 0
         ));
 
