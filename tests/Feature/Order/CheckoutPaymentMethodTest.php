@@ -11,6 +11,7 @@ function paymentMethodCheckoutData(Product $product, string $method): array
     return [
         'delivery_method' => 'pickup',
         'delivery_date' => now()->addDays(3)->format('Y-m-d'),
+        'delivery_slot' => '08:00-11:00',
         'payment_method' => $method,
         'items' => [['product_id' => $product->id, 'quantity' => 1]],
     ];

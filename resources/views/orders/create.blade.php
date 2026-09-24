@@ -289,7 +289,7 @@
 
             <label class="field-label">Slot Waktu</label>
             <div class="slot-grid">
-                @php $slots = ['08:00-11:00' => 'Pagi', '11:00-14:00' => 'Siang', '14:00-18:00' => 'Sore']; @endphp
+                @php $slots = config('checkout.delivery_slots'); @endphp
                 @foreach($slots as $value => $label)
                 <label class="slot-option {{ old('delivery_slot') === $value ? 'selected' : '' }}"
                        onclick="selectSlot(this)">

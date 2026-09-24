@@ -12,6 +12,7 @@ function validCheckoutData(Product $product): array
     return [
         'delivery_method' => 'pickup',
         'delivery_date'   => now()->addDays(3)->format('Y-m-d'),
+        'delivery_slot'   => '08:00-11:00',
         'payment_method'  => 'transfer_bank',
         'items'           => [
             ['product_id' => $product->id, 'quantity' => 1],
@@ -28,6 +29,7 @@ it('shows checkout page when cart is not empty', function () {
     $response = $this->actingAs($user)->get('/cart/checkout');
 
     $response->assertStatus(200);
+    $response->assertSee('08:00-11:00')->assertSee('11:00-14:00')->assertSee('14:00-18:00');
 });
 
 it('redirects checkout to cart when cart is empty', function () {
@@ -70,6 +72,7 @@ it('fails checkout with missing delivery method', function () {
 
     $response = $this->actingAs($user)->post('/orders', [
         'delivery_date'  => now()->addDays(3)->format('Y-m-d'),
+        'delivery_slot'  => '08:00-11:00',
         'payment_method' => 'transfer_bank',
         'items'          => [['product_id' => $product->id, 'quantity' => 1]],
     ]);
@@ -83,6 +86,7 @@ it('fails checkout with missing delivery date', function () {
 
     $response = $this->actingAs($user)->post('/orders', [
         'delivery_method' => 'pickup',
+        'delivery_slot'   => '08:00-11:00',
         'payment_method'  => 'transfer_bank',
         'items'           => [['product_id' => $product->id, 'quantity' => 1]],
     ]);
@@ -97,6 +101,7 @@ it('fails checkout with delivery date too soon', function () {
     $response = $this->actingAs($user)->post('/orders', [
         'delivery_method' => 'pickup',
         'delivery_date'   => now()->format('Y-m-d'),
+        'delivery_slot'   => '08:00-11:00',
         'payment_method'  => 'transfer_bank',
         'items'           => [['product_id' => $product->id, 'quantity' => 1]],
     ]);

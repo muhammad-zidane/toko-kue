@@ -68,7 +68,7 @@ class OrderController extends Controller
             'shipping_address'             => 'required_if:delivery_method,delivery|nullable|string',
             'shipping_zone_id'             => ['required_if:delivery_method,delivery', 'nullable', $shippingZoneExists],
             'delivery_date'                => ['required', 'date', 'after_or_equal:' . now()->addDays($leadDays)->format('Y-m-d')],
-            'delivery_slot'                => 'nullable|string',
+            'delivery_slot'                => ['required', 'string', 'max:11', Rule::in(array_keys(config('checkout.delivery_slots')))],
             'notes'                        => 'nullable|string|max:300',
             'items'                        => 'required|array',
             'items.*.product_id'           => 'required|exists:products,id',
