@@ -101,6 +101,34 @@ it('prices valid customizations from the database and allows different types and
     }
 });
 
+it('accepts an active global customization and uses its database price', function () {
+    $user = User::factory()->create();
+    $product = Product::factory()->create(['stock' => 5, 'price' => 100000]);
+    $option = CustomizationOption::create([
+        'category_id' => null,
+        'type' => 'rasa',
+        'name' => 'Rasa global',
+        'extra_price' => 15000,
+        'is_active' => true,
+    ]);
+    $data = checkoutCustomizationData($product, [$option->id], 2);
+    $data['items'][0]['extra_price'] = 1;
+
+    $response = $this->actingAs($user)->post('/orders', $data);
+
+    $response->assertSessionHasNoErrors()->assertRedirect();
+    $order = Order::firstOrFail();
+    $item = $order->orderItems()->firstOrFail();
+    $this->assertDatabaseHas('order_item_customizations', [
+        'order_item_id' => $item->id,
+        'customization_option_id' => $option->id,
+        'extra_price' => $option->extra_price,
+    ]);
+    expect((float) $item->price)->toBe(115000.0)
+        ->and((float) $order->total_price)->toBe(230000.0)
+        ->and($product->fresh()->stock)->toBe(3);
+});
+
 it('rejects malformed customization IDs instead of dropping them', function () {
     $user = User::factory()->create();
     $product = Product::factory()->create(['stock' => 5]);

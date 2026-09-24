@@ -146,7 +146,7 @@ class OrderController extends Controller
                         $singleChoiceTypes = [];
                         foreach ($parsedCustomizations[$idx] as $optionId) {
                             $option = $optionsMap->get($optionId);
-                            if (!$option || !$option->is_active || $option->category_id !== $product->category_id) {
+                            if (!$option || !$option->is_active || ($option->category_id !== null && $option->category_id !== $product->category_id)) {
                                 throw ValidationException::withMessages([
                                     "items.$idx.customizations" => 'Pilihan kustomisasi tidak tersedia untuk produk ini.',
                                 ]);
