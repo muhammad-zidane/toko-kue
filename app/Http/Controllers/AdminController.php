@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Models\Voucher;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -187,14 +188,27 @@ class AdminController extends Controller
         }
 
         $order->load(['user', 'payment']);
-        $order->update(['status' => $status]);
+        $isCodCompletion = $status === 'completed' && $order->payment?->payment_method === 'cod';
+
+        if ($isCodCompletion) {
+            DB::transaction(function () use ($order) {
+                $order->update([
+                    'status' => 'completed',
+                    'payment_status' => 'paid',
+                    'paid_amount' => $order->total_price,
+                ]);
+                $order->payment->update(['status' => 'paid', 'paid_at' => now()]);
+            });
+        } else {
+            $order->update(['status' => $status]);
+        }
 
         try {
             \Illuminate\Support\Facades\Mail::to($order->user->email)
                 ->queue(new \App\Mail\OrderStatusUpdatedMail($order));
         } catch (\Throwable) {}
 
-        if ($status === 'completed' && $order->payment) {
+        if ($status === 'completed' && $order->payment && ! $isCodCompletion) {
             $order->payment->update(['status' => 'paid', 'paid_at' => now()]);
         }
 

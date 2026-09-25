@@ -112,7 +112,7 @@
                         <a class="btn-outline" href="{{ route('orders.reviews.index', $order) }}">Ulasan</a>
                     @endif
 
-                    @if ($status === 'pending' && $paymentStatus === 'unpaid' && !($order->payment && $order->payment->proof_image))
+                    @if ($status === 'pending' && $paymentStatus === 'unpaid' && $order->payment?->payment_method !== 'cod' && !($order->payment && $order->payment->proof_image))
                         <a class="btn-primary" href="{{ route('orders.payment', $order) }}">Bayar Sekarang</a>
                     @endif
 

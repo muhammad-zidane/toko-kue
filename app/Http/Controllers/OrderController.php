@@ -45,6 +45,10 @@ class OrderController extends Controller
         $this->authorizeOwner($order);
         $order->load('orderItems.product', 'payment');
 
+        if ($order->payment?->payment_method === 'cod') {
+            return redirect()->route('orders.success', $order);
+        }
+
         return view('orders.payment', compact('order'));
     }
 
@@ -316,6 +320,10 @@ class OrderController extends Controller
         $this->authorizeOwner($order);
 
         $order->load('payment');
+        if ($order->payment?->payment_method === 'cod') {
+            return back()->withErrors(['proof_image' => 'Bukti pembayaran tidak diperlukan untuk COD.']);
+        }
+
         if ($order->payment?->status === 'paid') {
             return back()->with('error', 'Pembayaran untuk pesanan ini sudah dikonfirmasi.');
         }

@@ -241,7 +241,7 @@
                 @endif
             </div>
 
-            @if($order->status === 'pending' && $order->payment && $order->payment->status === 'unpaid')
+            @if($order->status === 'pending' && $order->payment && $order->payment->status === 'unpaid' && $order->payment->payment_method !== 'cod')
                 <a href="{{ route('orders.payment', $order) }}" class="btn-pay">
                     <i class="fa-solid fa-credit-card"></i> Bayar Sekarang
                 </a>

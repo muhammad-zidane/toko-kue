@@ -146,7 +146,7 @@
                 @endif
             </div>
 
-            @if($order->status === 'pending' && $order->payment && $order->payment->status === 'unpaid' && !$order->payment->proof_image)
+            @if($order->status === 'pending' && $order->payment && $order->payment->status === 'unpaid' && $order->payment->payment_method !== 'cod' && !$order->payment->proof_image)
             <a href="{{ route('orders.payment', $order) }}" class="btn-back-page" style="width:100%;text-align:center;display:block;margin-bottom:20px;background:var(--pink);">Bayar Sekarang</a>
             @endif
 

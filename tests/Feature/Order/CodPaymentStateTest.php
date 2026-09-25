@@ -102,3 +102,67 @@ it('keeps non-COD DP checkout behavior unchanged', function () {
         ->and((float) $order->payment->amount)->toBe(150000.0)
         ->and($order->payment->paid_at)->toBeNull();
 });
+
+it('does not expose the prepaid payment page for COD', function () {
+    $user = User::factory()->create();
+    $product = Product::factory()->create(['price' => 300000, 'stock' => 5]);
+
+    $this->actingAs($user)->post('/orders', codPaymentCheckoutData($product))
+        ->assertRedirect();
+
+    $order = Order::sole();
+    $this->get(route('orders.payment', $order))
+        ->assertRedirect(route('orders.success', $order));
+});
+
+it('records COD cash as received when admin completes the order', function () {
+    $user = User::factory()->create();
+    $admin = User::factory()->create(['role' => 'admin']);
+    $product = Product::factory()->create(['price' => 300000, 'stock' => 5]);
+
+    $this->actingAs($user)->post('/orders', codPaymentCheckoutData($product))
+        ->assertRedirect();
+
+    $order = Order::with('payment')->sole();
+    expect($order->status)->toBe('processing')
+        ->and($order->payment_status)->toBe('unpaid')
+        ->and((float) $order->paid_amount)->toBe(0.0)
+        ->and($order->payment->status)->toBe('unpaid')
+        ->and($order->payment->paid_at)->toBeNull();
+
+    $this->actingAs($admin)
+        ->patch(route('admin.orders.status', [$order, 'completed']))
+        ->assertRedirect();
+
+    $order->refresh()->load('payment');
+    expect($order->status)->toBe('completed')
+        ->and($order->payment_status)->toBe('paid')
+        ->and((float) $order->paid_amount)->toBe((float) $order->total_price)
+        ->and($order->payment->status)->toBe('paid')
+        ->and($order->payment->paid_at)->not->toBeNull();
+
+    $finance = app(AdminController::class)->finance()->getData();
+    expect($finance['totalRevenue'])->toBe(300000.0)
+        ->and($finance['paidCount'])->toBe(1);
+});
+
+it('keeps existing non-COD completion behavior outside the COD receipt path', function () {
+    $user = User::factory()->create();
+    $admin = User::factory()->create(['role' => 'admin']);
+    $product = Product::factory()->create(['price' => 300000, 'stock' => 5]);
+
+    $this->actingAs($user)->post('/orders', codPaymentCheckoutData($product, 'transfer_bank'))
+        ->assertRedirect();
+
+    $order = Order::with('payment')->sole();
+    $this->actingAs($admin)
+        ->patch(route('admin.orders.status', [$order, 'completed']))
+        ->assertRedirect();
+
+    $order->refresh()->load('payment');
+    expect($order->status)->toBe('completed')
+        ->and($order->payment->status)->toBe('paid')
+        ->and($order->payment->paid_at)->not->toBeNull()
+        ->and($order->payment_status)->toBe('unpaid')
+        ->and((float) $order->paid_amount)->toBe(0.0);
+});
