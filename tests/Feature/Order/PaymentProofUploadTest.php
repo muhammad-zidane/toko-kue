@@ -256,4 +256,48 @@ class PaymentProofUploadTest extends TestCase
             'status' => 'processing',
         ]);
     }
+
+    #[\PHPUnit\Framework\Attributes\Test]
+    public function cod_upload_proof_is_rejected_without_changing_payment()
+    {
+        Storage::fake('public');
+
+        $owner = User::factory()->create(['role' => 'customer']);
+        $order = Order::factory()->create([
+            'user_id' => $owner->id,
+            'status' => 'processing',
+            'payment_status' => 'unpaid',
+            'paid_amount' => 0,
+        ]);
+        $payment = Payment::factory()->create([
+            'order_id' => $order->id,
+            'payment_method' => 'cod',
+            'status' => 'unpaid',
+            'proof_image' => null,
+            'paid_at' => null,
+        ]);
+
+        $response = $this->actingAs($owner)->post(route('orders.uploadProof', $order), [
+            'proof_image' => UploadedFile::fake()->image('bukti.jpg'),
+        ]);
+
+        $response->assertSessionHasErrors([
+            'proof_image' => 'Bukti pembayaran tidak diperlukan untuk COD.',
+        ]);
+        $this->assertDatabaseHas('payments', [
+            'id' => $payment->id,
+            'payment_method' => 'cod',
+            'status' => 'unpaid',
+            'proof_image' => null,
+            'paid_at' => null,
+        ]);
+        $this->assertDatabaseHas('orders', [
+            'id' => $order->id,
+            'status' => 'processing',
+            'payment_status' => 'unpaid',
+            'paid_amount' => 0,
+        ]);
+        $this->assertSame([], Storage::disk('public')->allFiles('payment_proofs'));
+    }
+
 }

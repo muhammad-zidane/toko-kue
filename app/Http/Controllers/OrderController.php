@@ -45,6 +45,10 @@ class OrderController extends Controller
         $this->authorizeOwner($order);
         $order->load('orderItems.product', 'payment');
 
+        if ($order->payment?->payment_method === 'cod') {
+            return redirect()->route('orders.success', $order);
+        }
+
         return view('orders.payment', compact('order'));
     }
 
@@ -76,11 +80,12 @@ class OrderController extends Controller
             'items.*.note'                 => 'nullable|string|max:300',
             'items.*.customizations'       => 'nullable|string',
             'voucher_code'                 => 'nullable|string',
-            'use_dp'                       => 'nullable|boolean',
+            'use_dp'                       => 'nullable|boolean|prohibited_if:payment_method,cod',
             'payment_method'               => ['nullable', 'string', Rule::in(['transfer_bank', 'ewallet', 'qris', 'cod'])],
         ], [
             'shipping_zone_id.required_if' => 'Zona pengiriman wajib dipilih jika metode pengiriman adalah diantar.',
             'shipping_zone_id.exists'      => 'Zona pengiriman tidak valid.',
+            'use_dp.prohibited_if'          => 'DP tidak tersedia untuk pembayaran COD.',
         ]);
 
         $parsedCustomizations = [];
@@ -256,17 +261,13 @@ class OrderController extends Controller
                     Payment::create([
                         'order_id'       => $order->id,
                         'payment_method' => $paymentMethod,
-                        'status'         => $isCod ? 'paid' : 'unpaid',
+                        'status'         => 'unpaid',
                         'amount'         => $amountDue,
-                        'paid_at'        => $isCod ? now() : null,
+                        'paid_at'        => null,
                     ]);
 
                     if ($isCod) {
-                        $order->update([
-                            'status'         => 'processing',
-                            'payment_status' => 'paid',
-                            'paid_amount'    => $totalPrice,
-                        ]);
+                        $order->update(['status' => 'processing']);
                     }
 
                     return ['order' => $order, 'isCod' => $isCod];
@@ -319,6 +320,10 @@ class OrderController extends Controller
         $this->authorizeOwner($order);
 
         $order->load('payment');
+        if ($order->payment?->payment_method === 'cod') {
+            return back()->withErrors(['proof_image' => 'Bukti pembayaran tidak diperlukan untuk COD.']);
+        }
+
         if ($order->payment?->status === 'paid') {
             return back()->with('error', 'Pembayaran untuk pesanan ini sudah dikonfirmasi.');
         }
