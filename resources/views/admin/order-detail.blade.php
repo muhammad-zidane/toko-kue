@@ -141,6 +141,16 @@
                 <span class="text-xs text-text-secondary font-medium">Jumlah</span>
                 <span class="text-xs font-bold text-brown-dark">Rp {{ number_format($order->payment->amount, 0, ',', '.') }}</span>
             </div>
+            @if($order->dp_amount > 0)
+            <div class="flex justify-between items-center py-2.5 border-b border-cream-border/40">
+                <span class="text-xs text-text-secondary font-medium">Total Terkonfirmasi</span>
+                <span class="text-xs font-bold text-brown-dark">Rp {{ number_format($order->paid_amount, 0, ',', '.') }}</span>
+            </div>
+            <div class="flex justify-between items-center py-2.5 border-b border-cream-border/40">
+                <span class="text-xs text-text-secondary font-medium">Sisa Tagihan</span>
+                <span class="text-xs font-bold text-brown-dark">Rp {{ number_format(max(0, $order->total_price - $order->paid_amount), 0, ',', '.') }}</span>
+            </div>
+            @endif
             @if($order->payment->paid_at)
             <div class="flex justify-between items-center py-2.5 border-b border-cream-border/40 last:border-b-0 last:pb-0">
                 <span class="text-xs text-text-secondary font-medium">Dibayar Pada</span>
