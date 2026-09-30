@@ -1,5 +1,5 @@
 import { expect, test, beforeEach } from "bun:test";
-import { request, resetDatabase, login } from "./helpers";
+import { request, resetDatabase, login, ADMIN_EMAIL } from "./helpers";
 
 beforeEach(() => {
   resetDatabase();
@@ -23,7 +23,7 @@ test("Profile: Berhasil update profil", async () => {
     jar,
     body: JSON.stringify({
       name: "Updated Name",
-      email: "admin@tokokue.com",
+      email: ADMIN_EMAIL,
     }),
   });
 

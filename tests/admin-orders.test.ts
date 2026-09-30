@@ -14,16 +14,7 @@ test("Admin Orders: Berhasil melihat daftar pesanan", async () => {
 test("Admin Orders: Berhasil update status pesanan ke processing", async () => {
   const jar = await login();
 
-  // Buat order dulu
-  await request("/orders", {
-    method: "POST",
-    jar,
-    body: JSON.stringify({
-      shipping_address: "Jl. Test",
-      items: [{ product_id: 1, quantity: 1 }],
-    }),
-  });
-
+  // DemoSeeder sudah menyediakan pesanan dengan ID 1.
   const response = await request("/admin/orders/1/status/processing", {
     method: "PATCH",
     jar,
