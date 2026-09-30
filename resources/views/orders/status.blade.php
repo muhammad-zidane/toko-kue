@@ -163,6 +163,10 @@
                     </div>
                 </div>
 
+                @if($order->payment_status === 'dp' && $order->paid_amount > 0 && $order->payment?->status !== 'paid')
+                    <a href="{{ route('orders.payment', $order) }}" class="btn-primary w-full py-3.5 text-sm font-bold justify-center">Bayar Sisa Rp {{ number_format($order->total_price - $order->paid_amount, 0, ',', '.') }}</a>
+                @endif
+
                 @if($order->status === 'pending' && $order->payment && $order->payment->status === 'unpaid' && $order->payment->payment_method !== 'cod')
                     <a href="{{ route('orders.payment', $order) }}" class="btn-primary w-full py-3.5 text-sm font-bold justify-center">
                         <i class="fa-solid fa-credit-card mr-2"></i> Bayar Sekarang

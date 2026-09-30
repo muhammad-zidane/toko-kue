@@ -28,7 +28,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             @forelse ($orders as $order)
                 @php
-                    $paymentStatus = $order->payment?->status ?? 'unpaid';
+                    $paymentStatus = $order->payment_status ?? 'unpaid';
                     $status = $order->status ?? 'pending';
                     $firstItem = $order->orderItems->first();
                     $thumbPath = $firstItem?->product?->image ? asset('storage/' . $firstItem->product->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=200&q=80';
@@ -51,7 +51,7 @@
                                 {{ ucfirst($status) }}
                             </span>
                             <span class="inline-block px-2.5 py-0.5 text-xs font-bold rounded-full badge-{{ $paymentStatus === 'paid' ? 'green' : 'gold' }}">
-                                {{ $order->payment?->status_label ?? 'Belum Bayar' }}
+                                {{ $paymentStatus === 'dp' && $order->paid_amount > 0 ? 'DP Dibayar' : ($order->payment?->status_label ?? 'Belum Bayar') }}
                             </span>
                         </div>
 
@@ -78,8 +78,8 @@
                             <a class="btn-primary py-2 px-4 text-xs" href="{{ route('orders.payment', $order) }}">Bayar Sekarang</a>
                         @endif
 
-                        @if ($paymentStatus === 'dp')
-                            <a class="btn-primary py-2 px-4 text-xs bg-amber-500 hover:bg-amber-600 border-0" href="{{ route('orders.payment', $order) }}">Bayar Sisa</a>
+                        @if ($paymentStatus === 'dp' && $order->payment?->status !== 'paid')
+                            <a class="btn-primary py-2 px-4 text-xs bg-amber-500 hover:bg-amber-600 border-0" href="{{ route('orders.payment', $order) }}">{{ $order->paid_amount > 0 ? 'Bayar Sisa' : 'Bayar DP' }}</a>
                         @endif
                     </div>
                 </div>

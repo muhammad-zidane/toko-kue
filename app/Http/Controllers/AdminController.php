@@ -208,7 +208,7 @@ class AdminController extends Controller
                 ->queue(new \App\Mail\OrderStatusUpdatedMail($order));
         } catch (\Throwable) {}
 
-        if ($status === 'completed' && $order->payment && ! $isCodCompletion) {
+        if ($status === 'completed' && $order->payment && ! $isCodCompletion && $order->payment_status !== 'dp') {
             $order->payment->update(['status' => 'paid', 'paid_at' => now()]);
         }
 
@@ -749,19 +749,40 @@ class AdminController extends Controller
 
     public function confirmPayment(Request $request, Order $order)
     {
-        $payment = $order->payment;
-        if (!$payment) {
-            return back()->withErrors(['error' => 'Pembayaran tidak ditemukan.']);
+        $confirmed = DB::transaction(function () use ($order) {
+            $order = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
+            $payment = $order->payment;
+            if (!$payment || $payment->status !== 'unpaid') {
+                return false;
+            }
+
+            $paidAmount = (float) $order->paid_amount + (float) $payment->amount;
+            if ($paidAmount > (float) $order->total_price) {
+                return false;
+            }
+
+            $payment->update(['status' => 'paid', 'paid_at' => now()]);
+            $isFullyPaid = $paidAmount >= (float) $order->total_price;
+            $order->update([
+                'status'         => 'processing',
+                'paid_amount'    => $paidAmount,
+                'payment_status' => $isFullyPaid ? 'paid' : 'dp',
+            ]);
+
+            if (!$isFullyPaid && $order->dp_amount > 0) {
+                $order->payments()->create([
+                    'payment_method' => $payment->payment_method,
+                    'status' => 'unpaid',
+                    'amount' => (float) $order->total_price - $paidAmount,
+                ]);
+            }
+
+            return true;
+        });
+
+        if (!$confirmed) {
+            return back()->withErrors(['error' => 'Pembayaran tidak dapat dikonfirmasi.']);
         }
-
-        $payment->update(['status' => 'paid', 'paid_at' => now()]);
-
-        $isFullyPaid = (float) $payment->amount >= (float) $order->total_price;
-        $order->update([
-            'status'         => 'processing',
-            'paid_amount'    => $payment->amount,
-            'payment_status' => $isFullyPaid ? 'paid' : 'dp',
-        ]);
 
         return back()->with('success', 'Pembayaran dikonfirmasi.');
     }
@@ -771,9 +792,9 @@ class AdminController extends Controller
         $request->validate(['reason' => 'nullable|string|max:500']);
         $order->payment?->update(['status' => 'failed']);
         $order->update([
-            'status'         => 'pending',
-            'payment_status' => 'unpaid',
-            'paid_amount'    => 0,
+            'status'         => $order->paid_amount > 0 ? $order->status : 'pending',
+            'payment_status' => $order->dp_amount > 0 ? 'dp' : 'unpaid',
+            'paid_amount'    => $order->dp_amount > 0 ? $order->paid_amount : 0,
             'notes'          => $request->reason ? '[Pembayaran Ditolak] ' . $request->reason : $order->notes,
         ]);
         return back()->with('success', 'Pembayaran ditolak.');

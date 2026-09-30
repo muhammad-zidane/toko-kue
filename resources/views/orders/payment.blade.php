@@ -22,7 +22,7 @@
     $totalAmount   = $order->total_price;
     $uniqueCode    = 1000;
     $totalTransfer = $amountDue + $uniqueCode;
-    $deadline      = \Carbon\Carbon::parse($order->created_at)->addHours(2);
+    $deadline      = \Carbon\Carbon::parse($isRemaining ? $order->payment->created_at : $order->created_at)->addHours(2);
     $remainingSeconds = max(0, now()->diffInSeconds($deadline, false));
 @endphp
 

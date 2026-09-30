@@ -141,6 +141,10 @@
                 <a href="{{ route('orders.payment', $order) }}" class="btn-primary w-full py-3 text-center block text-sm font-bold justify-center">Bayar Sekarang</a>
                 @endif
 
+                @if($order->payment_status === 'dp' && $order->paid_amount > 0 && $order->payment?->status !== 'paid')
+                <a href="{{ route('orders.payment', $order) }}" class="btn-primary w-full py-3 text-center block text-sm font-bold justify-center">Bayar Sisa Rp {{ number_format($order->total_price - $order->paid_amount, 0, ',', '.') }}</a>
+                @endif
+
                 @if(in_array($order->status, ['processing', 'completed']))
                 <a href="{{ route('orders.invoice', $order) }}" target="_blank" class="btn-ghost w-full py-3 text-center block text-sm font-semibold justify-center">
                     <i class="fas fa-file-pdf mr-2"></i> Unduh Invoice (PDF)
