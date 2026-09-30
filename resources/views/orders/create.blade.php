@@ -1,99 +1,7 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" />
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jagoan Kue - Form Pemesanan</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    <style>
-        body { background-color: var(--cream); }
-        .breadcrumb { max-width: 1100px; margin: 0 auto; padding: 20px 24px 0; font-size: 14px; color: var(--gray); }
-        .stepper-wrap { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
-        .stepper { display: flex; align-items: center; justify-content: center; }
-        .step { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-        .step-circle { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; border: 2px solid var(--pink); color: var(--pink); background: var(--white); }
-        .step-circle.active { background: var(--pink); color: white; }
-        .step-circle.done { background: var(--pink); color: white; }
-        .step-label { font-size: 13px; font-weight: 500; }
-        .step-line { flex: 1; height: 2px; background: #E5C5CF; margin-bottom: 24px; max-width: 120px; }
-        .step-line.done { background: var(--pink); }
-        .checkout-layout { max-width: 1100px; margin: 0 auto; padding: 0 24px 60px; display: grid; grid-template-columns: 1fr 380px; gap: 24px; align-items: start; }
-        .card { background: var(--white); border-radius: 16px; padding: 24px; margin-bottom: 16px; border: 1px solid #EDE0D4; }
-        .card-title { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
-        .card-num { width: 28px; height: 28px; border-radius: 50%; background: var(--pink); color: white; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .card-title span { font-size: 15px; font-weight: 700; color: var(--brown-dark); }
-        .produk-item { display: flex; align-items: center; gap: 14px; background: var(--cream); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
-        .produk-item img { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; }
-        .produk-item h4 { font-size: 15px; font-weight: 700; }
-        .produk-item p { font-size: 14px; font-weight: 600; color: var(--brown-dark); margin-top: 4px; }
-        .produk-item small { font-size: 12px; color: var(--gray); }
-        .field-label { font-size: 13px; font-weight: 500; margin-bottom: 6px; display: block; }
-        .field-input { width: 100%; background: var(--brown-dark); color: white; border: none; border-radius: 8px; padding: 10px 14px; font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif; outline: none; margin-bottom: 14px; }
-        .field-input::placeholder { color: rgba(255,255,255,0.5); }
-        .field-input option { background: var(--brown-dark); }
-        .field-textarea { width: 100%; background: var(--brown-dark); color: white; border: none; border-radius: 8px; padding: 10px 14px; font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif; outline: none; resize: none; margin-bottom: 14px; }
-        .field-textarea::placeholder { color: rgba(255,255,255,0.5); }
-        .delivery-toggle { display: flex; gap: 12px; margin-bottom: 16px; }
-        .delivery-option { flex: 1; border: 2px solid #D1C0B8; border-radius: 12px; padding: 14px; cursor: pointer; text-align: center; transition: all 0.2s; }
-        .delivery-option input { display: none; }
-        .delivery-option.selected { border-color: var(--pink); background: #FFF5F7; }
-        .delivery-option i { font-size: 22px; color: var(--pink); margin-bottom: 6px; display: block; }
-        .delivery-option p { font-size: 13px; font-weight: 700; }
-        .delivery-option small { font-size: 11px; color: var(--gray); }
-        .slot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
-        .slot-option { border: 1.5px solid #D1C0B8; border-radius: 10px; padding: 10px; cursor: pointer; text-align: center; transition: all 0.2s; }
-        .slot-option input { display: none; }
-        .slot-option.selected { border-color: var(--pink); background: #FFF5F7; }
-        .slot-option p { font-size: 12px; font-weight: 600; }
-        .slot-option small { font-size: 11px; color: var(--gray); }
-        .payment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .payment-option { display: flex; align-items: center; gap: 10px; border: 1.5px solid #D1C0B8; border-radius: 10px; padding: 12px; cursor: pointer; transition: all 0.2s; }
-        .payment-option:has(input:checked) { border-color: var(--brown-dark); background: var(--cream-dark); }
-        .payment-option input { accent-color: var(--brown-dark); }
-        .payment-logo { width: 36px; height: 36px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: white; flex-shrink: 0; }
-        .payment-info p { font-size: 13px; font-weight: 600; }
-        .payment-info small { font-size: 11px; color: var(--gray); }
-        .summary-card { background: var(--white); border-radius: 16px; padding: 24px; border: 1px solid #EDE0D4; position: sticky; top: 90px; }
-        .summary-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
-        .summary-item { display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid #F0E8E0; margin-bottom: 12px; }
-        .summary-item img { width: 52px; height: 52px; object-fit: cover; border-radius: 8px; }
-        .summary-item-info { flex: 1; }
-        .summary-item-info p { font-size: 13px; font-weight: 600; }
-        .summary-item-info small { font-size: 12px; color: var(--gray); }
-        .summary-item-price { font-size: 13px; font-weight: 600; }
-        .summary-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 10px; }
-        .summary-row span:first-child { color: var(--gray); }
-        .summary-row span:last-child { font-weight: 600; }
-        .summary-total { display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; padding-top: 12px; border-top: 1.5px solid #EDE0D4; margin-bottom: 16px; }
-        .summary-total span:last-child { color: var(--pink); font-size: 16px; }
-        .btn-lanjut { width: 100%; background: var(--brown-dark); color: white; border: none; border-radius: 10px; padding: 14px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; }
-        .btn-lanjut:hover { opacity: 0.85; }
-        .alert-error { background: #FEE2E2; border: 1px solid #FECACA; border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #B91C1C; margin-bottom: 16px; }
-        .voucher-wrap { display: flex; gap: 8px; margin-bottom: 8px; }
-        .voucher-input { flex: 1; border: 1.5px solid #D1C0B8; border-radius: 8px; padding: 9px 12px; font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif; outline: none; }
-        .voucher-input:focus { border-color: var(--pink); }
-        .btn-voucher { background: var(--pink); color: white; border: none; border-radius: 8px; padding: 9px 16px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; white-space: nowrap; }
-        .voucher-msg { font-size: 12px; margin-bottom: 10px; }
-        .voucher-msg.ok { color: #059669; }
-        .voucher-msg.err { color: #DC2626; }
-        @media (max-width: 768px) {
-            .checkout-layout { grid-template-columns: 1fr; }
-            .slot-grid { grid-template-columns: 1fr 1fr; }
-        }
-        @media (max-width: 480px) {
-            .payment-grid { grid-template-columns: 1fr; }
-            .slot-grid { grid-template-columns: 1fr; }
-            .step-circle { width: 36px; height: 36px; font-size: 14px; }
-            .step-label { font-size: 11px; }
-            .step-line { max-width: 60px; }
-            .delivery-toggle { flex-direction: column; }
-        }
-    </style>
-</head>
-<body>
+@extends('layouts.main')
+
+@section('title', 'Jagoan Kue - Form Pemesanan')
+
 @php
     $items = [];
     if (isset($cartItems) && is_array($cartItems)) {
@@ -112,299 +20,361 @@
     $shippingZones = \App\Models\ShippingZone::where('is_available', true)->orderBy('area_name')->get();
 @endphp
 
-@include('partials.navbar')
+@section('content')
+<div class="bg-cream min-h-screen py-8 px-6">
+    <div class="max-w-[1140px] mx-auto">
+        <div class="text-xs text-text-secondary mb-4">
+            <a href="/" class="hover:text-primary transition-colors">Beranda</a> /
+            <a href="/products" class="hover:text-primary transition-colors">Katalog</a> /
+            <span class="text-brown-dark font-semibold">Form Pemesanan</span>
+        </div>
 
-<div class="breadcrumb">
-    <a href="/" style="color:var(--gray);">Beranda</a> /
-    <a href="/products" style="color:var(--gray);">Katalog</a> /
-    <span style="color:var(--text-dark);font-weight:600;">Form Pemesanan</span>
-</div>
-
-<div class="stepper-wrap"><div class="stepper">
-    <div class="step"><div class="step-circle done">✓</div><span class="step-label">Pilih Kue</span></div>
-    <div class="step-line done"></div>
-    <div class="step"><div class="step-circle active">2</div><span class="step-label">Detail Pesanan</span></div>
-    <div class="step-line"></div>
-    <div class="step"><div class="step-circle">3</div><span class="step-label">Pembayaran</span></div>
-    <div class="step-line"></div>
-    <div class="step"><div class="step-circle">4</div><span class="step-label">Konfirmasi</span></div>
-</div></div>
-
-<form action="/orders" method="POST" id="checkoutForm">
-@csrf
-
-@if($errors->any())
-<div style="max-width:1100px;margin:0 auto;padding:0 24px;">
-    <div class="alert-error">@foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>
-</div>
-@endif
-<div id="js-errors" style="display:none;max-width:1100px;margin:0 auto;padding:0 24px 0;">
-    <div class="alert-error" id="js-errors-inner"></div>
-</div>
-
-<div class="checkout-layout">
-    <div>
-        {{-- 1. Produk --}}
-        <div class="card">
-            <div class="card-title"><div class="card-num">1</div><span>Produk yang Dipesan</span></div>
-            @foreach($items as $idx => $item)
-            <div class="produk-item">
-                <img src="{{ $item['product']->image ? asset('storage/' . $item['product']->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=200&q=80' }}"
-                     alt="{{ $item['product']->name }}" loading="lazy">
-                <div>
-                    <h4>{{ $item['product']->name }}</h4>
-                    @php
-                        $itemExtraPrice = isset($item['customizationOptions']) ? $item['customizationOptions']->sum(fn($o) => $o->extra_price ?? 0) : 0;
-                        $itemUnitPrice  = $item['product']->price + $itemExtraPrice;
-                    @endphp
-                    <p>Rp {{ number_format($itemUnitPrice, 0, ',', '.') }}
-                        @if($itemExtraPrice > 0)
-                        <small style="color:var(--brown-dark);font-weight:500;"> (termasuk kustomisasi +Rp {{ number_format($itemExtraPrice, 0, ',', '.') }})</small>
-                        @endif
-                    </p>
-                    <small>Jumlah: {{ $item['quantity'] }}</small>
-                    @if(!empty($item['customizationOptions']) && $item['customizationOptions']->isNotEmpty())
-                    <small style="display:block;color:var(--brown-dark);">Kustomisasi:
-                        {{ $item['customizationOptions']->map(fn($o) => $o->name)->join(', ') }}
-                    </small>
-                    @endif
-                    @if(!empty($item['note']))<small style="display:block;color:var(--pink);">Catatan: {{ $item['note'] }}</small>@endif
-                </div>
+        <div class="flex items-center justify-center gap-0 mb-8 max-w-xl mx-auto mt-6">
+            <!-- Step 1 -->
+            <div class="flex flex-col items-center">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold bg-green-500 text-white">✓</div>
+                <span class="text-xs font-semibold mt-1 text-center text-brown-dark">Pilih Kue</span>
             </div>
-            <input type="hidden" name="items[{{ $idx }}][product_id]" value="{{ $item['product']->id }}">
-            <input type="hidden" name="items[{{ $idx }}][quantity]"   value="{{ $item['quantity'] }}">
-            <input type="hidden" name="items[{{ $idx }}][note]"       value="{{ $item['note'] ?? '' }}">
-            <input type="hidden" name="items[{{ $idx }}][customizations]" value="{{ json_encode($item['customizations'] ?? []) }}">
+            
+            <!-- Connector 1 -->
+            <div class="flex-1 w-16 sm:w-24 h-0.5 bg-primary mb-4"></div>
+
+            <!-- Step 2 -->
+            <div class="flex flex-col items-center">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold bg-primary text-white shadow-gold">2</div>
+                <span class="text-xs font-semibold mt-1 text-center text-brown-dark">Detail Pesanan</span>
+            </div>
+
+            <!-- Connector 2 -->
+            <div class="flex-1 w-16 sm:w-24 h-0.5 bg-cream-border mb-4"></div>
+
+            <!-- Step 3 -->
+            <div class="flex flex-col items-center">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold bg-cream-dark text-brown-light">3</div>
+                <span class="text-xs font-semibold mt-1 text-center text-text-muted">Pembayaran</span>
+            </div>
+
+            <!-- Connector 3 -->
+            <div class="flex-1 w-16 sm:w-24 h-0.5 bg-cream-border mb-4"></div>
+
+            <!-- Step 4 -->
+            <div class="flex flex-col items-center">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold bg-cream-dark text-brown-light">4</div>
+                <span class="text-xs font-semibold mt-1 text-center text-text-muted">Konfirmasi</span>
+            </div>
+        </div>
+
+        <form action="/orders" method="POST" id="checkoutForm">
+        @csrf
+
+        @if($errors->any())
+        <div class="bg-red-50 text-red-700 border border-red-200 rounded-xl p-4 text-sm mb-6">
+            @foreach($errors->all() as $error)
+                <p>{{ $error }}</p>
             @endforeach
         </div>
-
-        {{-- 2. Metode Pengiriman --}}
-        <div class="card">
-            <div class="card-title"><div class="card-num">2</div><span>Metode Pengiriman</span></div>
-            <div class="delivery-toggle">
-                <label class="delivery-option selected" id="opt-delivery" onclick="setDelivery('delivery')">
-                    <input type="radio" name="delivery_method" value="delivery" checked>
-                    <i class="fas fa-truck"></i>
-                    <p>Kirim ke Alamat</p>
-                    <small>Ongkir sesuai zona</small>
-                </label>
-                <label class="delivery-option" id="opt-pickup" onclick="setDelivery('pickup')">
-                    <input type="radio" name="delivery_method" value="pickup">
-                    <i class="fas fa-store"></i>
-                    <p>Ambil di Toko</p>
-                    <small>Gratis, ambil sendiri</small>
-                </label>
-            </div>
-
-            <div id="address-section">
-                {{-- Alamat Tersimpan --}}
-                @if(isset($savedAddresses) && $savedAddresses->isNotEmpty())
-                <label class="field-label">Pilih Alamat Tersimpan</label>
-                <select class="field-input" id="savedAddressSelect" onchange="fillSavedAddress(this)">
-                    <option value="">-- Isi manual / alamat baru --</option>
-                    @foreach($savedAddresses as $addr)
-                    <option value="{{ $addr->id }}"
-                            data-name="{{ $addr->recipient_name }}"
-                            data-phone="{{ $addr->phone }}"
-                            data-address="{{ $addr->full_address }}"
-                            data-city="{{ $addr->city }}"
-                            {{ $addr->is_default ? 'selected' : '' }}>
-                        {{ $addr->label }} — {{ $addr->recipient_name }} ({{ $addr->city }})
-                    </option>
-                    @endforeach
-                </select>
-                <div style="text-align:right;margin-top:-10px;margin-bottom:14px;">
-                    <a href="{{ route('account.addresses.index') }}" target="_blank"
-                       style="font-size:11px;color:var(--pink);">+ Tambah alamat baru</a>
-                </div>
-                @endif
-
-                <label class="field-label">Nama Penerima</label>
-                <input type="text" name="recipient_name" id="fieldName" class="field-input"
-                       value="{{ old('recipient_name', auth()->user()->name) }}" placeholder="Nama penerima">
-
-                <label class="field-label">No. Telepon Penerima</label>
-                <input type="text" name="phone" id="fieldPhone" class="field-input"
-                       value="{{ old('phone') }}" placeholder="08123456789">
-
-                <label class="field-label">Alamat Lengkap</label>
-                <textarea name="shipping_address" id="fieldAddress" class="field-textarea" rows="3"
-                          placeholder="Jl. Imam Bonjol No. 10, RT 01/RW 02...">{{ old('shipping_address') }}</textarea>
-
-                <label class="field-label">Kota / Kabupaten Tujuan <span style="color:#F9A8D4;">*</span></label>
-                @php
-                    $kotaZones = $shippingZones->filter(fn($z) => str_starts_with($z->area_name, 'Kota'));
-                    $kabZones  = $shippingZones->filter(fn($z) => str_starts_with($z->area_name, 'Kabupaten'));
-                @endphp
-                <select name="shipping_zone_id" class="field-input" id="zoneSelect" onchange="updateShipping()" required>
-                    <option value="">-- Pilih kota/kabupaten tujuan --</option>
-                    @if($kotaZones->isNotEmpty())
-                    <optgroup label="── Kota ──">
-                        @foreach($kotaZones as $zone)
-                        <option value="{{ $zone->id }}" data-cost="{{ $zone->cost }}"
-                                @selected(old('shipping_zone_id') == $zone->id)>
-                            {{ $zone->area_name }} — Rp {{ number_format($zone->cost, 0, ',', '.') }}
-                        </option>
-                        @endforeach
-                    </optgroup>
-                    @endif
-                    @if($kabZones->isNotEmpty())
-                    <optgroup label="── Kabupaten ──">
-                        @foreach($kabZones as $zone)
-                        <option value="{{ $zone->id }}" data-cost="{{ $zone->cost }}"
-                                @selected(old('shipping_zone_id') == $zone->id)>
-                            {{ $zone->area_name }} — Rp {{ number_format($zone->cost, 0, ',', '.') }}
-                        </option>
-                        @endforeach
-                    </optgroup>
-                    @endif
-                </select>
-                <p style="font-size:11px;color:var(--gray);margin-top:-10px;margin-bottom:14px;">Ongkir dihitung berdasarkan kota/kabupaten tujuan pengiriman</p>
-            </div>
-
-            <div id="pickup-section" style="display:none;">
-                <div style="background:var(--cream);border-radius:10px;padding:14px;font-size:13px;">
-                    <i class="fas fa-map-marker-alt" style="color:var(--pink);"></i>
-                    <strong style="margin-left:6px;">Alamat Toko:</strong>
-                    <p style="margin-top:6px;">Jl. Contoh No. 1, Jakarta Selatan</p>
-                    <p style="color:var(--gray);margin-top:4px;">Buka: Senin–Sabtu, 08.00–18.00</p>
-                </div>
-            </div>
+        @endif
+        
+        <div id="js-errors" style="display:none;" class="bg-red-50 text-red-700 border border-red-200 rounded-xl p-4 text-sm mb-6">
+            <div id="js-errors-inner"></div>
         </div>
 
-        {{-- 3. Tanggal & Slot Waktu --}}
-        <div class="card">
-            <div class="card-title"><div class="card-num">3</div><span>Jadwal Pengiriman / Pengambilan</span></div>
-
-            <label class="field-label">
-                Tanggal
-                <span style="color:var(--gray);font-weight:400;">(minimal {{ $leadDays }} hari ke depan)</span>
-            </label>
-            <input type="date" name="delivery_date" id="delivery_date" class="field-input"
-                   min="{{ $minDate }}" value="{{ old('delivery_date', $minDate) }}" required
-                   oninput="validateDeliveryDate(this)">
-            <p id="date-error" style="display:none;color:#DC2626;font-size:12px;margin-top:-10px;margin-bottom:10px;">
-                Tanggal pengiriman minimal {{ $leadDays }} hari setelah tanggal pemesanan.
-            </p>
-
-            <label class="field-label">Slot Waktu</label>
-            <div class="slot-grid">
-                @php $slots = ['08:00-11:00' => 'Pagi', '11:00-14:00' => 'Siang', '14:00-18:00' => 'Sore']; @endphp
-                @foreach($slots as $value => $label)
-                <label class="slot-option {{ old('delivery_slot') === $value ? 'selected' : '' }}"
-                       onclick="selectSlot(this)">
-                    <input type="radio" name="delivery_slot" value="{{ $value }}"
-                           {{ old('delivery_slot') === $value ? 'checked' : '' }}>
-                    <p>{{ $label }}</p>
-                    <small>{{ $value }}</small>
-                </label>
-                @endforeach
-            </div>
-        </div>
-
-        {{-- 4. Catatan --}}
-        <div class="card">
-            <div class="card-title"><div class="card-num">4</div><span>Catatan Pesanan</span></div>
-            <label class="field-label">Catatan untuk toko (opsional, maks. 300 karakter)</label>
-            <textarea name="notes" class="field-textarea" rows="3"
-                      placeholder="Contoh: tolong tambahkan lilin, warna biru..." maxlength="300">{{ old('notes') }}</textarea>
-        </div>
-
-        {{-- 5. Pembayaran --}}
-        <div class="card">
-            <div class="card-title"><div class="card-num">5</div><span>Metode Pembayaran</span></div>
-            <div class="payment-grid">
-                <label class="payment-option">
-                    <input type="radio" name="payment_method" value="transfer_bank" checked>
-                    <div class="payment-logo" style="background:#006CB0;"><i class="fas fa-university"></i></div>
-                    <div class="payment-info"><p>Transfer Bank</p><small>BCA / BNI / dll</small></div>
-                </label>
-                <label class="payment-option">
-                    <input type="radio" name="payment_method" value="ewallet">
-                    <div class="payment-logo" style="background:#00B14F;"><i class="fas fa-wallet"></i></div>
-                    <div class="payment-info"><p>E-wallet</p><small>GoPay / OVO / dll</small></div>
-                </label>
-                <label class="payment-option">
-                    <input type="radio" name="payment_method" value="qris">
-                    <div class="payment-logo" style="background:#7C3AED;"><i class="fas fa-qrcode"></i></div>
-                    <div class="payment-info"><p>QRIS</p><small>Scan & bayar</small></div>
-                </label>
-                <label class="payment-option">
-                    <input type="radio" name="payment_method" value="cod">
-                    <div class="payment-logo" style="background:#6B7280;"><i class="fas fa-motorcycle"></i></div>
-                    <div class="payment-info"><p>COD</p><small>Bayar di tempat</small></div>
-                </label>
-            </div>
-        </div>
-    </div>
-
-    {{-- RINGKASAN --}}
-    <div>
-        <div class="summary-card">
-            <p class="summary-title">Ringkasan Pesanan</p>
-
-            @foreach($items as $item)
-            <div class="summary-item">
-                <img src="{{ $item['product']->image ? asset('storage/' . $item['product']->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=200&q=80' }}"
-                     alt="" loading="lazy">
-                <div class="summary-item-info">
-                    <p>{{ $item['product']->name }}</p>
-                    <small>{{ $item['quantity'] }}x</small>
-                </div>
-                <span class="summary-item-price">Rp {{ number_format((($item['product']->price + (isset($item['customizationOptions']) ? $item['customizationOptions']->sum(fn($o) => $o->extra_price ?? 0) : 0)) * $item['quantity']), 0, ',', '.') }}</span>
-            </div>
-            @endforeach
-
-            <div class="summary-row"><span>Subtotal</span><span>Rp {{ number_format($subtotal, 0, ',', '.') }}</span></div>
-            <div class="summary-row" id="row-shipping"><span>Ongkir</span><span id="val-shipping" style="color:var(--gray);">Pilih kota tujuan</span></div>
-            <div class="summary-row" id="row-discount" style="display:none;">
-                <span>Diskon Voucher</span>
-                <span id="val-discount" style="color:#059669;">-Rp 0</span>
-            </div>
-
-            {{-- Voucher --}}
-            <div style="margin: 8px 0 12px;">
-                <label class="field-label" style="color:var(--text-dark);">Kode Voucher (opsional)</label>
-                <div class="voucher-wrap">
-                    <input type="text" id="voucherInput" placeholder="Masukkan kode"
-                           class="voucher-input" style="text-transform:uppercase;">
-                    <button type="button" class="btn-voucher" onclick="applyVoucher()">Pakai</button>
-                </div>
-                <input type="hidden" name="voucher_code" id="voucherCode">
-                <div id="voucherMsg" class="voucher-msg"></div>
-            </div>
-
-            <div class="summary-total">
-                <span>Total</span>
-                <span id="val-total">Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
-            </div>
-
-            {{-- Opsi DP --}}
-            @php $dpMin = $dpMinAmount ?? config('app.dp_min_amount', 200000); $dpPct = $dpPercentage ?? config('app.dp_percentage', 50); @endphp
-            <div id="dp-section" style="display:none;background:var(--cream);border-radius:10px;padding:14px;margin-bottom:14px;">
-                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
-                    <input type="checkbox" name="use_dp" id="useDpCheck" value="1" style="margin-top:2px;accent-color:var(--pink);">
-                    <div>
-                        <p style="font-size:13px;font-weight:700;color:var(--text-dark);margin-bottom:2px;">
-                            Bayar DP {{ $dpPct }}% Sekarang
-                        </p>
-                        <p style="font-size:12px;color:var(--gray);">
-                            Bayar Rp <span id="dp-amount-display">0</span> sekarang, sisanya sebelum pengiriman.
-                        </p>
+        <div class="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8 items-start">
+            <div class="space-y-6">
+                {{-- 1. Produk --}}
+                <div class="bg-white rounded-2xl border border-cream-border p-6 shadow-sm">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">1</div>
+                        <span class="font-heading text-xl font-bold text-brown-dark">Produk yang Dipesan</span>
                     </div>
-                </label>
+                    @foreach($items as $idx => $item)
+                    <div class="flex items-start gap-4 py-4 border-b border-cream-border last:border-0">
+                        <img src="{{ $item['product']->image ? asset('storage/' . $item['product']->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=200&q=80' }}"
+                             alt="{{ $item['product']->name }}" class="w-16 h-16 rounded-xl object-cover shrink-0">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-semibold text-sm text-brown-dark truncate">{{ $item['product']->name }}</h4>
+                            @php
+                                $itemExtraPrice = isset($item['customizationOptions']) ? $item['customizationOptions']->sum(fn($o) => $o->extra_price ?? 0) : 0;
+                                $itemUnitPrice  = $item['product']->price + $itemExtraPrice;
+                            @endphp
+                            <div class="flex flex-col gap-0.5 mt-1">
+                                <small class="text-xs text-text-secondary">Jumlah: {{ $item['quantity'] }}</small>
+                                @if(!empty($item['customizationOptions']) && $item['customizationOptions']->isNotEmpty())
+                                <small class="text-xs text-brown-light">Kustomisasi:
+                                    {{ $item['customizationOptions']->map(fn($o) => $o->name)->join(', ') }}
+                                </small>
+                                @endif
+                                @if(!empty($item['note']))
+                                <small class="text-xs text-text-secondary font-medium">Catatan: {{ $item['note'] }}</small>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <span class="font-bold text-sm text-primary">Rp {{ number_format($itemUnitPrice, 0, ',', '.') }}</span>
+                            @if($itemExtraPrice > 0)
+                            <div class="text-[10px] text-text-muted mt-0.5">(+Rp {{ number_format($itemExtraPrice, 0, ',', '.') }} kustomisasi)</div>
+                            @endif
+                        </div>
+                    </div>
+                    <input type="hidden" name="items[{{ $idx }}][product_id]" value="{{ $item['product']->id }}">
+                    <input type="hidden" name="items[{{ $idx }}][quantity]"   value="{{ $item['quantity'] }}">
+                    <input type="hidden" name="items[{{ $idx }}][note]"       value="{{ $item['note'] ?? '' }}">
+                    <input type="hidden" name="items[{{ $idx }}][customizations]" value="{{ json_encode($item['customizations'] ?? []) }}">
+                    @endforeach
+                </div>
+
+                {{-- 2. Metode Pengiriman --}}
+                <div class="bg-white rounded-2xl border border-cream-border p-6 shadow-sm">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">2</div>
+                        <span class="font-heading text-xl font-bold text-brown-dark">Metode Pengiriman</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <label class="delivery-option selected" id="opt-delivery" onclick="setDelivery('delivery')">
+                            <input type="radio" name="delivery_method" value="delivery" class="hidden" checked>
+                            <i class="fas fa-truck text-lg"></i>
+                            <p class="font-bold text-sm text-brown-dark">Kirim ke Alamat</p>
+                            <small class="text-xs text-text-secondary">Ongkir sesuai zona</small>
+                        </label>
+                        <label class="delivery-option" id="opt-pickup" onclick="setDelivery('pickup')">
+                            <input type="radio" name="delivery_method" value="pickup" class="hidden">
+                            <i class="fas fa-store text-lg"></i>
+                            <p class="font-bold text-sm text-brown-dark">Ambil di Toko</p>
+                            <small class="text-xs text-text-secondary">Gratis, ambil sendiri</small>
+                        </label>
+                    </div>
+
+                    <div id="address-section">
+                        {{-- Alamat Tersimpan --}}
+                        @if(isset($savedAddresses) && $savedAddresses->isNotEmpty())
+                        <label class="field-label">Pilih Alamat Tersimpan</label>
+                        <select class="field-input" id="savedAddressSelect" onchange="fillSavedAddress(this)">
+                            <option value="">-- Isi manual / alamat baru --</option>
+                            @foreach($savedAddresses as $addr)
+                            <option value="{{ $addr->id }}"
+                                    data-name="{{ $addr->recipient_name }}"
+                                    data-phone="{{ $addr->phone }}"
+                                    data-address="{{ $addr->full_address }}"
+                                    data-city="{{ $addr->city }}"
+                                    {{ $addr->is_default ? 'selected' : '' }}>
+                                {{ $addr->label }} — {{ $addr->recipient_name }} ({{ $addr->city }})
+                            </option>
+                            @endforeach
+                        </select>
+                        <div class="text-right mt-1.5 mb-4">
+                            <a href="{{ route('account.addresses.index') }}" target="_blank"
+                               class="text-xs font-semibold text-primary hover:text-primary-hover transition-colors">+ Tambah alamat baru</a>
+                        </div>
+                        @endif
+
+                        <label class="field-label">Nama Penerima</label>
+                        <input type="text" name="recipient_name" id="fieldName" class="field-input"
+                               value="{{ old('recipient_name', auth()->user()->name) }}" placeholder="Nama penerima">
+
+                        <label class="field-label">No. Telepon Penerima</label>
+                        <input type="text" name="phone" id="fieldPhone" class="field-input"
+                               value="{{ old('phone') }}" placeholder="08123456789">
+
+                        <label class="field-label">Alamat Lengkap</label>
+                        <textarea name="shipping_address" id="fieldAddress" class="field-textarea resize-none" rows="3"
+                                  placeholder="Jl. Imam Bonjol No. 10, RT 01/RW 02...">{{ old('shipping_address') }}</textarea>
+
+                        <label class="field-label">Kota / Kabupaten Tujuan <span class="text-red-500">*</span></label>
+                        @php
+                            $kotaZones = $shippingZones->filter(fn($z) => str_starts_with($z->area_name, 'Kota'));
+                            $kabZones  = $shippingZones->filter(fn($z) => str_starts_with($z->area_name, 'Kabupaten'));
+                        @endphp
+                        <select name="shipping_zone_id" class="field-input" id="zoneSelect" onchange="updateShipping()" required>
+                            <option value="">-- Pilih kota/kabupaten tujuan --</option>
+                            @if($kotaZones->isNotEmpty())
+                            <optgroup label="── Kota ──">
+                                @foreach($kotaZones as $zone)
+                                <option value="{{ $zone->id }}" data-cost="{{ $zone->cost }}"
+                                        @selected(old('shipping_zone_id') == $zone->id)>
+                                    {{ $zone->area_name }} — Rp {{ number_format($zone->cost, 0, ',', '.') }}
+                                </option>
+                                @endforeach
+                            </optgroup>
+                            @endif
+                            @if($kabZones->isNotEmpty())
+                            <optgroup label="── Kabupaten ──">
+                                @foreach($kabZones as $zone)
+                                <option value="{{ $zone->id }}" data-cost="{{ $zone->cost }}"
+                                        @selected(old('shipping_zone_id') == $zone->id)>
+                                    {{ $zone->area_name }} — Rp {{ number_format($zone->cost, 0, ',', '.') }}
+                                </option>
+                                @endforeach
+                            </optgroup>
+                            @endif
+                        </select>
+                        <p class="text-[11px] text-text-muted mt-1.5">Ongkir dihitung berdasarkan kota/kabupaten tujuan pengiriman</p>
+                    </div>
+
+                    <div id="pickup-section" style="display:none;">
+                        <div class="bg-cream-warm border border-cream-border rounded-xl p-4 text-sm text-brown-mid">
+                            <div class="flex items-center gap-2 mb-2 font-bold text-brown-dark">
+                                <i class="fas fa-map-marker-alt text-primary"></i>
+                                <span>Alamat Toko:</span>
+                            </div>
+                            <p class="font-semibold">Jl. Contoh No. 1, Jakarta Selatan</p>
+                            <p class="text-xs text-text-muted mt-1">Buka: Senin–Sabtu, 08.00–18.00</p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- 3. Tanggal & Slot Waktu --}}
+                <div class="bg-white rounded-2xl border border-cream-border p-6 shadow-sm">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">3</div>
+                        <span class="font-heading text-xl font-bold text-brown-dark">Jadwal Pengiriman / Pengambilan</span>
+                    </div>
+
+                    <label class="field-label">
+                        Tanggal
+                        <span class="text-xs text-text-muted font-normal">(minimal {{ $leadDays }} hari ke depan)</span>
+                    </label>
+                    <input type="date" name="delivery_date" id="delivery_date" class="field-input"
+                           min="{{ $minDate }}" value="{{ old('delivery_date', $minDate) }}" required
+                           oninput="validateDeliveryDate(this)">
+                    <p id="date-error" style="display:none;" class="text-red-600 text-xs font-semibold mt-1">
+                        Tanggal pengiriman minimal {{ $leadDays }} hari setelah tanggal pemesanan.
+                    </p>
+
+                    <label class="field-label">Slot Waktu</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        @php $slots = ['08:00-11:00' => 'Pagi', '11:00-14:00' => 'Siang', '14:00-18:00' => 'Sore']; @endphp
+                        @foreach($slots as $value => $label)
+                        <label class="slot-option {{ old('delivery_slot') === $value ? 'selected' : '' }}"
+                               onclick="selectSlot(this)">
+                            <input type="radio" name="delivery_slot" value="{{ $value }}" class="hidden"
+                                   {{ old('delivery_slot') === $value ? 'checked' : '' }}>
+                            <p class="font-bold text-sm text-brown-dark">{{ $label }}</p>
+                            <small class="text-xs text-text-secondary">{{ $value }}</small>
+                        </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                {{-- 4. Catatan --}}
+                <div class="bg-white rounded-2xl border border-cream-border p-6 shadow-sm">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">4</div>
+                        <span class="font-heading text-xl font-bold text-brown-dark">Catatan Pesanan</span>
+                    </div>
+                    <label class="field-label">Catatan untuk toko (opsional, maks. 300 karakter)</label>
+                    <textarea name="notes" class="field-textarea resize-none" rows="3"
+                              placeholder="Contoh: tolong tambahkan lilin, warna biru..." maxlength="300">{{ old('notes') }}</textarea>
+                </div>
+
+                {{-- 5. Pembayaran --}}
+                <div class="bg-white rounded-2xl border border-cream-border p-6 shadow-sm">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">5</div>
+                        <span class="font-heading text-xl font-bold text-brown-dark">Metode Pembayaran</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <label class="payment-option">
+                            <input type="radio" name="payment_method" value="transfer_bank" checked class="accent-primary w-4 h-4">
+                            <div class="w-8 h-8 rounded-lg bg-[#006CB0] text-white flex items-center justify-center text-xs shrink-0"><i class="fas fa-university"></i></div>
+                            <div class="text-left"><p class="font-semibold text-xs text-brown-dark">Transfer Bank</p><small class="text-[10px] text-text-secondary">BCA / BNI / dll</small></div>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="payment_method" value="ewallet" class="accent-primary w-4 h-4">
+                            <div class="w-8 h-8 rounded-lg bg-[#00B14F] text-white flex items-center justify-center text-xs shrink-0"><i class="fas fa-wallet"></i></div>
+                            <div class="text-left"><p class="font-semibold text-xs text-brown-dark">E-wallet</p><small class="text-[10px] text-text-secondary">GoPay / OVO / dll</small></div>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="payment_method" value="qris" class="accent-primary w-4 h-4">
+                            <div class="w-8 h-8 rounded-lg bg-[#7C3AED] text-white flex items-center justify-center text-xs shrink-0"><i class="fas fa-qrcode"></i></div>
+                            <div class="text-left"><p class="font-semibold text-xs text-brown-dark">QRIS</p><small class="text-[10px] text-text-secondary">Scan & bayar</small></div>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="payment_method" value="cod" class="accent-primary w-4 h-4">
+                            <div class="w-8 h-8 rounded-lg bg-gray-500 text-white flex items-center justify-center text-xs shrink-0"><i class="fas fa-motorcycle"></i></div>
+                            <div class="text-left"><p class="font-semibold text-xs text-brown-dark">COD</p><small class="text-[10px] text-text-secondary">Bayar di tempat</small></div>
+                        </label>
+                    </div>
+                </div>
             </div>
 
-            <button type="submit" id="submitBtn" class="btn-lanjut" onclick="return validateCheckout()">
-                Lanjutkan Ke Pembayaran →
-            </button>
+            {{-- RINGKASAN --}}
+            <div class="bg-cream-warm rounded-2xl border border-cream-border p-5 shrink-0 shadow-sm">
+                <p class="font-heading text-xl font-bold text-brown-dark mb-4">Ringkasan Pesanan</p>
+
+                <div class="divide-y divide-cream-border max-h-[280px] overflow-y-auto pr-1 mb-4">
+                @foreach($items as $item)
+                <div class="flex items-start gap-3 py-3 first:pt-0">
+                    <img src="{{ $item['product']->image ? asset('storage/' . $item['product']->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=200&q=80' }}"
+                         alt="" class="w-12 h-12 rounded-lg object-cover shrink-0">
+                    <div class="flex-1 min-w-0">
+                        <p class="font-semibold text-xs text-brown-dark truncate">{{ $item['product']->name }}</p>
+                        <small class="text-[10px] text-text-secondary">{{ $item['quantity'] }}x</small>
+                    </div>
+                    <span class="font-bold text-xs text-primary shrink-0">Rp {{ number_format((($item['product']->price + (isset($item['customizationOptions']) ? $item['customizationOptions']->sum(fn($o) => $o->extra_price ?? 0) : 0)) * $item['quantity']), 0, ',', '.') }}</span>
+                </div>
+                @endforeach
+                </div>
+
+                <div class="space-y-2 mb-4 border-t border-cream-border pt-4">
+                    <div class="flex justify-between items-center text-xs text-text-secondary">
+                        <span>Subtotal</span>
+                        <span class="font-semibold text-brown-dark">Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-text-secondary" id="row-shipping">
+                        <span>Ongkir</span>
+                        <span id="val-shipping" class="font-semibold text-brown-dark">Pilih kota tujuan</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-green-700" id="row-discount" style="display:none;">
+                        <span>Diskon Voucher</span>
+                        <span id="val-discount" class="font-bold">-Rp 0</span>
+                    </div>
+                </div>
+
+                {{-- Voucher --}}
+                <div class="border-t border-cream-border pt-4 mb-4">
+                    <label class="block text-xs font-semibold text-brown-mid mb-1.5">Kode Voucher (opsional)</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="voucherInput" placeholder="Masukkan kode"
+                               class="flex-1 input-field uppercase py-2 px-3 text-xs">
+                        <button type="button" class="btn-secondary py-2 px-4 text-xs" onclick="applyVoucher()">Pakai</button>
+                    </div>
+                    <input type="hidden" name="voucher_code" id="voucherCode">
+                    <div id="voucherMsg" class="voucher-msg"></div>
+                </div>
+
+                <div class="flex justify-between items-center pt-3 border-t border-cream-border font-bold text-brown-dark mb-4">
+                    <span>Total</span>
+                    <span id="val-total" class="text-xl text-primary font-extrabold">Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
+                </div>
+
+                {{-- Opsi DP --}}
+                @php $dpMin = $dpMinAmount ?? config('app.dp_min_amount', 200000); $dpPct = $dpPercentage ?? config('app.dp_percentage', 50); @endphp
+                <div id="dp-section" style="display:none;" class="bg-white rounded-xl border border-cream-border p-4 mb-4">
+                    <label class="flex items-start gap-2.5 cursor-pointer">
+                        <input type="checkbox" name="use_dp" id="useDpCheck" value="1" class="mt-1 rounded border-cream-border accent-primary">
+                        <div>
+                            <p class="text-xs font-bold text-brown-dark mb-0.5">
+                                Bayar DP {{ $dpPct }}% Sekarang
+                            </p>
+                            <p class="text-[10px] text-text-secondary leading-relaxed">
+                                Bayar Rp <span id="dp-amount-display">0</span> sekarang, sisanya sebelum pengiriman.
+                            </p>
+                        </div>
+                    </label>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn-primary w-full py-3.5 text-sm font-bold justify-center" onclick="return validateCheckout()">
+                    Lanjutkan Ke Pembayaran →
+                </button>
+            </div>
         </div>
+        </form>
     </div>
 </div>
-</form>
+@endsection
 
-@include('partials.footer')
-
+@push('scripts')
 <script>
 const subtotal = {{ $subtotal }};
 const DEFAULT_SHIPPING = 0;
@@ -603,5 +573,5 @@ async function applyVoucher() {
     recalc();
 }
 </script>
-</body>
-</html>
+<script src="{{ asset('js/app.js') }}" defer></script>
+@endpush

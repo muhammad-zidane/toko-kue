@@ -1,102 +1,7 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" />
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jagoan Kue - Konfirmasi Pembayaran</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    <style>
-        .breadcrumb { max-width: 1100px; margin: 0 auto; padding: 20px 24px 0; font-size: 13px; color: var(--gray); }
-        .breadcrumb a { color: var(--gray); } .breadcrumb span { color: var(--text-dark); font-weight: 600; }
-        .stepper-wrap { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
-        .stepper { display: flex; align-items: center; justify-content: center; }
-        .step { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-        .step-circle { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; border: 2px solid var(--pink); color: var(--pink); background: var(--white); }
-        .step-circle.done { background: var(--pink); color: white; }
-        .step-circle.active { background: var(--pink); color: white; }
-        .step-label { font-size: 13px; font-weight: 500; }
-        .step-line { flex: 1; height: 2px; background: #E5C5CF; margin-bottom: 24px; max-width: 120px; }
-        .step-line.done { background: var(--pink); }
-        .main { max-width: 1100px; margin: 0 auto; padding: 0 24px 60px; display: grid; grid-template-columns: 1fr 380px; gap: 24px; align-items: start; }
-        .card { background: var(--white); border-radius: 16px; border: 1px solid #EDE0D4; padding: 24px; margin-bottom: 16px; }
-        .timer-label { font-size: 14px; font-weight: 700; color: var(--pink); margin-bottom: 16px; }
-        .timer-box { background: var(--cream-dark); border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-        .timer-text { font-size: 13px; }
-        .timer-digits { display: flex; align-items: center; gap: 4px; }
-        .timer-unit { text-align: center; }
-        .timer-num { font-size: 28px; font-weight: 800; color: var(--pink); font-variant-numeric: tabular-nums; }
-        .timer-sep { font-size: 24px; font-weight: 800; color: var(--pink); margin-bottom: 12px; }
-        .timer-sub { font-size: 10px; color: var(--gray); }
-        .timer-warning { font-size: 12px; color: var(--pink); margin-bottom: 12px; }
-        .alert-box { background: #FFF0F3; border: 1px solid #FECDD3; border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #BE123C; line-height: 1.6; }
-        .metode-label { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
-        .status-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--cream-dark); border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 600; color: var(--brown-dark); margin-bottom: 16px; }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #F59E0B; }
-        .bank-header { display: flex; align-items: center; gap: 12px; padding: 14px; background: var(--cream-dark); border-radius: 10px; margin-bottom: 16px; }
-        .bank-logo { width: 42px; height: 42px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 800; }
-        .bank-name { font-size: 14px; font-weight: 700; }
-        .bank-desc { font-size: 12px; color: var(--gray); }
-        .bank-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #F0E8E0; }
-        .bank-row:last-child { border-bottom: none; }
-        .bank-row-label { font-size: 13px; color: var(--gray); }
-        .bank-row-value { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-        .btn-salin { background: none; border: 1.5px solid #D1C0B8; border-radius: 6px; padding: 3px 10px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; }
-        .jumlah-box { background: var(--pink); border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; margin: 12px 0; }
-        .jumlah-left p { font-size: 13px; font-weight: 700; color: white; }
-        .jumlah-left small { font-size: 11px; color: rgba(255,255,255,0.75); }
-        .jumlah-right { display: flex; align-items: center; gap: 8px; }
-        .jumlah-amount { font-size: 18px; font-weight: 800; color: white; }
-        .btn-salin-white { background: white; border: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 700; cursor: pointer; color: var(--pink); font-family: 'Plus Jakarta Sans', sans-serif; }
-        .kode-unik-note { font-size: 12px; color: var(--gray); line-height: 1.6; margin-top: 4px; }
-        .cara-label { font-size: 13px; font-weight: 700; color: var(--pink); margin-bottom: 12px; }
-        .cara-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-        .cara-item { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.6; }
-        .cara-num { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--pink); color: var(--pink); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
-        .upload-label { font-size: 13px; font-weight: 700; color: var(--pink); margin-bottom: 12px; }
-        .upload-zone { border: 2px dashed #D1C0B8; border-radius: 12px; padding: 32px; text-align: center; cursor: pointer; margin-bottom: 12px; }
-        .upload-zone:hover { border-color: var(--pink); background: #FFF0F3; }
-        .upload-icon { font-size: 32px; margin-bottom: 8px; }
-        .upload-text { font-size: 13px; margin-bottom: 4px; }
-        .upload-sub { font-size: 12px; color: var(--gray); margin-bottom: 12px; }
-        .btn-pilih { background: var(--pink); color: white; border: none; border-radius: 8px; padding: 8px 20px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; }
-        .upload-format { font-size: 11px; color: var(--gray); }
-        .upload-info { background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 10px; padding: 12px 16px; font-size: 12px; color: #065F46; line-height: 1.6; }
-        .summary-card { background: var(--white); border-radius: 16px; border: 1px solid #EDE0D4; padding: 24px; position: sticky; top: 90px; }
-        .summary-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
-        .summary-item { display: flex; align-items: center; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid #F0E8E0; margin-bottom: 16px; }
-        .summary-item img { width: 52px; height: 52px; object-fit: cover; border-radius: 8px; }
-        .summary-item-info { flex: 1; }
-        .summary-item-info p { font-size: 13px; font-weight: 600; }
-        .summary-item-info small { font-size: 12px; color: var(--gray); }
-        .summary-item-price { font-size: 13px; font-weight: 600; }
-        .summary-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; }
-        .summary-row span:first-child { color: var(--gray); }
-        .summary-row span:last-child { font-weight: 600; }
-        .summary-total { display: flex; justify-content: space-between; font-size: 15px; font-weight: 700; padding-top: 12px; border-top: 1.5px solid #EDE0D4; margin: 12px 0 20px; }
-        .btn-upload-bukti { width: 100%; background: var(--brown-dark); color: white; border: none; border-radius: 10px; padding: 14px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; margin-bottom: 10px; }
-        .bantuan { text-align: center; font-size: 12px; color: var(--gray); margin-bottom: 16px; }
-        .bantuan a { color: var(--green); font-weight: 600; }
-        .aman-box { background: var(--cream); border-radius: 10px; padding: 14px; }
-        .aman-title { font-size: 12px; font-weight: 700; margin-bottom: 8px; }
-        .aman-item { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 6px; }
-        .aman-check { color: var(--green); font-size: 14px; }
-        @media (max-width: 768px) {
-            .main { grid-template-columns: 1fr; }
-            .timer-box { flex-direction: column; gap: 12px; }
-        }
-        @media (max-width: 480px) {
-            .step-circle { width: 36px; height: 36px; font-size: 14px; }
-            .step-label { font-size: 11px; }
-            .step-line { max-width: 60px; }
-            .jumlah-box { flex-direction: column; gap: 10px; }
-            .jumlah-right { justify-content: flex-start; }
-        }
-    </style>
-</head>
-<body>
+@extends('layouts.main')
+
+@section('title', 'Jagoan Kue - Konfirmasi Pembayaran')
+
 @php
     $paymentMethod = $order->payment->payment_method ?? 'transfer';
 
@@ -121,328 +26,409 @@
     $remainingSeconds = max(0, now()->diffInSeconds($deadline, false));
 @endphp
 
-@include('partials.navbar')
-
-<div class="breadcrumb"><a href="/">Beranda</a> / <a href="/products">Katalog</a> / <span>Konfirmasi Pembayaran</span></div>
-
-<div class="stepper-wrap"><div class="stepper">
-    <div class="step"><div class="step-circle done">✓</div><span class="step-label">Pilih Kue</span></div>
-    <div class="step-line done"></div>
-    <div class="step"><div class="step-circle done">✓</div><span class="step-label">Detail Pesanan</span></div>
-    <div class="step-line done"></div>
-    <div class="step"><div class="step-circle active">3</div><span class="step-label">Pembayaran</span></div>
-    <div class="step-line"></div>
-    <div class="step"><div class="step-circle">4</div><span class="step-label">Konfirmasi</span></div>
-</div></div>
-
-<form id="upload-form" action="{{ route('orders.uploadProof', $order) }}" method="POST" enctype="multipart/form-data">
-@csrf
-<div class="main">
-    <div>
-        {{-- TIMER --}}
-        <div class="card">
-            <p class="timer-label">Batas Waktu Pembayaran</p>
-            <div class="timer-box">
-                <p class="timer-text">Selesaikan pembayaran sebelum:</p>
-                <div class="timer-digits">
-                    <div class="timer-unit"><div class="timer-num" id="timer-jam">00</div><div class="timer-sub">Jam</div></div>
-                    <div class="timer-sep">:</div>
-                    <div class="timer-unit"><div class="timer-num" id="timer-menit">00</div><div class="timer-sub">Menit</div></div>
-                    <div class="timer-sep">:</div>
-                    <div class="timer-unit"><div class="timer-num" id="timer-detik">00</div><div class="timer-sub">Detik</div></div>
-                </div>
-            </div>
-            <p class="timer-warning">Pesanan akan otomatis dibatalkan jika tidak dibayar sebelum <strong>{{ $deadline->format('d M Y, H.i') }} WIB</strong></p>
-            <div class="alert-box">Segera lakukan pembayaran agar pesanan kue kamu tidak hangus dan stok tetap terjamin.</div>
+@section('content')
+<div class="bg-cream min-h-screen py-8 px-6">
+    <div class="max-w-[1140px] mx-auto">
+        <div class="text-xs text-text-secondary mb-4">
+            <a href="/" class="hover:text-primary transition-colors">Beranda</a> /
+            <a href="/products" class="hover:text-primary transition-colors">Katalog</a> /
+            <span class="text-brown-dark font-semibold">Konfirmasi Pembayaran</span>
         </div>
 
-        {{-- METODE PEMBAYARAN --}}
-        <div class="card">
-            <p class="metode-label">Metode Pembayaran</p>
-            <div class="status-badge"><div class="status-dot"></div> Menunggu Pembayaran</div>
+        <div class="flex items-center justify-center gap-0 mb-8 max-w-xl mx-auto mt-6">
+            <!-- Step 1 -->
+            <div class="flex flex-col items-center">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold bg-green-500 text-white">✓</div>
+                <span class="text-xs font-semibold mt-1 text-center text-brown-dark">Pilih Kue</span>
+            </div>
+            
+            <!-- Connector 1 -->
+            <div class="flex-1 w-16 sm:w-24 h-0.5 bg-primary mb-4"></div>
 
-            @if($paymentMethod === 'transfer_bank')
-            {{-- TRANSFER BANK UI --}}
-            <div class="bank-header">
-                <div class="bank-logo" style="background:#006CB0;"><i class="fas fa-university"></i></div>
-                <div><p class="bank-name">Transfer Bank</p><p class="bank-desc">Transfer Manual</p></div>
+            <!-- Step 2 -->
+            <div class="flex flex-col items-center">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold bg-green-500 text-white">✓</div>
+                <span class="text-xs font-semibold mt-1 text-center text-brown-dark">Detail Pesanan</span>
             </div>
 
-            <div class="bank-row"><span class="bank-row-label">Nama Rekening</span><span class="bank-row-value">Jagoan Kue Official</span></div>
-            <div class="bank-row"><span class="bank-row-label">Nomor Rekening</span><span class="bank-row-value">1234 5678 9012 <button type="button" class="btn-salin" onclick="salin('123456789012')">Salin</button></span></div>
+            <!-- Connector 2 -->
+            <div class="flex-1 w-16 sm:w-24 h-0.5 bg-primary mb-4"></div>
 
-            <div class="jumlah-box">
-                <div class="jumlah-left"><p>{{ $payLabel }} (Transfer Tepat)</p><small>Transfer sesuai nominal untuk verifikasi</small></div>
-                <div class="jumlah-right">
-                    <span class="jumlah-amount">Rp {{ number_format($totalTransfer, 0, ',', '.') }}</span>
-                    <button type="button" class="btn-salin-white" onclick="salin('{{ $totalTransfer }}')">Salin</button>
+            <!-- Step 3 -->
+            <div class="flex flex-col items-center">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold bg-primary text-white shadow-gold">3</div>
+                <span class="text-xs font-semibold mt-1 text-center text-brown-dark">Pembayaran</span>
+            </div>
+
+            <!-- Connector 3 -->
+            <div class="flex-1 w-16 sm:w-24 h-0.5 bg-cream-border mb-4"></div>
+
+            <!-- Step 4 -->
+            <div class="flex flex-col items-center">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold bg-cream-dark text-brown-light">4</div>
+                <span class="text-xs font-semibold mt-1 text-center text-text-muted">Konfirmasi</span>
+            </div>
+        </div>
+
+        <form id="upload-form" action="{{ route('orders.uploadProof', $order) }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        <div class="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8 items-start">
+            <div class="space-y-6">
+                {{-- TIMER --}}
+                <div class="bg-white rounded-2xl border border-cream-border p-6 shadow-sm">
+                    <p class="font-semibold text-xs text-text-secondary uppercase tracking-wider mb-3">Batas Waktu Pembayaran</p>
+                    <div class="border-2 border-amber-200 bg-amber-50 rounded-2xl p-6 text-center mb-4">
+                        <p class="text-xs text-brown-mid mb-4">Selesaikan pembayaran sebelum:</p>
+                        <div class="flex justify-center items-center gap-4">
+                            <div class="flex flex-col items-center">
+                                <div class="font-heading text-4xl font-bold text-brown-dark" id="timer-jam">00</div>
+                                <div class="text-[10px] text-text-muted mt-1 uppercase font-semibold">Jam</div>
+                            </div>
+                            <div class="font-heading text-2xl font-bold text-brown-light self-start mt-3">:</div>
+                            <div class="flex flex-col items-center">
+                                <div class="font-heading text-4xl font-bold text-brown-dark" id="timer-menit">00</div>
+                                <div class="text-[10px] text-text-muted mt-1 uppercase font-semibold">Menit</div>
+                            </div>
+                            <div class="font-heading text-2xl font-bold text-brown-light self-start mt-3">:</div>
+                            <div class="flex flex-col items-center">
+                                <div class="font-heading text-4xl font-bold text-brown-dark" id="timer-detik">00</div>
+                                <div class="text-[10px] text-text-muted mt-1 uppercase font-semibold">Detik</div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-text-secondary text-center leading-relaxed">Pesanan akan otomatis dibatalkan jika tidak dibayar sebelum <strong class="text-brown-dark">{{ $deadline->format('d M Y, H.i') }} WIB</strong></p>
+                    <div class="bg-amber-100/50 border border-amber-200 rounded-xl p-3.5 text-xs text-amber-800 font-semibold mt-4 text-center">Segera lakukan pembayaran agar pesanan kue kamu tidak hangus dan stok tetap terjamin.</div>
+                </div>
+
+                {{-- METODE PEMBAYARAN --}}
+                <div class="bg-white rounded-2xl border border-cream-border p-6 shadow-sm">
+                    <div class="flex items-center justify-between gap-2 mb-6 border-b border-cream-border pb-4">
+                        <p class="font-heading text-xl font-bold text-brown-dark">Metode Pembayaran</p>
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold rounded-full">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                            <span>Menunggu Pembayaran</span>
+                        </div>
+                    </div>
+
+                    @if($paymentMethod === 'transfer_bank')
+                    {{-- TRANSFER BANK UI --}}
+                    <div class="flex items-center gap-3 mb-6 bg-cream-warm/30 border border-cream-border rounded-xl p-4">
+                        <div class="w-10 h-10 rounded-xl bg-[#006CB0] text-white flex items-center justify-center text-sm shrink-0"><i class="fas fa-university"></i></div>
+                        <div>
+                            <p class="font-bold text-sm text-brown-dark">Transfer Bank</p>
+                            <p class="text-[11px] text-text-secondary">Transfer Manual</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between items-center py-2 text-sm border-b border-cream-border/50">
+                            <span class="text-text-secondary">Nama Rekening</span>
+                            <span class="font-semibold text-brown-dark">Jagoan Kue Official</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 text-sm border-b border-cream-border/50">
+                            <span class="text-text-secondary">Nomor Rekening</span>
+                            <span class="font-semibold text-brown-dark flex items-center gap-2">
+                                1234 5678 9012
+                                <button type="button" class="btn-secondary py-1 px-3 text-xs" onclick="salin('123456789012')">Salin</button>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="bg-primary text-white rounded-2xl p-5 flex justify-between items-center shadow-gold mb-4">
+                        <div>
+                            <p class="text-xs text-white/80">{{ $payLabel }} (Transfer Tepat)</p>
+                            <small class="text-[10px] text-white/70 block mt-0.5">Transfer sesuai nominal untuk verifikasi</small>
+                        </div>
+                        <div class="text-right flex items-center gap-3">
+                            <span class="font-heading text-2xl font-bold">Rp {{ number_format($totalTransfer, 0, ',', '.') }}</span>
+                            <button type="button" class="bg-white/20 hover:bg-white/30 text-white font-bold py-1 px-3 rounded-full text-xs transition-colors shrink-0" onclick="salin('{{ $totalTransfer }}')">Salin</button>
+                        </div>
+                    </div>
+                    @if($isFirstDP)
+                    <p class="text-xs text-text-secondary leading-relaxed bg-cream p-3 rounded-xl border border-cream-border">Ini adalah pembayaran <strong>DP 50%</strong> dari total Rp {{ number_format($totalAmount, 0, ',', '.') }}. Nominal transfer berbeda Rp {{ number_format($uniqueCode, 0, ',', '.') }} sebagai kode unik verifikasi.</p>
+                    @elseif($isRemaining)
+                    <p class="text-xs text-text-secondary leading-relaxed bg-cream p-3 rounded-xl border border-cream-border">Ini adalah <strong>pelunasan sisa</strong> dari total Rp {{ number_format($totalAmount, 0, ',', '.') }}. Nominal transfer berbeda Rp {{ number_format($uniqueCode, 0, ',', '.') }} sebagai kode unik verifikasi.</p>
+                    @else
+                    <p class="text-xs text-text-secondary leading-relaxed bg-cream p-3 rounded-xl border border-cream-border">Nominal transfer berbeda Rp {{ number_format($uniqueCode, 0, ',', '.') }} dari total pesanan — ini adalah kode unik untuk verifikasi otomatis.</p>
+                    @endif
+
+                    @elseif($paymentMethod === 'ewallet')
+                    {{-- E-WALLET UI --}}
+                    <div class="flex items-center gap-3 mb-6 bg-cream-warm/30 border border-cream-border rounded-xl p-4">
+                        <div class="w-10 h-10 rounded-xl bg-[#00B14F] text-white flex items-center justify-center text-sm shrink-0"><i class="fas fa-wallet"></i></div>
+                        <div>
+                            <p class="font-bold text-sm text-brown-dark">E-Wallet</p>
+                            <p class="text-[11px] text-text-secondary">GoPay / OVO / dll</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-primary text-white rounded-2xl p-5 flex justify-between items-center shadow-gold mb-4">
+                        <div>
+                            <p class="text-xs text-white/80">{{ $payLabel }}</p>
+                            <small class="text-[10px] text-white/70 block mt-0.5">Bayar via E-Wallet</small>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-heading text-2xl font-bold">Rp {{ number_format($amountDue, 0, ',', '.') }}</span>
+                        </div>
+                    </div>
+
+                    @elseif($paymentMethod === 'qris')
+                    {{-- QRIS UI --}}
+                    <div class="flex items-center gap-3 mb-6 bg-cream-warm/30 border border-cream-border rounded-xl p-4">
+                        <div class="w-10 h-10 rounded-xl bg-[#7C3AED] text-white flex items-center justify-center text-sm shrink-0"><i class="fas fa-qrcode"></i></div>
+                        <div>
+                            <p class="font-bold text-sm text-brown-dark">QRIS</p>
+                            <p class="text-[11px] text-text-secondary">Scan & Bayar</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-primary text-white rounded-2xl p-5 flex justify-between items-center shadow-gold mb-6">
+                        <div>
+                            <p class="text-xs text-white/80">{{ $payLabel }}</p>
+                            <small class="text-[10px] text-white/70 block mt-0.5">Scan QR Code di bawah</small>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-heading text-2xl font-bold">Rp {{ number_format($amountDue, 0, ',', '.') }}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col items-center justify-center mt-4">
+                        @if(file_exists(public_path('images/qris.png')))
+                        <img src="{{ asset('images/qris.png') }}" alt="QR Code QRIS" class="w-[220px] h-[220px] object-contain border border-cream-border rounded-2xl p-2 bg-white shadow-sm">
+                        @else
+                        <div class="w-[220px] h-[220px] border-2 border-dashed border-[#7C3AED]/40 rounded-2xl flex flex-col items-center justify-center gap-2 text-[#7C3AED] bg-[#7C3AED]/5 p-4 text-center">
+                            <i class="fas fa-qrcode text-5xl opacity-50"></i>
+                            <span class="text-[11px] font-semibold opacity-70">QR Code belum tersedia</span>
+                        </div>
+                        @endif
+                        <p class="mt-3 text-xs text-text-secondary max-w-sm text-center">Scan QR Code ini menggunakan aplikasi apapun yang mendukung QRIS</p>
+                    </div>
+                    @endif
+                </div>
+
+                {{-- CARA TRANSFER / PEMBAYARAN --}}
+                <div class="bg-white rounded-2xl border border-cream-border p-6 shadow-sm">
+                    <p class="font-heading text-lg font-bold text-brown-dark mb-4">
+                        @if($paymentMethod === 'transfer_bank')
+                            CARA MELAKUKAN TRANSFER
+                        @elseif($paymentMethod === 'ewallet')
+                            CARA PEMBAYARAN E-WALLET
+                        @elseif($paymentMethod === 'qris')
+                            CARA SCAN QRIS
+                        @endif
+                    </p>
+                    <ul class="space-y-4">
+                        @if($paymentMethod === 'transfer_bank')
+                        <li class="flex gap-3.5 items-start">
+                            <div class="w-6 h-6 rounded-full bg-primary-light text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</div>
+                            <div class="text-sm text-text-secondary leading-relaxed">Buka aplikasi mobile banking atau m-banking kamu</div>
+                        </li>
+                        <li class="flex gap-3.5 items-start">
+                            <div class="w-6 h-6 rounded-full bg-primary-light text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</div>
+                            <div class="text-sm text-text-secondary leading-relaxed">Pilih menu Transfer</div>
+                        </li>
+                        <li class="flex gap-3.5 items-start">
+                            <div class="w-6 h-6 rounded-full bg-primary-light text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</div>
+                            <div class="text-sm text-text-secondary leading-relaxed">Masukkan nomor rekening <strong class="text-brown-dark">1234 5678 9012</strong> a.n. Jagoan Kue Official</div>
+                        </li>
+                        <li class="flex gap-3.5 items-start">
+                            <div class="w-6 h-6 rounded-full bg-primary-light text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">4</div>
+                            <div class="text-sm text-text-secondary leading-relaxed">Masukkan nominal transfer <strong class="text-brown-dark">Rp {{ number_format($totalTransfer, 0, ',', '.') }}</strong> ({{ $payLabel }} + kode unik Rp {{ number_format($uniqueCode, 0, ',', '.') }})</div>
+                        </li>
+                        <li class="flex gap-3.5 items-start">
+                            <div class="w-6 h-6 rounded-full bg-primary-light text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">5</div>
+                            <div class="text-sm text-text-secondary leading-relaxed">Selesaikan transfer, lalu upload bukti pembayaran di bawah</div>
+                        </li>
+                        @elseif($paymentMethod === 'ewallet')
+                        <li class="flex gap-3.5 items-start">
+                            <div class="w-6 h-6 rounded-full bg-primary-light text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</div>
+                            <div class="text-sm text-text-secondary leading-relaxed">Buka aplikasi E-Wallet kamu (GoPay, OVO, Dana, dll)</div>
+                        </li>
+                        <li class="flex gap-3.5 items-start">
+                            <div class="w-6 h-6 rounded-full bg-primary-light text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</div>
+                            <div class="text-sm text-text-secondary leading-relaxed">Transfer ke nomor: <strong class="text-brown-dark">0822-8320-3385</strong> a.n. Jagoan Kue</div>
+                        </li>
+                        <li class="flex gap-3.5 items-start">
+                            <div class="w-6 h-6 rounded-full bg-primary-light text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</div>
+                            <div class="text-sm text-text-secondary leading-relaxed">Masukkan nominal Rp {{ number_format($totalAmount, 0, ',', '.') }}</div>
+                        </li>
+                        <li class="flex gap-3.5 items-start">
+                            <div class="w-6 h-6 rounded-full bg-primary-light text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">4</div>
+                            <div class="text-sm text-text-secondary leading-relaxed">Selesaikan pembayaran, lalu screenshot dan upload bukti di bawah</div>
+                        </li>
+                        @elseif($paymentMethod === 'qris')
+                        <li class="flex gap-3.5 items-start">
+                            <div class="w-6 h-6 rounded-full bg-primary-light text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</div>
+                            <div class="text-sm text-text-secondary leading-relaxed">Screenshot atau simpan gambar QR Code di atas</div>
+                        </li>
+                        <li class="flex gap-3.5 items-start">
+                            <div class="w-6 h-6 rounded-full bg-primary-light text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</div>
+                            <div class="text-sm text-text-secondary leading-relaxed">Buka aplikasi mobile banking atau e-wallet yang mendukung QRIS</div>
+                        </li>
+                        <li class="flex gap-3.5 items-start">
+                            <div class="w-6 h-6 rounded-full bg-primary-light text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</div>
+                            <div class="text-sm text-text-secondary leading-relaxed">Pilih opsi Bayar / Scan, lalu pilih gambar QR Code dari galeri handphone</div>
+                        </li>
+                        <li class="flex gap-3.5 items-start">
+                            <div class="w-6 h-6 rounded-full bg-primary-light text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">4</div>
+                            <div class="text-sm text-text-secondary leading-relaxed">Konfirmasi pembayaran dengan jumlah tepat Rp {{ number_format($totalAmount, 0, ',', '.') }}</div>
+                        </li>
+                        <li class="flex gap-3.5 items-start">
+                            <div class="w-6 h-6 rounded-full bg-primary-light text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">5</div>
+                            <div class="text-sm text-text-secondary leading-relaxed">Selesaikan transaksi, screenshot bukti sukses, dan unggah di bawah</div>
+                        </li>
+                        @endif
+                    </ul>
+                </div>
+
+                {{-- BUKTI PEMBAYARAN --}}
+                <div class="bg-white rounded-2xl border border-cream-border p-6 shadow-sm">
+                    <p class="font-heading text-lg font-bold text-brown-dark mb-4">UPLOAD BUKTI PEMBAYARAN</p>
+                    @if($order->payment && $order->payment->proof_image)
+                        <div class="flex items-start gap-2.5 bg-green-50 border border-green-200 text-green-700 rounded-xl p-4 text-xs font-semibold mb-4 leading-relaxed">
+                            <i class="fas fa-check-circle text-base mt-0.5 shrink-0"></i>
+                            <div>
+                                Bukti pembayaran telah diunggah. Kami akan segera memverifikasi pesanan kamu.
+                                <br>
+                                <a href="{{ asset('storage/' . $order->payment->proof_image) }}" target="_blank" class="text-green-800 font-bold underline mt-1.5 inline-block">Lihat bukti yang diunggah</a>
+                            </div>
+                        </div>
+                        <div class="text-center text-xs text-text-muted mb-4">Ingin mengganti bukti? Pilih file baru di bawah.</div>
+                    @endif
+
+                    <input type="file" name="proof_image" id="file-proof" style="display:none;" accept="image/*" onchange="fileSelected(this)" required>
+                    <div class="border-2 border-dashed border-cream-border rounded-2xl p-8 text-center hover:border-primary hover:bg-primary-light/30 transition-all cursor-pointer bg-white" onclick="document.getElementById('file-proof').click()" id="uploadZone">
+                        <div class="text-4xl mb-3">📸</div>
+                        <p class="text-sm font-semibold text-brown-dark mb-1" id="uploadText">Klik di sini untuk memilih foto bukti transfer</p>
+                        <p class="text-[11px] text-text-muted mb-4">Mendukung format JPG, PNG, GIF (Maks 2MB)</p>
+                        <button type="button" class="btn-ghost py-2 px-6 text-xs">Pilih File</button>
+                    </div>
+                    <p class="text-[10px] text-text-muted mt-3 text-center leading-relaxed">Pastikan bukti transfer menampilkan: Tanggal, Waktu, Nominal Sukses, Rekening Tujuan.</p>
                 </div>
             </div>
-            @if($isFirstDP)
-            <p class="kode-unik-note">Ini adalah pembayaran <strong>DP 50%</strong> dari total Rp {{ number_format($totalAmount, 0, ',', '.') }}. Nominal transfer berbeda Rp {{ number_format($uniqueCode, 0, ',', '.') }} sebagai kode unik verifikasi.</p>
-            @elseif($isRemaining)
-            <p class="kode-unik-note">Ini adalah <strong>pelunasan sisa</strong> dari total Rp {{ number_format($totalAmount, 0, ',', '.') }}. Nominal transfer berbeda Rp {{ number_format($uniqueCode, 0, ',', '.') }} sebagai kode unik verifikasi.</p>
-            @else
-            <p class="kode-unik-note">Nominal transfer berbeda Rp {{ number_format($uniqueCode, 0, ',', '.') }} dari total pesanan — ini adalah kode unik untuk verifikasi otomatis.</p>
-            @endif
 
-            @elseif($paymentMethod === 'ewallet')
-            {{-- E-WALLET UI --}}
-            <div class="bank-header">
-                <div class="bank-logo" style="background:#00B14F;"><i class="fas fa-wallet"></i></div>
-                <div><p class="bank-name">E-Wallet</p><p class="bank-desc">GoPay / OVO / dll</p></div>
-            </div>
-
-            <div class="jumlah-box">
-                <div class="jumlah-left"><p>{{ $payLabel }}</p><small>Bayar via E-Wallet</small></div>
-                <div class="jumlah-right">
-                    <span class="jumlah-amount">Rp {{ number_format($amountDue, 0, ',', '.') }}</span>
+            {{-- RINGKASAN --}}
+            <div class="bg-cream-warm rounded-2xl border border-cream-border p-5 shrink-0 shadow-sm">
+                <p class="font-heading text-xl font-bold text-brown-dark mb-4">Detail Pesanan</p>
+                
+                <div class="divide-y divide-cream-border max-h-[240px] overflow-y-auto pr-1 mb-4">
+                @foreach($order->orderItems as $item)
+                <div class="flex items-start gap-3 py-3 first:pt-0">
+                    <img src="{{ $item->product?->image ? asset('storage/' . $item->product->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=200&q=80' }}"
+                         alt="" class="w-12 h-12 rounded-lg object-cover shrink-0">
+                    <div class="flex-1 min-w-0">
+                        <p class="font-semibold text-xs text-brown-dark truncate">{{ $item->product?->name }}</p>
+                        <small class="text-[10px] text-text-secondary">{{ $item->quantity }}x</small>
+                    </div>
+                    <span class="font-bold text-xs text-primary shrink-0">Rp {{ number_format($item->price * $item->quantity, 0, ',', '.') }}</span>
                 </div>
-            </div>
-
-            @elseif($paymentMethod === 'qris')
-            {{-- QRIS UI --}}
-            <div class="bank-header">
-                <div class="bank-logo" style="background:#7C3AED;"><i class="fas fa-qrcode"></i></div>
-                <div><p class="bank-name">QRIS</p><p class="bank-desc">Scan & Bayar</p></div>
-            </div>
-
-            <div class="jumlah-box">
-                <div class="jumlah-left"><p>{{ $payLabel }}</p><small>Scan QR Code di bawah</small></div>
-                <div class="jumlah-right">
-                    <span class="jumlah-amount">Rp {{ number_format($amountDue, 0, ',', '.') }}</span>
+                @endforeach
                 </div>
-            </div>
 
-            <div style="text-align:center;margin-top:16px;">
-                @if(file_exists(public_path('images/qris.png')))
-                <img src="{{ asset('images/qris.png') }}" alt="QR Code QRIS" style="width:220px;height:220px;object-fit:contain;border:1px solid #e5e7eb;border-radius:12px;padding:8px;">
-                @else
-                <div style="width:220px;height:220px;margin:0 auto;border:2px dashed #7C3AED;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#7C3AED;background:#f5f3ff;">
-                    <i class="fas fa-qrcode" style="font-size:64px;opacity:0.4;"></i>
-                    <small style="font-size:11px;opacity:0.7;">QR Code belum tersedia</small>
+                <div class="space-y-2 mb-4 border-t border-cream-border pt-4 text-xs text-text-secondary">
+                    <div class="flex justify-between items-center">
+                        <span>Total Harga</span>
+                        <span class="font-semibold text-brown-dark">Rp {{ number_format($order->total_price - $order->shipping_cost, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span>Ongkir</span>
+                        <span class="font-semibold text-brown-dark">Rp {{ number_format($order->shipping_cost, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center pt-3 border-t border-cream-border font-bold text-brown-dark mb-4">
+                    <span>Total</span>
+                    <span class="text-xl text-primary font-extrabold">Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
+                </div>
+
+                @if($order->payment_status === 'dp')
+                <div class="bg-white rounded-xl border border-cream-border p-3 text-xs mb-4 space-y-1.5">
+                    <div class="flex justify-between">
+                        <span class="text-text-secondary">Telah Dibayar (DP):</span>
+                        <span class="font-bold text-brown-dark">Rp {{ number_format($order->paid_amount, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between font-bold text-primary border-t border-cream-border/50 pt-1.5">
+                        <span>Sisa Pelunasan:</span>
+                        <span>Rp {{ number_format($order->total_price - $order->paid_amount, 0, ',', '.') }}</span>
+                    </div>
                 </div>
                 @endif
-                <p style="margin-top:10px;font-size:12px;color:#6B7280;">Scan QR Code ini menggunakan aplikasi apapun yang mendukung QRIS</p>
-            </div>
-            @endif
-        </div>
 
-        @if($paymentMethod === 'transfer_bank')
-        {{-- CARA TRANSFER BANK --}}
-        <div class="card">
-            <p class="cara-label">CARA MELAKUKAN TRANSFER</p>
-            <ul class="cara-list">
-                <li class="cara-item"><div class="cara-num">1</div><div>Buka aplikasi mobile banking atau m-banking kamu</div></li>
-                <li class="cara-item"><div class="cara-num">2</div><div>Pilih menu Transfer</div></li>
-                <li class="cara-item"><div class="cara-num">3</div><div>Masukkan nomor rekening 1234 5678 9012 a.n. Jagoan Kue Official</div></li>
-                <li class="cara-item"><div class="cara-num">4</div><div>Masukkan nominal transfer <strong>Rp {{ number_format($totalTransfer, 0, ',', '.') }}</strong> ({{ $payLabel }} + kode unik Rp {{ number_format($uniqueCode, 0, ',', '.') }})</div></li>
-                <li class="cara-item"><div class="cara-num">5</div><div>Selesaikan transfer, lalu upload bukti pembayaran di bawah</div></li>
-            </ul>
-        </div>
-        @elseif($paymentMethod === 'ewallet')
-        <div class="card">
-            <p class="cara-label">CARA PEMBAYARAN E-WALLET</p>
-            <ul class="cara-list">
-                <li class="cara-item"><div class="cara-num">1</div><div>Buka aplikasi E-Wallet kamu (GoPay, OVO, Dana, dll)</div></li>
-                <li class="cara-item"><div class="cara-num">2</div><div>Transfer ke nomor: <strong>0822-8320-3385</strong> a.n. Jagoan Kue</div></li>
-                <li class="cara-item"><div class="cara-num">3</div><div>Masukkan nominal Rp {{ number_format($totalAmount, 0, ',', '.') }}</div></li>
-                <li class="cara-item"><div class="cara-num">4</div><div>Selesaikan pembayaran, lalu screenshot dan upload bukti di bawah</div></li>
-            </ul>
-        </div>
-        @elseif($paymentMethod === 'qris')
-        <div class="card">
-            <p class="cara-label">CARA PEMBAYARAN QRIS</p>
-            <ul class="cara-list">
-                <li class="cara-item"><div class="cara-num">1</div><div>Buka aplikasi apapun yang mendukung QRIS (GoPay, OVO, Dana, m-Banking, dll)</div></li>
-                <li class="cara-item"><div class="cara-num">2</div><div>Pilih menu Scan QR atau Bayar dengan QR</div></li>
-                <li class="cara-item"><div class="cara-num">3</div><div>Scan QR Code yang ditampilkan</div></li>
-                <li class="cara-item"><div class="cara-num">4</div><div>Pastikan nominal Rp {{ number_format($totalAmount, 0, ',', '.') }} sudah sesuai</div></li>
-                <li class="cara-item"><div class="cara-num">5</div><div>Selesaikan pembayaran, lalu screenshot dan upload bukti di bawah</div></li>
-            </ul>
-        </div>
-        @endif
+                <button type="submit" class="btn-primary w-full py-3.5 text-sm font-bold justify-center mb-4">Kirim Bukti Pembayaran</button>
 
-        {{-- UPLOAD BUKTI --}}
-        <div class="card">
-            <p class="upload-label">UPLOAD BUKTI PEMBAYARAN</p>
-
-            @if ($errors->has('proof_image'))
-                <div class="alert-box" style="margin-bottom:12px;">
-                    {{ $errors->first('proof_image') }}
+                <div class="text-center text-xs text-text-secondary mb-6">
+                    Butuh Bantuan?
+                    <a href="https://wa.me/081234567890" target="_blank" class="inline-flex items-center gap-1 text-primary hover:underline font-bold ml-1">
+                        <i class="fab fa-whatsapp"></i> Hubungi WA Kami
+                    </a>
                 </div>
-            @endif
-            <div id="upload-error" style="display:none;color:#DC2626;font-size:13px;font-weight:600;margin-bottom:12px;"></div>
 
-            <input
-                type="file"
-                id="file-input"
-                name="proof_image"
-                style="display:none"
-                accept=".jpg,.jpeg,.png"
-                onchange="handleFile(this)"
-            >
-
-            <div class="upload-zone" onclick="document.getElementById('file-input').click()" ondragover="event.preventDefault()" ondrop="handleDrop(event)">
-                <div class="upload-icon" id="upload-icon"><i class="fas fa-file-upload" style="color:var(--pink)"></i></div>
-                <p class="upload-text" id="upload-text">Seret & letakkan file di sini</p>
-                <p class="upload-sub" id="upload-sub">atau klik untuk memilih file</p>
-                <button class="btn-pilih" type="button">Pilih File</button>
-                <p class="upload-format" id="upload-format" style="margin-top:10px;">Format: JPG, PNG • Maks. 2MB</p>
-            </div>
-            <div class="upload-info">Bukti pembayaran akan diverifikasi oleh tim kami dalam 5-10 menit.</div>
-        </div>
-    </div>
-
-    {{-- RINGKASAN --}}
-    <div>
-        <div class="summary-card">
-            <p class="summary-title">Ringkasan Pesanan</p>
-
-            @foreach($order->orderItems as $item)
-            <div class="summary-item">
-                <img src="{{ $item->product && $item->product->image ? asset('storage/' . $item->product->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=200&q=80' }}" alt="">
-                <div class="summary-item-info">
-                    <p>{{ $item->product->name ?? 'Produk' }}</p>
-                    <small>{{ $item->quantity }}x</small>
+                <div class="border-t border-cream-border pt-4 space-y-3">
+                    <p class="text-xs font-bold text-brown-dark">Mengapa Belanja di Jagoan Kue Aman?</p>
+                    <div class="flex items-start gap-2 text-[11px] text-text-secondary">
+                        <i class="fas fa-check-circle text-primary mt-0.5 shrink-0"></i>
+                        <span>Bahan baku premium & fresh</span>
+                    </div>
+                    <div class="flex items-start gap-2 text-[11px] text-text-secondary">
+                        <i class="fas fa-check-circle text-primary mt-0.5 shrink-0"></i>
+                        <span>Pengiriman aman & tepat waktu</span>
+                    </div>
+                    <div class="flex items-start gap-2 text-[11px] text-text-secondary">
+                        <i class="fas fa-check-circle text-primary mt-0.5 shrink-0"></i>
+                        <span>CS kami siap membantu 24/7</span>
+                    </div>
                 </div>
-                <span class="summary-item-price">Rp {{ number_format($item->price * $item->quantity, 0, ',', '.') }}</span>
-            </div>
-            @endforeach
-
-            @php
-                $subtotalItems = $order->orderItems->sum(fn($i) => $i->price * $i->quantity);
-            @endphp
-            <div class="summary-row"><span>Subtotal Produk</span><span>Rp {{ number_format($subtotalItems, 0, ',', '.') }}</span></div>
-            <div class="summary-row"><span>Ongkir</span><span>{{ $order->shipping_cost > 0 ? 'Rp ' . number_format($order->shipping_cost, 0, ',', '.') : 'Gratis' }}</span></div>
-            @if($isFirstDP || $isRemaining)
-            <div class="summary-row"><span>Total Pesanan</span><span>Rp {{ number_format($totalAmount, 0, ',', '.') }}</span></div>
-            @endif
-            @if($isFirstDP)
-            <div class="summary-row"><span style="color:#C2410C;font-weight:700;">DP 50% (Dibayar Sekarang)</span><span style="color:#C2410C;font-weight:700;">Rp {{ number_format($order->dp_amount, 0, ',', '.') }}</span></div>
-            <div class="summary-row"><span>Sisa (Bayar Nanti)</span><span>Rp {{ number_format($totalAmount - $order->dp_amount, 0, ',', '.') }}</span></div>
-            @elseif($isRemaining)
-            <div class="summary-row"><span>Sudah Dibayar (DP)</span><span>Rp {{ number_format($order->paid_amount, 0, ',', '.') }}</span></div>
-            <div class="summary-row"><span style="color:#C2410C;font-weight:700;">Sisa Pelunasan</span><span style="color:#C2410C;font-weight:700;">Rp {{ number_format($amountDue, 0, ',', '.') }}</span></div>
-            @endif
-            @if($paymentMethod === 'transfer_bank')
-            <div class="summary-row"><span>Kode Unik</span><span>+ Rp {{ number_format($uniqueCode, 0, ',', '.') }}</span></div>
-            <div class="summary-total"><span>{{ $payLabel }} (Transfer)</span><span>Rp {{ number_format($totalTransfer, 0, ',', '.') }}</span></div>
-            @else
-            <div class="summary-total"><span>{{ $payLabel }}</span><span>Rp {{ number_format($amountDue, 0, ',', '.') }}</span></div>
-            @endif
-
-            <div style="margin-bottom:20px;">
-                <p style="font-size:12px;font-weight:700;color:var(--gray);margin-bottom:6px;">Detail Pengiriman</p>
-                <p style="font-size:13px;">{{ auth()->user()->name }} - {{ $order->shipping_address }}</p>
-            </div>
-
-            @if($order->notes)
-            <div style="margin-bottom:20px;">
-                <p style="font-size:12px;font-weight:700;color:var(--gray);margin-bottom:6px;">Catatan Pesanan</p>
-                <p style="font-size:13px;">{{ $order->notes }}</p>
-            </div>
-            @endif
-
-            <button type="submit" class="btn-upload-bukti" id="btn-submit" disabled>Menunggu Upload Bukti Bayar</button>
-            <p class="bantuan">ⓘ Butuh Bantuan? <a href="https://wa.me/6282283203385" target="_blank">Chat Whatsapp</a></p>
-
-            <div class="aman-box">
-                <p class="aman-title">Pesanan Aman Bersama Kami</p>
-                <div class="aman-item"><span class="aman-check"><i class="fas fa-check-circle" style="color:#22C55E"></i></span> Verifikasi pembayaran otomatis</div>
-                <div class="aman-item"><span class="aman-check"><i class="fas fa-check-circle" style="color:#22C55E"></i></span> Uang kembali jika pesanan gagal</div>
-                <div class="aman-item"><span class="aman-check"><i class="fas fa-check-circle" style="color:#22C55E"></i></span> Data transaksi terenkripsi & aman</div>
             </div>
         </div>
+        </form>
     </div>
 </div>
-</form>
+@endsection
 
-<div id="salin-toast" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1F2937;color:white;font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;z-index:9999;">
-    ✓ Berhasil disalin!
-</div>
-
-@include('partials.footer')
-
+@push('scripts')
 <script>
-    let totalSeconds = {{ (int)$remainingSeconds }};
+    let seconds = {{ $remainingSeconds }};
+    const jamEl = document.getElementById('timer-jam');
+    const minEl = document.getElementById('timer-menit');
+    const detEl = document.getElementById('timer-detik');
+
     function updateTimer() {
-        if (totalSeconds <= 0) { document.getElementById('timer-jam').textContent = '00'; document.getElementById('timer-menit').textContent = '00'; document.getElementById('timer-detik').textContent = '00'; return; }
-        totalSeconds--;
-        document.getElementById('timer-jam').textContent = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-        document.getElementById('timer-menit').textContent = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-        document.getElementById('timer-detik').textContent = String(totalSeconds % 60).padStart(2, '0');
+        if (seconds <= 0) {
+            jamEl.textContent = '00';
+            minEl.textContent = '00';
+            detEl.textContent = '00';
+            return;
+        }
+        let h = Math.floor(seconds / 3600);
+        let m = Math.floor((seconds % 3600) / 60);
+        let s = seconds % 60;
+
+        jamEl.textContent = String(h).padStart(2, '0');
+        minEl.textContent = String(m).padStart(2, '0');
+        detEl.textContent = String(s).padStart(2, '0');
+        seconds--;
     }
-    updateTimer();
-    setInterval(updateTimer, 1000);
+
+    if (seconds > 0) {
+        updateTimer();
+        setInterval(updateTimer, 1000);
+    }
 
     function salin(text) {
-        navigator.clipboard.writeText(text).then(() => {
-            const el = document.getElementById('salin-toast');
-            if (el) { el.style.display = 'block'; setTimeout(() => el.style.display = 'none', 2000); }
+        navigator.clipboard.writeText(text).then(function() {
+            alert('Teks berhasil disalin ke clipboard!');
         });
     }
 
-    function handleFile(input) {
+    function fileSelected(input) {
+        const text = document.getElementById('uploadText');
+        const zone = document.getElementById('uploadZone');
         if (input.files && input.files[0]) {
-            const file = input.files[0];
-            const icon = document.getElementById('upload-icon');
-            const text = document.getElementById('upload-text');
-            const sub = document.getElementById('upload-sub');
-            const format = document.getElementById('upload-format');
-            const btn = document.getElementById('btn-submit');
-
-            const allowedTypes = ['image/jpeg', 'image/png'];
-            const maxSize = 2 * 1024 * 1024;
-
-            const errEl = document.getElementById('upload-error');
-
-            if (!allowedTypes.includes(file.type)) {
-                input.value = '';
-                if (text) text.textContent = 'Seret & letakkan file di sini';
-                if (sub) sub.textContent = 'atau klik untuk memilih file';
-                if (format) format.textContent = 'Format: JPG, PNG • Maks. 2MB';
-                if (icon) icon.innerHTML = '<i class="fas fa-file-upload" style="color:var(--pink)"></i>';
-                if (errEl) { errEl.textContent = 'Format file tidak didukung. Gunakan JPG atau PNG.'; errEl.style.display = 'block'; }
-                btn.disabled = true;
-                btn.style.background = '';
-                btn.textContent = 'Menunggu Upload Bukti Bayar';
-                return;
-            }
-
-            if (file.size > maxSize) {
-                input.value = '';
-                if (text) text.textContent = 'Seret & letakkan file di sini';
-                if (sub) sub.textContent = 'atau klik untuk memilih file';
-                if (format) format.textContent = 'Format: JPG, PNG • Maks. 2MB';
-                if (icon) icon.innerHTML = '<i class="fas fa-file-upload" style="color:var(--pink)"></i>';
-                if (errEl) { errEl.textContent = 'Ukuran file maksimal 2MB.'; errEl.style.display = 'block'; }
-                btn.disabled = true;
-                btn.style.background = '';
-                btn.textContent = 'Menunggu Upload Bukti Bayar';
-                return;
-            }
-
-            if (errEl) errEl.style.display = 'none';
-
-            if (icon) icon.innerHTML = '<i class="fas fa-check-circle" style="color:#22C55E;"></i>';
-            if (text) text.textContent = file.name;
-            if (sub) sub.textContent = 'File siap diupload';
-            if (format) format.textContent = '';
-
-            btn.style.background = 'var(--pink)';
-            btn.textContent = '✓ Kirim Bukti Pembayaran';
-            btn.disabled = false;
+            text.innerHTML = '<strong>File Terpilih:</strong> ' + input.files[0].name;
+            zone.style.borderColor = '#10B981';
+            zone.style.background = '#ECFDF5';
         }
     }
-    function handleDrop(e) { e.preventDefault(); document.getElementById('file-input').files = e.dataTransfer.files; handleFile(document.getElementById('file-input')); }
-
-    document.getElementById('upload-form').addEventListener('submit', function() {
-        const btn = document.getElementById('btn-submit');
-        btn.textContent = '⏳ Mengupload...';
-        btn.disabled = true;
-    });
 </script>
 <script src="{{ asset('js/app.js') }}" defer></script>
-</body>
-</html>
+@endpush

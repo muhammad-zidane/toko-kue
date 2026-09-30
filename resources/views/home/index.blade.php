@@ -1,229 +1,175 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" />
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jagoan Kue — Kue Lezat Dikirim ke Pintumu</title>
-    <meta name="description" content="Jagoan Kue menyediakan berbagai kue lezat: kue ulang tahun, pernikahan, kering, dan custom cake. Pesan sekarang, kirim ke pintumu!">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    <style>
-        /* HERO */
-        .hero { background-color: var(--cream); padding: 80px 24px; }
-        .hero-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 40px; }
-        .hero-text { flex: 1; max-width: 520px; }
-        .hero-title { font-family: 'Playfair Display', serif; font-size: 52px; font-weight: 800; line-height: 1.2; color: var(--text-dark); margin-bottom: 16px; }
-        .hero-title span { color: var(--pink); }
-        .hero-subtitle { font-size: 15px; color: var(--gray); line-height: 1.7; margin-bottom: 36px; }
-        .hero-buttons { display: flex; gap: 16px; }
-        .btn-primary { background-color: var(--brown-dark); color: white; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; transition: opacity 0.2s; }
-        .btn-primary:hover { opacity: 0.85; }
-        .btn-secondary { border: 2px solid var(--brown-dark); color: var(--brown-dark); padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; transition: background 0.2s; }
-        .btn-secondary:hover { background: var(--cream-dark); }
-        .hero-image { flex: 1; display: flex; justify-content: center; }
-        .hero-image img { width: 380px; height: 380px; object-fit: cover; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+@extends('layouts.main')
 
-        /* SECTIONS */
-        .section { padding: 72px 24px; }
-        .section-white { background: var(--white); }
-        .section-cream { background-color: var(--cream); }
-        .section-inner { max-width: 1100px; margin: 0 auto; }
-        .section-title { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; text-align: center; color: var(--text-dark); margin-bottom: 8px; }
-        .section-subtitle { text-align: center; color: var(--gray); font-size: 14px; margin-bottom: 48px; }
+@section('title', 'Jagoan Kue — Kue Lezat Dikirim ke Pintumu')
 
-        /* KATEGORI */
-        .category-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
-        .category-card { border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); display: block; }
-        .category-card img { width: 100%; height: 200px; object-fit: cover; display: block; }
-        .category-info { background-color: var(--cream-dark); padding: 16px; }
-        .category-info h3 { font-size: 15px; font-weight: 600; color: var(--text-dark); margin-bottom: 2px; }
-        .category-info p { font-size: 13px; color: var(--gray); }
-
-        /* PRODUK */
-        .product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-        .product-card { background: var(--white); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
-        .product-card img { width: 100%; height: 200px; object-fit: cover; display: block; }
-        .product-info { padding: 20px; }
-        .product-info h3 { font-size: 16px; font-weight: 700; color: var(--text-dark); margin-bottom: 6px; }
-        .product-info p { font-size: 13px; color: var(--gray); line-height: 1.6; margin-bottom: 16px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-        .product-footer { display: flex; align-items: center; justify-content: space-between; }
-        .product-price { font-size: 15px; font-weight: 700; color: var(--pink); }
-        .product-order { font-size: 13px; font-weight: 600; color: var(--brown-dark); }
-        .product-order:hover { opacity: 0.7; }
-
-        /* TESTIMONI */
-        .testimoni-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-        .testimoni-card { background-color: var(--cream); border-radius: 16px; padding: 24px; border: 1px solid #EDE5D0; }
-        .testimoni-text { font-size: 14px; color: #444; line-height: 1.7; margin-bottom: 20px; }
-        .testimoni-author { display: flex; align-items: center; gap: 12px; }
-        .testimoni-avatar { width: 38px; height: 38px; border-radius: 50%; background-color: var(--pink); color: white; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .testimoni-name { font-size: 13px; font-weight: 700; color: var(--text-dark); }
-        .testimoni-role { font-size: 12px; color: var(--gray); margin-top: 2px; }
-
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .hero-inner { flex-direction: column; text-align: center; }
-            .hero-title { font-size: 36px; }
-            .hero-buttons { justify-content: center; }
-            .hero-image img { width: 280px; height: 280px; }
-            .category-grid { grid-template-columns: 1fr; }
-            .product-grid { grid-template-columns: 1fr; }
-            .testimoni-grid { grid-template-columns: 1fr; }
-        }
-    </style>
-</head>
-<body>
-        {{-- NAVBAR --}}
-        @include('partials.navbar')
-
+@section('content')
         {{-- BANNER SLIDESHOW (dari database) --}}
         @if($banners->isNotEmpty())
-        <div id="bannerSlider" style="position:relative;overflow:hidden;background:var(--cream);">
+        <div id="bannerSlider" class="relative overflow-hidden bg-cream">
             @foreach($banners as $i => $banner)
-            <div class="banner-slide" style="display:{{ $i === 0 ? 'block' : 'none' }};position:relative;">
+            <div class="banner-slide" style="display:{{ $i === 0 ? 'block' : 'none' }}; position: relative;">
                 <a href="{{ $banner->link ?? '#' }}">
                     @if($banner->image)
                         <img src="{{ asset('storage/' . $banner->image) }}"
                              alt="{{ $banner->title }}"
-                             style="width:100%;max-height:480px;object-fit:cover;display:block;" loading="lazy">
+                             class="w-full max-h-[480px] object-cover block" loading="lazy">
                     @else
-                        <div style="width:100%;height:480px;background:linear-gradient(135deg,var(--cream) 0%,var(--pink-light,#fde8ef) 100%);display:flex;align-items:center;justify-content:center;">
+                        <div class="w-full h-[480px] bg-gradient-to-br from-cream to-cream-warm flex items-center justify-center">
                         </div>
                     @endif
                 </a>
                 @if($banner->title)
-                <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.55));padding:24px 32px;">
-                    <h2 style="color:white;font-family:'Playfair Display',serif;font-size:28px;font-weight:800;margin-bottom:4px;">{{ $banner->title }}</h2>
-                    @if($banner->subtitle)<p style="color:rgba(255,255,255,0.85);font-size:14px;">{{ $banner->subtitle }}</p>@endif
+                <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent px-8 py-6">
+                    <h2 class="text-white font-heading text-2xl md:text-3xl font-extrabold mb-1">{{ $banner->title }}</h2>
+                    @if($banner->subtitle)<p class="text-white/90 text-sm">{{ $banner->subtitle }}</p>@endif
                 </div>
                 @endif
             </div>
             @endforeach
 
             @if($banners->count() > 1)
-            <button onclick="slideBanner(-1)" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.8);border:none;border-radius:50%;width:36px;height:36px;font-size:16px;cursor:pointer;">‹</button>
-            <button onclick="slideBanner(1)"  style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.8);border:none;border-radius:50%;width:36px;height:36px;font-size:16px;cursor:pointer;">›</button>
-            <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;" id="bannerDots">
+            <button onclick="slideBanner(-1)" aria-label="Slide sebelumnya" class="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 rounded-full w-10 h-10 flex items-center justify-center shadow-md hover:bg-white transition-all text-brown-dark font-bold text-lg">‹</button>
+            <button onclick="slideBanner(1)"  aria-label="Slide berikutnya" class="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 rounded-full w-10 h-10 flex items-center justify-center shadow-md hover:bg-white transition-all text-brown-dark font-bold text-lg">›</button>
+            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5" id="bannerDots">
                 @foreach($banners as $i => $banner)
-                <div class="banner-dot" onclick="goToBanner({{ $i }})"
-                     style="width:8px;height:8px;border-radius:50%;background:{{ $i === 0 ? 'white' : 'rgba(255,255,255,0.5)' }};cursor:pointer;transition:background 0.2s;"></div>
+                <div class="banner-dot {{ $i === 0 ? 'w-3 bg-white' : 'w-2 bg-white/50' }} h-2 rounded-full cursor-pointer transition-all duration-200" onclick="goToBanner({{ $i }})"></div>
                 @endforeach
             </div>
             @endif
         </div>
-        <script>
-        let bannerIdx = 0;
-        const slides = document.querySelectorAll('.banner-slide');
-        const dots   = document.querySelectorAll('.banner-dot');
-        function goToBanner(n) {
-            slides[bannerIdx].style.display = 'none';
-            if (dots[bannerIdx]) dots[bannerIdx].style.background = 'rgba(255,255,255,0.5)';
-            bannerIdx = (n + slides.length) % slides.length;
-            slides[bannerIdx].style.display = 'block';
-            if (dots[bannerIdx]) dots[bannerIdx].style.background = 'white';
-        }
-        function slideBanner(dir) { goToBanner(bannerIdx + dir); }
-        if (slides.length > 1) setInterval(() => slideBanner(1), 5000);
-        </script>
         @endif
 
         {{-- HERO --}}
-        <section class="hero">
-            <div class="hero-inner">
-                <div class="hero-text">
-                    <h1 class="hero-title">
+        <section class="bg-gradient-to-br from-cream to-cream-warm py-20 px-6">
+            <div class="max-w-[1140px] mx-auto flex flex-col md:flex-row items-center justify-between gap-10">
+                <div class="flex-1 max-w-[520px]">
+                    <h1 class="font-heading text-5xl font-bold leading-tight text-brown-dark mb-4">
                         Kue Lezat, Dikirim<br>
-                        Hangat ke <span>Pintumu</span>
+                        Hangat ke <span class="text-primary relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-full after:h-1.5 after:bg-primary/20 after:rounded-full">Pintumu</span>
                     </h1>
-                    <p class="hero-subtitle">
-                        Menyediakan Bermacam-macam kue yang<br>dibuat oleh cinta
+                    <p class="text-base text-text-secondary leading-relaxed mb-9 max-w-md">
+                        Menyediakan Bermacam-macam kue yang<br>dibuat dengan cinta
                     </p>
-                    <div class="hero-buttons">
+                    <div class="flex gap-4">
                         <a href="/products" class="btn-primary">Katalog</a>
                         <a href="/orders" class="btn-secondary">Pesanan Saya</a>
                     </div>
                 </div>
-                <div class="hero-image">
-                    <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&q=80" alt="Kue Lezat" loading="lazy">
+                <div class="flex-1 flex justify-center">
+                    <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&q=80" alt="Kue Lezat" class="w-[380px] h-[380px] object-cover rounded-3xl shadow-lg border-4 border-white" loading="lazy">
                 </div>
             </div>
         </section>
 
         {{-- KATEGORI --}}
-        <section class="section section-white">
-            <div class="section-inner">
+        <section class="py-20 px-6 bg-white">
+            <div class="max-w-[1140px] mx-auto">
                 <h2 class="section-title">Jelajahi Kategori</h2>
-                <div class="category-grid" style="margin-top: 40px;">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-10">
                     @forelse($categories as $category)
-                    <a href="/products?category={{ $category->slug }}" class="category-card">
-                        <img src="{{ $category->image ? Storage::url($category->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=600&q=80' }}" alt="{{ $category->name }}">
-                        <div class="category-info">
-                            <h3>{{ $category->name }}</h3>
-                            <p>{{ $category->products_count ?? 0 }} Produk</p>
+                    <a href="/products?category={{ $category->slug }}" class="block rounded-2xl overflow-hidden border border-cream-border shadow-sm hover:-translate-y-1 hover:shadow-md transition-all duration-200">
+                        <img src="{{ $category->image ? Storage::url($category->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=600&q=80' }}" alt="{{ $category->name }}" class="w-full h-52 object-cover">
+                        <div class="bg-cream-warm px-5 py-4">
+                            <h3 class="font-semibold text-base text-brown-dark">{{ $category->name }}</h3>
+                            <span class="inline-block mt-1 bg-primary-light text-primary text-xs font-bold px-2 py-0.5 rounded-full">
+                                {{ $category->products_count ?? 0 }} Produk
+                            </span>
                         </div>
                     </a>
                     @empty
-                    <p style="grid-column: span 2; text-align: center; color: var(--gray);">Belum ada kategori.</p>
+                    <p class="sm:col-span-2 text-center text-text-muted">Belum ada kategori.</p>
                     @endforelse
                 </div>
             </div>
         </section>
 
         {{-- PRODUK UNGGULAN --}}
-        <section class="section section-cream">
-            <div class="section-inner">
+        <section class="py-20 px-6 bg-cream">
+            <div class="max-w-[1140px] mx-auto">
                 <h2 class="section-title">Produk Unggulan</h2>
-                <div class="product-grid" style="margin-top: 40px;">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
                     @forelse($featuredProducts as $product)
-                    <div class="product-card">
-                        <img src="{{ $product->image ? asset('storage/' . $product->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=600&q=80' }}"
-                             alt="{{ $product->name }}">
-                        <div class="product-info">
-                            <h3>{{ $product->name }}</h3>
-                            <p>{{ $product->description }}</p>
-                            <div class="product-footer">
-                                <span class="product-price">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                                <a href="/products/{{ $product->slug }}" class="product-order">Pesan Sekarang →</a>
+                    <div class="card card-hover relative overflow-hidden group">
+                        <div class="absolute top-3 left-3 bg-amber-100 text-amber-700 text-[11px] font-bold px-2.5 py-1 rounded-full z-10">Unggulan</div>
+                        <div class="overflow-hidden">
+                            <img src="{{ $product->image ? asset('storage/' . $product->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=600&q=80' }}"
+                                 alt="{{ $product->name }}"
+                                 class="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-300">
+                        </div>
+                        <div class="p-5">
+                            <h3 class="font-bold text-base text-brown-dark mb-1.5">{{ $product->name }}</h3>
+                            <p class="text-sm text-text-secondary line-clamp-2 mb-4 leading-relaxed">{{ $product->description }}</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-base font-extrabold text-primary">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
+                                <a href="/products/{{ $product->slug }}" class="text-sm font-semibold text-brown-mid hover:text-primary transition-colors">Pesan Sekarang →</a>
                             </div>
                         </div>
                     </div>
                     @empty
-                    <p style="grid-column: span 3; text-align: center; color: var(--gray);">Belum ada produk.</p>
+                    <p class="lg:col-span-3 sm:col-span-2 text-center text-text-muted">Belum ada produk.</p>
                     @endforelse
                 </div>
             </div>
         </section>
 
         {{-- TESTIMONI --}}
-        <section class="section section-white">
-            <div class="section-inner">
+        <section class="py-20 px-6 bg-white">
+            <div class="max-w-[1140px] mx-auto">
                 <h2 class="section-title">Testimoni</h2>
                 <p class="section-subtitle">Yang orang-orang rasakan.</p>
-                <div class="testimoni-grid">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
                     @forelse($testimonials as $t)
-                    <div class="testimoni-card">
-                        <p class="testimoni-text">"{{ $t->comment ?? '-' }}"</p>
-                        <div class="testimoni-author">
-                            <div class="testimoni-avatar">{{ strtoupper(substr($t->user->name ?? 'U', 0, 1)) }}</div>
+                    <div class="bg-cream rounded-2xl p-6 border border-cream-border relative overflow-hidden">
+                        <span class="absolute top-3 right-4 text-7xl font-heading text-cream-dark opacity-60 leading-none select-none">"</span>
+                        <div class="flex gap-0.5 text-amber-400 text-sm mb-3">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="text-sm text-text-secondary leading-relaxed mb-5 relative z-10">"{{ $t->comment ?? '-' }}"</p>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary-hover text-white text-sm font-bold flex items-center justify-center">
+                                {{ strtoupper(substr($t->user->name ?? 'U', 0, 1)) }}
+                            </div>
                             <div>
-                                <p class="testimoni-name">{{ $t->user->name ?? 'Pelanggan' }}</p>
-                                <p class="testimoni-role">
+                                <p class="text-sm font-bold text-brown-dark">{{ $t->user->name ?? 'Pelanggan' }}</p>
+                                <p class="text-xs text-text-muted mt-0.5">
                                     {{ $t->product ? 'Ulasan untuk ' . $t->product->name : 'Ulasan Produk' }}
                                 </p>
                             </div>
                         </div>
                     </div>
                     @empty
-                    <p style="grid-column: span 3; text-align: center; color: var(--gray);">Belum ada testimoni.</p>
+                    <p class="md:col-span-3 text-center text-text-muted">Belum ada testimoni.</p>
                     @endforelse
                 </div>
             </div>
         </section>
+@endsection
 
-
-@include('partials.footer')
-<script src="{{ asset('js/app.js') }}" defer></script>
-</body>
-</html>
+@push('scripts')
+    @if($banners->isNotEmpty())
+        <script>
+        let bannerIdx = 0;
+        const slides = document.querySelectorAll('.banner-slide');
+        const dots   = document.querySelectorAll('.banner-dot');
+        function goToBanner(n) {
+            slides[bannerIdx].style.display = 'none';
+            if (dots[bannerIdx]) {
+                dots[bannerIdx].classList.remove('bg-white', 'w-3');
+                dots[bannerIdx].classList.add('bg-white/50', 'w-2');
+            }
+            bannerIdx = (n + slides.length) % slides.length;
+            slides[bannerIdx].style.display = 'block';
+            if (dots[bannerIdx]) {
+                dots[bannerIdx].classList.remove('bg-white/50', 'w-2');
+                dots[bannerIdx].classList.add('bg-white', 'w-3');
+            }
+        }
+        function slideBanner(dir) { goToBanner(bannerIdx + dir); }
+        if (slides.length > 1) setInterval(() => slideBanner(1), 5000);
+        </script>
+    @endif
+@endpush

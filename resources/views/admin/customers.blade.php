@@ -1,28 +1,7 @@
-﻿@extends('admin.layout')
+@extends('admin.layout')
 @section('title', 'Data Pelanggan')
 @section('page-title', 'Data Pelanggan')
 @section('page-subtitle', 'Lihat semua pelanggan terdaftar')
-
-@push('styles')
-<style>
-    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
-    .stat-card { background: white; border-radius: 16px; padding: 20px; border: 1px solid #EDE0D4; transition: transform 0.2s; }
-    .stat-card:hover { transform: translateY(-2px); }
-    .stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 12px; }
-    .stat-value { font-size: 30px; font-weight: 800; color: var(--text-dark); }
-    .stat-label { font-size: 12px; color: var(--gray); margin-top: 4px; }
-    .card { background: white; border-radius: 16px; border: 1px solid #EDE0D4; overflow: hidden; }
-    table { width: 100%; border-collapse: collapse; }
-    th { padding: 12px 16px; font-size: 11px; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; background: var(--cream); border-bottom: 1px solid #EDE0D4; text-align: left; }
-    td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid rgba(237,224,212,0.5); vertical-align: middle; }
-    tr:hover { background: rgba(255,248,238,0.3); }
-    .avatar { width: 40px; height: 40px; border-radius: 50%; color: white; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .customer-name { font-size: 14px; font-weight: 600; }
-    .customer-email { font-size: 11px; color: var(--gray); }
-    .order-badge { background: var(--cream); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; color: var(--brown-dark); }
-    @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr; } }
-</style>
-@endpush
 
 @section('content')
 @php
@@ -30,63 +9,67 @@
 @endphp
 
 {{-- STATS --}}
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(240,80,122,0.1);"><i class="fas fa-user" style="color:var(--pink)"></i></div>
-        <div class="stat-value">{{ $totalCustomers }}</div>
-        <div class="stat-label">Total Pelanggan</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-2xl border border-cream-border p-5 shadow-sm hover:-translate-y-1 hover:shadow-md transition-all duration-200">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl mb-4 bg-primary/10 text-primary"><i class="fas fa-user"></i></div>
+        <div class="font-heading text-3xl font-bold text-brown-dark mt-1">{{ $totalCustomers }}</div>
+        <div class="text-sm text-text-secondary">Total Pelanggan</div>
     </div>
-    <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(34,197,94,0.1);"><i class="fas fa-user-plus" style="color:var(--pink)"></i></div>
-        <div class="stat-value">{{ $newCustomers }}</div>
-        <div class="stat-label">Pelanggan Baru (Bulan Ini)</div>
+    <div class="bg-white rounded-2xl border border-cream-border p-5 shadow-sm hover:-translate-y-1 hover:shadow-md transition-all duration-200">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl mb-4 bg-green-50 text-green-600"><i class="fas fa-user-plus"></i></div>
+        <div class="font-heading text-3xl font-bold text-brown-dark mt-1">{{ $newCustomers }}</div>
+        <div class="text-sm text-text-secondary">Pelanggan Baru (Bulan Ini)</div>
     </div>
-    <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(59,130,246,0.1);"><i class="fas fa-box" style="color:var(--pink)"></i></div>
-        <div class="stat-value">{{ $totalOrders }}</div>
-        <div class="stat-label">Total Pesanan</div>
+    <div class="bg-white rounded-2xl border border-cream-border p-5 shadow-sm hover:-translate-y-1 hover:shadow-md transition-all duration-200">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl mb-4 bg-blue-50 text-blue-600"><i class="fas fa-box"></i></div>
+        <div class="font-heading text-3xl font-bold text-brown-dark mt-1">{{ $totalOrders }}</div>
+        <div class="text-sm text-text-secondary">Total Pesanan</div>
     </div>
 </div>
 
 {{-- TABLE --}}
-<div class="card">
-    <div style="overflow-x:auto;">
-        <table>
+<div class="bg-white rounded-2xl border border-cream-border overflow-hidden shadow-sm">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
             <thead>
                 <tr>
-                    <th>#</th>
-                    <th>Pelanggan</th>
-                    <th>Pesanan</th>
-                    <th>Total Belanja</th>
-                    <th>Bergabung</th>
+                    <th class="px-5 py-3 text-xs font-bold text-brown-light uppercase tracking-wider bg-cream/50 border-b border-cream-border">#</th>
+                    <th class="px-5 py-3 text-xs font-bold text-brown-light uppercase tracking-wider bg-cream/50 border-b border-cream-border">Pelanggan</th>
+                    <th class="px-5 py-3 text-xs font-bold text-brown-light uppercase tracking-wider bg-cream/50 border-b border-cream-border">Pesanan</th>
+                    <th class="px-5 py-3 text-xs font-bold text-brown-light uppercase tracking-wider bg-cream/50 border-b border-cream-border">Total Belanja</th>
+                    <th class="px-5 py-3 text-xs font-bold text-brown-light uppercase tracking-wider bg-cream/50 border-b border-cream-border">Bergabung</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($customers as $i => $customer)
                 @php $totalSpent = $customer->orders->sum('total_price'); @endphp
-                <tr>
-                    <td style="font-weight:600;color:var(--gray);">{{ $loop->iteration + ($customers->currentPage() - 1) * $customers->perPage() }}</td>
-                    <td>
-                        <div style="display:flex;align-items:center;gap:12px;">
-                            <div class="avatar" style="background:{{ $colors[$i % count($colors)] }};">
+                <tr class="hover:bg-cream-warm/20 transition-colors">
+                    <td class="px-5 py-4 text-sm border-b border-cream-border/50 align-middle font-semibold text-text-muted">{{ $loop->iteration + ($customers->currentPage() - 1) * $customers->perPage() }}</td>
+                    <td class="px-5 py-4 text-sm border-b border-cream-border/50 align-middle">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-sm" style="background:{{ $colors[$i % count($colors)] }};">
                                 {{ strtoupper(substr($customer->name, 0, 2)) }}
                             </div>
                             <div>
-                                <div class="customer-name">{{ $customer->name }}</div>
-                                <div class="customer-email">{{ $customer->email }}</div>
+                                <div class="font-bold text-brown-dark text-sm">{{ $customer->name }}</div>
+                                <div class="text-xs text-text-secondary mt-0.5">{{ $customer->email }}</div>
                             </div>
                         </div>
                     </td>
-                    <td><span class="order-badge">{{ $customer->orders->count() }} pesanan</span></td>
-                    <td style="font-weight:700;color:var(--brown-dark);">Rp {{ number_format($totalSpent, 0, ',', '.') }}</td>
-                    <td style="font-size:12px;color:var(--gray);">{{ $customer->created_at->format('d M Y') }}</td>
+                    <td class="px-5 py-4 text-sm border-b border-cream-border/50 align-middle">
+                        <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cream-warm text-brown-mid border border-cream-border">{{ $customer->orders->count() }} pesanan</span>
+                    </td>
+                    <td class="px-5 py-4 text-sm border-b border-cream-border/50 align-middle font-bold text-brown-dark">Rp {{ number_format($totalSpent, 0, ',', '.') }}</td>
+                    <td class="px-5 py-4 text-sm border-b border-cream-border/50 align-middle text-text-secondary text-xs">{{ $customer->created_at->format('d M Y') }}</td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" style="text-align:center;padding:64px;">
-                        <div style="font-size:48px;margin-bottom:12px;"><i class="fas fa-user"></i></div>
-                        <h3 style="font-weight:700;color:var(--brown-dark);">Belum Ada Pelanggan</h3>
-                        <p style="font-size:14px;color:var(--gray);">Pelanggan akan muncul di sini.</p>
+                    <td colspan="5" class="px-5 py-8 border-b border-cream-border/50 text-center">
+                        <div class="py-6 text-center">
+                            <div class="w-12 h-12 rounded-full bg-primary-light text-primary flex items-center justify-center mx-auto mb-3 text-lg"><i class="fas fa-user"></i></div>
+                            <h3 class="font-bold text-brown-dark text-sm mb-1">Belum Ada Pelanggan</h3>
+                            <p class="text-xs text-text-secondary">Pelanggan akan muncul di sini.</p>
+                        </div>
                     </td>
                 </tr>
                 @endforelse
@@ -94,7 +77,9 @@
         </table>
     </div>
     @if($customers->hasPages())
-    <div style="padding:16px;">{{ $customers->links() }}</div>
+    <div class="p-4 flex justify-center bg-white border-t border-cream-border">
+        {{ $customers->links() }}
+    </div>
     @endif
 </div>
 @endsection

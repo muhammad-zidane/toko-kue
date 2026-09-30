@@ -37,4 +37,27 @@ class OrderFactory extends Factory
             'shipping_cost'    => 15000,
         ]);
     }
+
+    public function completed(): static
+    {
+        return $this->state([
+            'status'         => 'completed',
+            'payment_status' => 'paid',
+        ]);
+    }
+
+    public function cancelled(): static
+    {
+        return $this->state([
+            'status' => 'cancelled',
+        ]);
+    }
+
+    public function withDp(): static
+    {
+        return $this->state([
+            'payment_status' => 'dp',
+            'dp_amount'      => 50000,
+        ]);
+    }
 }

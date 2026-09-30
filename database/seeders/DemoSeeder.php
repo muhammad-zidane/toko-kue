@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Address;
+use App\Models\Category;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
@@ -16,6 +17,14 @@ use Illuminate\Support\Str;
 class DemoSeeder extends Seeder
 {
     public function run(): void
+    {
+        $customerModels = $this->createCustomers();
+        $this->createAddresses($customerModels);
+        $this->ensureExtraProducts();
+        $this->createOrders($customerModels);
+    }
+
+    private function createCustomers(): array
     {
         $customers = [
             ['name' => 'Customer Demo',  'email' => 'customer@jagoan-kue.test'],
@@ -32,6 +41,11 @@ class DemoSeeder extends Seeder
             );
         }
 
+        return $customerModels;
+    }
+
+    private function createAddresses(array $customerModels): void
+    {
         $alamatData = [
             [
                 'label'          => 'Rumah',
@@ -85,37 +99,51 @@ class DemoSeeder extends Seeder
                 array_merge($alamat, ['user_id' => $customerModels[$userAddressMap[$i]]->id])
             );
         }
+    }
+
+    private function ensureExtraProducts(): void
+    {
+        $categories = Category::pluck('id', 'slug');
+        $defaultCatId = $categories->first() ?? 1;
 
         $extraProducts = [
-            ['name' => 'Tart Buah Segar',    'category_id' => 1, 'price' => 280000, 'stock' => 8],
-            ['name' => 'Cheesecake New York', 'category_id' => 1, 'price' => 320000, 'stock' => 6],
-            ['name' => 'Opera Cake',          'category_id' => 2, 'price' => 450000, 'stock' => 4],
-            ['name' => 'Mille Crepe',         'category_id' => 1, 'price' => 380000, 'stock' => 7],
-            ['name' => 'Kastengel',           'category_id' => 3, 'price' => 90000,  'stock' => 40],
-            ['name' => 'Lidah Kucing',        'category_id' => 3, 'price' => 75000,  'stock' => 40],
+            ['name' => 'Tart Buah Segar',     'category_slug' => 'kue-ulang-tahun', 'price' => 280000, 'stock' => 8],
+            ['name' => 'Cheesecake New York', 'category_slug' => 'kue-ulang-tahun', 'price' => 320000, 'stock' => 6],
+            ['name' => 'Opera Cake',          'category_slug' => 'kue-pernikahan',  'price' => 450000, 'stock' => 4],
+            ['name' => 'Mille Crepe',         'category_slug' => 'kue-ulang-tahun', 'price' => 380000, 'stock' => 7],
+            ['name' => 'Kastengel',           'category_slug' => 'kue-kering',      'price' => 90000,  'stock' => 40],
+            ['name' => 'Lidah Kucing',        'category_slug' => 'kue-kering',      'price' => 75000,  'stock' => 40],
         ];
 
         foreach ($extraProducts as $p) {
-            if (!Product::where('name', $p['name'])->exists()) {
-                Product::create([
-                    'name'         => $p['name'],
+            $catId = $categories->get($p['category_slug']) ?? $defaultCatId;
+            Product::firstOrCreate(
+                ['name' => $p['name']],
+                [
                     'slug'         => Str::slug($p['name']),
-                    'category_id'  => $p['category_id'],
+                    'category_id'  => $catId,
                     'price'        => $p['price'],
                     'stock'        => $p['stock'],
                     'description'  => 'Deskripsi ' . $p['name'],
                     'is_available' => true,
-                ]);
-            }
+                ]
+            );
+        }
+    }
+
+    private function createOrders(array $customerModels): void
+    {
+        $products = Product::all();
+        if ($products->isEmpty()) {
+            return;
         }
 
-        $products    = Product::all();
         $statuses    = ['pending', 'processing', 'shipped', 'completed', 'completed', 'completed', 'cancelled', 'processing', 'shipped', 'completed'];
         $payStatuses = ['unpaid',  'paid',       'paid',    'paid',      'paid',      'paid',      'unpaid',    'dp',         'paid',    'paid'];
 
         foreach ($statuses as $idx => $status) {
             $customer        = $customerModels[$idx % count($customerModels)];
-            $pickedProducts  = $products->random(rand(1, 3));
+            $pickedProducts  = $products->random(min(rand(1, 3), $products->count()));
             $subtotal        = 0;
             $items           = [];
 

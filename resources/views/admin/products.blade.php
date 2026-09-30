@@ -1,115 +1,88 @@
-﻿@extends('admin.layout')
+@extends('admin.layout')
 @section('title', 'Produk')
 @section('page-title', 'Kelola Produk')
 @section('page-subtitle', 'Lihat, tambah, edit, dan hapus produk')
 
-@push('styles')
-<style>
-    .card { background: white; border-radius: 16px; border: 1px solid #EDE0D4; overflow: hidden; }
-    .card-header { display: flex; align-items: center; justify-content: space-between; padding: 20px; border-bottom: 1px solid #EDE0D4; }
-    .card-header h2 { font-size: 15px; font-weight: 700; color: var(--text-dark); }
-    .btn-add { background: var(--pink); color: white; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: opacity 0.2s; }
-    .btn-add:hover { opacity: 0.85; }
-    table { width: 100%; border-collapse: collapse; }
-    th { padding: 12px 16px; font-size: 11px; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; background: #FAFAF8; border-bottom: 1px solid #EDE0D4; text-align: left; }
-    td { padding: 12px 16px; font-size: 13px; border-bottom: 1px solid #F9F4EE; vertical-align: middle; }
-    tr:hover { background: #FAFAF8; }
-    .product-img { width: 48px; height: 48px; border-radius: 10px; object-fit: cover; background: var(--cream); display: flex; align-items: center; justify-content: center; overflow: hidden; }
-    .product-img img { width: 100%; height: 100%; object-fit: cover; }
-    .product-name { font-weight: 700; color: var(--text-dark); }
-    .product-desc { font-size: 11px; color: var(--gray); margin-top: 2px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
-    .cat-badge { background: var(--cream); padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; color: var(--brown-dark); }
-    .stock-badge { padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
-    .stock-ok { background: #DCFCE7; color: #16A34A; }
-    .stock-low { background: #FEF3C7; color: #D97706; }
-    .stock-out { background: #FEE2E2; color: #DC2626; }
-    .actions { display: flex; gap: 6px; }
-    .btn-edit { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; background: #DBEAFE; color: #2563EB; }
-    .btn-edit:hover { opacity: 0.8; }
-    .btn-delete { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; background: #FEE2E2; color: #DC2626; border: none; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; }
-    .btn-delete:hover { opacity: 0.8; }
-    .pagination { display: flex; justify-content: center; gap: 30px; padding: 16px; }
-</style>
-@endpush
-
 @section('content')
-<div class="card">
-    <div class="card-header">
-        <h2>Daftar Produk ({{ $products->total() }})</h2>
-        <a href="{{ route('admin.products.create') }}" class="btn-add"><i class="fas fa-plus" style="color:white"></i> Tambah Produk</a>
+<div class="bg-white rounded-2xl border border-cream-border overflow-hidden shadow-sm">
+    <div class="px-5 py-4 border-b border-cream-border flex justify-between items-center bg-cream-warm/10">
+        <h2 class="font-heading text-lg font-bold text-brown-dark">Daftar Produk ({{ $products->total() }})</h2>
+        <a href="{{ route('admin.products.create') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white font-bold text-xs rounded-full shadow-gold transition-all duration-200 hover:bg-primary-hover hover:-translate-y-0.5"><i class="fas fa-plus"></i> Tambah Produk</a>
     </div>
-    <div style="overflow-x:auto;">
-        <table>
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
             <thead>
                 <tr>
-                    <th>Produk</th>
-                    <th>Kategori</th>
-                    <th>Harga</th>
-                    <th>Stok</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
+                    <th class="px-5 py-3 text-xs font-bold text-brown-light uppercase tracking-wider bg-cream/50 border-b border-cream-border">Produk</th>
+                    <th class="px-5 py-3 text-xs font-bold text-brown-light uppercase tracking-wider bg-cream/50 border-b border-cream-border">Kategori</th>
+                    <th class="px-5 py-3 text-xs font-bold text-brown-light uppercase tracking-wider bg-cream/50 border-b border-cream-border">Harga</th>
+                    <th class="px-5 py-3 text-xs font-bold text-brown-light uppercase tracking-wider bg-cream/50 border-b border-cream-border">Stok</th>
+                    <th class="px-5 py-3 text-xs font-bold text-brown-light uppercase tracking-wider bg-cream/50 border-b border-cream-border">Status</th>
+                    <th class="px-5 py-3 text-xs font-bold text-brown-light uppercase tracking-wider bg-cream/50 border-b border-cream-border">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($products as $product)
-                <tr>
-                    <td>
-                        <div style="display:flex;align-items:center;gap:12px;">
-                            <div class="product-img">
+                <tr class="hover:bg-cream-warm/20 transition-colors">
+                    <td class="px-5 py-4 text-sm border-b border-cream-border/50 align-middle">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-lg bg-cream/40 border border-cream-border flex items-center justify-center overflow-hidden shrink-0">
                                 @if($product->image)
-                                    <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}">
+                                    <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
                                 @else
-                                    <span style="font-size:20px;"><i class="fas fa-birthday-cake" style="color:var(--pink)"></i></span>
+                                    <span class="text-xl text-primary"><i class="fas fa-birthday-cake"></i></span>
                                 @endif
                             </div>
                             <div>
-                                <div class="product-name">{{ $product->name }}</div>
-                                <div class="product-desc">{{ $product->description }}</div>
+                                <div class="font-bold text-brown-dark text-sm">{{ $product->name }}</div>
+                                <div class="text-xs text-text-secondary line-clamp-1 max-w-[240px]">{{ $product->description }}</div>
                             </div>
                         </div>
                     </td>
-                    <td><span class="cat-badge">{{ $product->category->name ?? '-' }}</span></td>
-                    <td style="font-weight:700;">Rp {{ number_format($product->price, 0, ',', '.') }}</td>
-                    <td>
+                    <td class="px-5 py-4 text-sm border-b border-cream-border/50 align-middle">
+                        <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cream-warm text-brown-mid border border-cream-border">{{ $product->category->name ?? '-' }}</span>
+                    </td>
+                    <td class="px-5 py-4 text-sm border-b border-cream-border/50 align-middle font-bold text-brown-dark">Rp {{ number_format($product->price, 0, ',', '.') }}</td>
+                    <td class="px-5 py-4 text-sm border-b border-cream-border/50 align-middle">
                         @if($product->stock > 10)
-                            <span class="stock-badge stock-ok">{{ $product->stock }}</span>
+                            <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-50 text-green-700">{{ $product->stock }}</span>
                         @elseif($product->stock > 0)
-                            <span class="stock-badge stock-low">{{ $product->stock }}</span>
+                            <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700">{{ $product->stock }}</span>
                         @else
-                            <span class="stock-badge stock-out">Habis</span>
+                            <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-50 text-red-700">Habis</span>
                         @endif
                     </td>
-                    <td>
+                    <td class="px-5 py-4 text-sm border-b border-cream-border/50 align-middle">
                         @if($product->is_available)
-                            <span style="color:#16A34A;font-weight:600;font-size:12px;">● Aktif</span>
+                            <span class="inline-flex items-center gap-1.5 text-xs font-bold text-green-600">● Aktif</span>
                         @else
-                            <span style="color:#DC2626;font-weight:600;font-size:12px;">● Nonaktif</span>
+                            <span class="inline-flex items-center gap-1.5 text-xs font-bold text-red-600">● Nonaktif</span>
                         @endif
                     </td>
-                    <td>
-                        <div class="actions">
-                            <a href="{{ route('admin.products.edit', $product) }}" class="btn-edit"><i class="fas fa-pen"></i> Edit</a>
-                            <form method="POST" action="{{ route('admin.products.destroy', $product) }}" onsubmit="return confirm('Hapus produk {{ $product->name }}?')">
+                    <td class="px-5 py-4 text-sm border-b border-cream-border/50 align-middle">
+                        <div class="flex gap-2 items-center">
+                            <a href="{{ route('admin.products.edit', $product) }}" class="text-xs px-3 py-1.5 rounded-lg border border-primary text-primary hover:bg-primary hover:text-white transition-all"><i class="fas fa-pen text-[10px] mr-1"></i> Edit</a>
+                            <form method="POST" action="{{ route('admin.products.destroy', $product) }}" onsubmit="return confirm('Hapus produk {{ $product->name }}?')" class="m-0">
                                 @csrf @method('DELETE')
-                                <button class="btn-delete"><i class="fas fa-trash"></i></button>
+                                <button type="submit" class="text-xs px-3 py-1.5 rounded-lg border border-red-300 text-red-600 hover:bg-red-600 hover:text-white transition-all cursor-pointer"><i class="fas fa-trash"></i></button>
                             </form>
                         </div>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" style="text-align:center;padding:48px;">
-                        <div style="font-size:48px;margin-bottom:12px;"><i class="fas fa-birthday-cake" style="color:var(--pink)"></i></div>
-                        <h3 style="font-weight:700;color:var(--brown-dark);">Belum Ada Produk</h3>
-                        <p style="font-size:14px;color:var(--gray);margin-bottom:16px;">Mulai tambahkan produk kue pertama Anda.</p>
-                        <a href="{{ route('admin.products.create') }}" class="btn-add"><i class="fas fa-plus" style="color:white"></i> Tambah Produk</a>
+                    <td colspan="6" class="px-5 py-12 text-center border-b border-cream-border/50">
+                        <div class="w-20 h-20 rounded-full bg-primary-light text-primary text-3xl flex items-center justify-center mx-auto mb-4"><i class="fas fa-birthday-cake"></i></div>
+                        <h3 class="font-semibold text-base text-brown-dark mb-1">Belum Ada Produk</h3>
+                        <p class="text-sm text-text-secondary mb-4">Mulai tambahkan produk kue pertama Anda.</p>
+                        <a href="{{ route('admin.products.create') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white font-bold text-xs rounded-full shadow-gold transition-all duration-200 hover:bg-primary-hover hover:-translate-y-0.5"><i class="fas fa-plus"></i> Tambah Produk</a>
                     </td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-    <div class="pagination">
+    <div class="p-4 flex justify-center bg-white border-t border-cream-border">
         {{ $products->links('pagination::simple-bootstrap-5') }}
     </div>
 </div>

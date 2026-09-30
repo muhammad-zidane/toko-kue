@@ -1,67 +1,109 @@
-<nav class="navbar">
-    <div class="navbar-inner">
-        <a href="/" class="navbar-logo">Jagoan Kue</a>
-        <ul class="navbar-links">
-            <li><a href="/" {{ request()->is('/') ? 'class=active' : '' }}>Beranda</a></li>
-            <li><a href="/products" {{ request()->is('products*') ? 'class=active' : '' }}>Katalog</a></li>
-            <li><a href="/about" {{ request()->is('about') ? 'class=active' : '' }}>Tentang Kami</a></li>
-            @auth
-            <li><a href="/orders" {{ request()->is('orders*') ? 'class=active' : '' }}>Pesanan Saya</a></li>
-            @endauth
-        </ul>
-        <div class="navbar-actions">
-            @php $cartCount = collect(session()->get('cart', []))->sum('quantity'); @endphp
-            <a href="/cart" class="btn-cart" style="position:relative;">
-                <i class="fas fa-shopping-cart" style="color:white"></i> Keranjang
-                @if($cartCount > 0)
-                <span id="cart-badge" style="position:absolute;top:-8px;right:-8px;background:#fff;color:var(--pink);font-size:11px;font-weight:800;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;border:2px solid var(--pink);line-height:1;">{{ $cartCount }}</span>
-                @else
-                <span id="cart-badge" style="position:absolute;top:-8px;right:-8px;background:#fff;color:var(--pink);font-size:11px;font-weight:800;border-radius:50%;width:20px;height:20px;display:none;align-items:center;justify-content:center;border:2px solid var(--pink);line-height:1;">0</span>
-                @endif
+<nav x-data="{ mobileOpen: false }" class="sticky top-0 z-50 bg-white border-b border-cream-border shadow-sm">
+    <div class="max-w-[1140px] mx-auto px-6">
+        <div class="flex items-center justify-between h-20">
+            {{-- Logo --}}
+            <a href="{{ route('home') }}" class="font-heading text-2xl font-bold text-primary flex items-center gap-2 hover:text-primary-hover transition-colors">
+                🍰 Jagoan Kue
             </a>
-            @auth
-                <div style="position:relative;display:inline-block;">
-                    <button id="profileToggle" onclick="toggleProfileMenu()" style="background:var(--pink);color:white;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">
-                        {{ auth()->user()->name }} <i class="fas fa-chevron-down" style="font-size:10px;margin-left:4px;"></i>
-                    </button>
-                    <div id="profileMenu" style="display:none;position:absolute;right:0;top:44px;background:white;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);border:1px solid #EDE0D4;min-width:180px;z-index:1000;overflow:hidden;">
-                        <a href="/profile" style="display:block;padding:10px 16px;font-size:13px;color:var(--text-dark);text-decoration:none;border-bottom:1px solid #F0E8E0;">
-                            <i class="fas fa-user" style="color:var(--pink);margin-right:8px;"></i> Profil
-                        </a>
-                        <a href="/account/addresses" style="display:block;padding:10px 16px;font-size:13px;color:var(--text-dark);text-decoration:none;border-bottom:1px solid #F0E8E0;">
-                            <i class="fas fa-map-marker-alt" style="color:var(--pink);margin-right:8px;"></i> Alamat Tersimpan
-                        </a>
-                        <a href="/akun/ganti-password" style="display:block;padding:10px 16px;font-size:13px;color:var(--text-dark);text-decoration:none;border-bottom:1px solid #F0E8E0;">
-                            <i class="fas fa-lock" style="color:var(--pink);margin-right:8px;"></i> Ganti Password
-                        </a>
-                        @if(auth()->user()->isAdmin())
-                        <a href="/admin/dashboard" style="display:block;padding:10px 16px;font-size:13px;color:var(--text-dark);text-decoration:none;border-bottom:1px solid #F0E8E0;">
-                            <i class="fas fa-cog" style="color:var(--pink);margin-right:8px;"></i> Admin Panel
-                        </a>
-                        @endif
-                        <form method="POST" action="/logout">@csrf
-                            <button type="submit" style="display:block;width:100%;padding:10px 16px;font-size:13px;color:#DC2626;text-align:left;background:none;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">
-                                <i class="fas fa-sign-out-alt" style="margin-right:8px;"></i> Keluar
-                            </button>
-                        </form>
+
+            {{-- Links --}}
+            <div class="hidden md:flex items-center gap-8">
+                <a href="{{ route('home') }}" class="text-sm font-semibold hover:text-primary transition-colors {{ request()->is('/') ? 'text-primary border-b-2 border-primary pb-0.5' : 'text-brown-mid border-b-2 border-transparent pb-0.5' }}">
+                    Beranda
+                </a>
+                <a href="{{ route('products.index') }}" class="text-sm font-semibold hover:text-primary transition-colors {{ request()->is('products*') ? 'text-primary border-b-2 border-primary pb-0.5' : 'text-brown-mid border-b-2 border-transparent pb-0.5' }}">
+                    Katalog
+                </a>
+                <a href="/about" class="text-sm font-semibold hover:text-primary transition-colors {{ request()->is('about') ? 'text-primary border-b-2 border-primary pb-0.5' : 'text-brown-mid border-b-2 border-transparent pb-0.5' }}">
+                    Tentang Kami
+                </a>
+                @auth
+                <a href="{{ route('orders.index') }}" class="text-sm font-semibold hover:text-primary transition-colors {{ request()->is('orders*') ? 'text-primary border-b-2 border-primary pb-0.5' : 'text-brown-mid border-b-2 border-transparent pb-0.5' }}">
+                    Pesanan Saya
+                </a>
+                @endauth
+            </div>
+
+            {{-- Actions --}}
+            <div class="flex items-center gap-3">
+                @php $cartCount = collect(session()->get('cart', []))->sum('quantity'); @endphp
+                <a href="{{ route('cart.index') }}" class="relative inline-flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-gold hover:bg-primary-hover hover:-translate-y-0.5 transition-all">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Keranjang</span>
+                    <span id="cart-badge" class="absolute -top-2 -right-2 bg-white text-primary text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-primary {{ $cartCount > 0 ? 'flex' : 'hidden' }}">
+                        {{ $cartCount }}
+                    </span>
+                </a>
+
+                @auth
+                    <div class="relative" x-data="{ open: false }" @click.away="open = false">
+                        <button @click="open = !open" id="profileToggle" aria-label="Menu profil pengguna" aria-expanded="false" class="bg-cream-warm text-brown-dark border border-cream-border px-4 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 cursor-pointer hover:bg-cream-dark transition-colors">
+                            <span>{{ auth()->user()->name }}</span>
+                            <i class="fas fa-chevron-down transition-transform duration-200" :class="open ? 'rotate-180' : ''"></i>
+                        </button>
+                        
+                        <div x-show="open" 
+                             x-transition:enter="transition ease-out duration-100"
+                             x-transition:enter-start="transform opacity-0 scale-95"
+                             x-transition:enter-end="transform opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-75"
+                             x-transition:leave-start="transform opacity-100 scale-100"
+                             x-transition:leave-end="transform opacity-0 scale-95"
+                             id="profileMenu" 
+                             class="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-lg border border-cream-border py-2 z-50" 
+                             style="display: none;">
+                            <a href="{{ route('profile.index') }}" class="flex items-center gap-3 px-4 py-3 text-sm text-brown-mid hover:bg-cream hover:text-primary transition-colors">
+                                <i class="fas fa-user text-primary w-4 text-center"></i> Profil
+                            </a>
+                            <a href="{{ route('account.addresses.index') }}" class="flex items-center gap-3 px-4 py-3 text-sm text-brown-mid hover:bg-cream hover:text-primary transition-colors">
+                                <i class="fas fa-map-marker-alt text-primary w-4 text-center"></i> Alamat
+                            </a>
+                            <a href="{{ route('account.change-password') }}" class="flex items-center gap-3 px-4 py-3 text-sm text-brown-mid hover:bg-cream hover:text-primary transition-colors">
+                                <i class="fas fa-lock text-primary w-4 text-center"></i> Ganti Password
+                            </a>
+                            @if(auth()->user()->isAdmin())
+                            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-sm text-brown-mid hover:bg-cream hover:text-primary transition-colors">
+                                <i class="fas fa-cog text-primary w-4 text-center"></i> Admin Panel
+                            </a>
+                            @endif
+                            <div class="border-t border-cream-border my-1"></div>
+                            <form method="POST" action="{{ route('logout') }}" class="block w-full">@csrf
+                                <button type="submit" class="flex items-center gap-3 w-full px-4 py-3 text-sm text-red-600 font-bold hover:bg-red-50 transition-colors bg-transparent border-none text-left cursor-pointer">
+                                    <i class="fas fa-sign-out-alt text-red-600 w-4 text-center"></i> Keluar
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                </div>
-                <script>
-                function toggleProfileMenu() {
-                    var m = document.getElementById('profileMenu');
-                    m.style.display = m.style.display === 'none' ? 'block' : 'none';
-                }
-                document.addEventListener('click', function(e) {
-                    var menu   = document.getElementById('profileMenu');
-                    var toggle = document.getElementById('profileToggle');
-                    if (menu && toggle && !menu.contains(e.target) && !toggle.contains(e.target)) {
-                        menu.style.display = 'none';
-                    }
-                });
-                </script>
-            @else
-                <a href="/login" class="btn-login">Login</a>
-            @endauth
+                @else
+                    <a href="{{ route('login') }}" class="bg-cream-warm border-2 border-primary text-primary px-5 py-2.5 rounded-full text-sm font-bold hover:bg-primary hover:text-white transition-all">
+                        Login
+                    </a>
+                @endauth
+
+                {{-- Hamburger --}}
+                <button @click="mobileOpen = !mobileOpen" aria-label="Toggle navigasi mobile" class="md:hidden flex items-center justify-center w-10 h-10 rounded-xl border border-cream-border text-brown-dark hover:bg-cream-warm">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
         </div>
     </div>
+
+    {{-- Mobile Menu --}}
+    <div md:hidden x-show="mobileOpen" x-transition class="bg-white border-t border-cream-border px-6 py-4 flex flex-col gap-2" style="display: none;">
+        <a href="/" class="text-sm font-semibold py-2.5 transition-colors hover:text-primary {{ request()->is('/') ? 'text-primary' : 'text-brown-mid' }}">
+            Beranda
+        </a>
+        <a href="/products" class="text-sm font-semibold py-2.5 transition-colors hover:text-primary {{ request()->is('products*') ? 'text-primary' : 'text-brown-mid' }}">
+            Katalog
+        </a>
+        <a href="/about" class="text-sm font-semibold py-2.5 transition-colors hover:text-primary {{ request()->is('about') ? 'text-primary' : 'text-brown-mid' }}">
+            Tentang Kami
+        </a>
+        @auth
+        <a href="/orders" class="text-sm font-semibold py-2.5 transition-colors hover:text-primary {{ request()->is('orders*') ? 'text-primary' : 'text-brown-mid' }}">
+            Pesanan Saya
+        </a>
+        @endauth
+    </div>
 </nav>
+

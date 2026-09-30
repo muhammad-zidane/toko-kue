@@ -1,14 +1,8 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" />
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tentang Kami — Jagoan Kue</title>
-    <meta name="description" content="Jagoan Kue — toko kue rumahan dengan bahan segar pilihan. Melayani custom cake, kue ulang tahun, kue pernikahan, dan pengiriman ke seluruh kota.">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+@extends('layouts.main')
+
+@section('title', 'Tentang Kami — Jagoan Kue')
+
+@push('styles')
     <style>
         /* HERO */
         .about-hero {
@@ -18,7 +12,7 @@
         }
         .about-hero-tag {
             display: inline-block;
-            background: var(--pink);
+            background: var(--primary);
             color: white;
             font-size: 12px;
             font-weight: 700;
@@ -35,7 +29,7 @@
             margin-bottom: 20px;
             line-height: 1.2;
         }
-        .about-hero h1 span { color: var(--pink); }
+        .about-hero h1 span { color: var(--primary); }
         .about-hero p {
             font-size: 16px;
             color: var(--gray);
@@ -57,7 +51,7 @@
             font-family: 'Playfair Display', serif;
             font-size: 32px;
             font-weight: 800;
-            color: var(--pink);
+            color: var(--primary);
         }
         .hero-stat-label {
             font-size: 13px;
@@ -81,33 +75,11 @@
         .story-img-wrap {
             position: relative;
         }
-        .story-img {
-            width: 100%;
-            border-radius: 20px;
-            object-fit: cover;
-            height: 380px;
-            background: var(--cream);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 80px;
-        }
-        .story-img-placeholder {
-            width: 100%;
-            height: 380px;
-            border-radius: 20px;
-            background: linear-gradient(135deg, var(--cream) 0%, #FDE8EF 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 80px;
-            border: 2px dashed #EDE0D4;
-        }
         .story-badge {
             position: absolute;
             bottom: -16px;
             right: -16px;
-            background: var(--pink);
+            background: var(--primary);
             color: white;
             border-radius: 16px;
             padding: 16px 20px;
@@ -134,7 +106,7 @@
             margin-bottom: 16px;
             line-height: 1.3;
         }
-        .story-content h2 span { color: var(--pink); }
+        .story-content h2 span { color: var(--primary); }
         .story-content p {
             font-size: 14px;
             color: var(--gray);
@@ -151,7 +123,7 @@
         .section-header { text-align: center; margin-bottom: 48px; }
         .section-tag {
             display: inline-block;
-            background: var(--pink);
+            background: var(--primary);
             color: white;
             font-size: 12px;
             font-weight: 700;
@@ -165,7 +137,7 @@
             font-weight: 800;
             color: var(--text-dark);
         }
-        .section-header h2 span { color: var(--pink); }
+        .section-header h2 span { color: var(--primary); }
         .section-header p { font-size: 14px; color: var(--gray); margin-top: 10px; }
         .features-grid {
             display: grid;
@@ -190,7 +162,7 @@
             width: 52px;
             height: 52px;
             border-radius: 14px;
-            background: linear-gradient(135deg, var(--pink) 0%, #FF8FAB 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, #FF8FAB 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -225,7 +197,6 @@
             gap: 40px;
             margin-top: 40px;
         }
-        .contact-info-wrap {}
         .contact-item {
             display: flex;
             gap: 14px;
@@ -240,7 +211,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--pink);
+            color: var(--primary);
             font-size: 16px;
             flex-shrink: 0;
         }
@@ -258,7 +229,7 @@
             color: var(--text-dark);
         }
         .contact-value a {
-            color: var(--pink);
+            color: var(--primary);
             text-decoration: none;
         }
         .contact-value a:hover { text-decoration: underline; }
@@ -291,7 +262,7 @@
         /* CTA */
         .about-cta {
             padding: 72px 24px;
-            background: linear-gradient(135deg, var(--pink) 0%, #FF6B95 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, #FF6B95 100%);
             text-align: center;
         }
         .about-cta h2 {
@@ -307,7 +278,7 @@
             align-items: center;
             gap: 8px;
             background: white;
-            color: var(--pink);
+            color: var(--primary);
             font-weight: 700;
             font-size: 14px;
             padding: 14px 28px;
@@ -341,11 +312,9 @@
             .contact-grid { grid-template-columns: 1fr; }
         }
     </style>
-</head>
-<body>
+@endpush
 
-@include('partials.navbar')
-
+@section('content')
 {{-- HERO --}}
 <section class="about-hero">
     <div class="about-hero-tag"><i class="fas fa-birthday-cake"></i> Tentang Jagoan Kue</div>
@@ -385,7 +354,7 @@
             <h2>Berawal dari <span>Dapur Rumah</span>, Menjadi Pilihan Utama</h2>
             <p>Jagoan Kue lahir dari kecintaan mendalam terhadap seni membuat kue. Berawal dari dapur rumah kecil, kami mulai melayani pesanan kue untuk acara keluarga dan kerabat terdekat.</p>
             <p>Dengan komitmen terhadap kualitas bahan baku segar dan teknik pembuatan yang teliti, kami perlahan-lahan mendapat kepercayaan dari semakin banyak pelanggan. Kini, Jagoan Kue melayani ratusan pesanan setiap bulannya.</p>
-            <p>Setiap kue yang kami buat mengandung ketulusan dan perhatian pada detail, karena kami percaya bahwa kue yang baik bukan hanya soal rasa, tapi juga soal momen yang diciptakannya.</p>
+            <p>Setiap kue yang kami buat mengandung ketulusan and perhatian pada detail, karena kami percaya bahwa kue yang baik bukan hanya soal rasa, tapi juga soal momen yang diciptakannya.</p>
         </div>
     </div>
 </section>
@@ -522,9 +491,8 @@
         </a>
     </div>
 </section>
+@endsection
 
-@include('partials.footer')
-
+@push('scripts')
 <script src="{{ asset('js/app.js') }}" defer></script>
-</body>
-</html>
+@endpush

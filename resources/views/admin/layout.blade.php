@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" />
@@ -6,145 +6,127 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Jagoan Kue — @yield('title', 'Admin')</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    
+    @include('partials.head-assets')
+
+    <!-- Vite (Tailwind CSS) -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
     @stack('styles')
 </head>
-<body>
+<body class="bg-cream text-text-primary font-sans antialiased">
 
 <!-- SIDEBAR OVERLAY (mobile) -->
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="fixed inset-0 bg-black/40 z-[45] hidden [&.active]:block md:hidden" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
 <!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
+<aside class="fixed left-0 top-0 h-screen w-[220px] bg-brown-dark flex flex-col z-50 transition-transform duration-300 -translate-x-full md:translate-x-0 [&.open]:translate-x-0" id="sidebar">
+    <div class="px-6 py-6 border-b border-white/10 flex items-center justify-between">
         <div>
-            <div class="sidebar-logo">Jagoan Kue</div>
-            <div class="sidebar-subtitle">admin panel</div>
+            <div class="font-heading text-xl font-bold text-primary tracking-wide">Jagoan Kue</div>
+            <div class="text-[11px] text-white/40 mt-1 uppercase tracking-widest font-semibold">admin panel</div>
         </div>
-        <button class="sidebar-close" onclick="closeSidebar()"><i class="fas fa-times"></i></button>
+        <button class="md:hidden bg-transparent border-0 text-white/60 hover:text-white text-lg cursor-pointer" onclick="closeSidebar()"><i class="fas fa-times"></i></button>
     </div>
 
-    <nav class="sidebar-nav">
-        <div class="sidebar-section">Utama</div>
-        <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-            <span class="sidebar-link-icon"><i class="fas fa-th-large"></i></span> Dashboard
-        </a>
-        <a href="{{ route('admin.orders.index') }}" class="sidebar-link {{ request()->routeIs('admin.orders.index') ? 'active' : '' }}">
-            <span class="sidebar-link-icon"><i class="fas fa-clipboard-list"></i></span> Pesanan
-        </a>
-        <a href="{{ route('admin.products.index') }}" class="sidebar-link {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
-            <span class="sidebar-link-icon"><i class="fas fa-birthday-cake"></i></span> Produk
-        </a>
-        <a href="{{ route('admin.categories.index') }}" class="sidebar-link {{ request()->routeIs('admin.categories.index') ? 'active' : '' }}">
-            <span class="sidebar-link-icon"><i class="fas fa-tag"></i></span> Kategori
-        </a>
-        <a href="{{ route('admin.customers.index') }}" class="sidebar-link {{ request()->routeIs('admin.customers.index') ? 'active' : '' }}">
-            <span class="sidebar-link-icon"><i class="fas fa-user"></i></span> Pelanggan
-        </a>
+    <nav class="flex-1 px-3 py-4 overflow-y-auto scrollbar-none">
+        <div class="text-[10px] font-bold text-white/30 uppercase tracking-widest px-3 mb-2 mt-5 first:mt-0">Utama</div>
+        
+        <x-admin.nav-link route="admin.dashboard" routePattern="admin.dashboard" icon="fa-th-large" label="Dashboard" />
+        <x-admin.nav-link route="admin.orders.index" routePattern="admin.orders.*" icon="fa-clipboard-list" label="Pesanan" />
+        <x-admin.nav-link route="admin.products.index" routePattern="admin.products.*" icon="fa-birthday-cake" label="Produk" />
+        <x-admin.nav-link route="admin.categories.index" routePattern="admin.categories.index" icon="fa-tag" label="Kategori" />
+        <x-admin.nav-link route="admin.customers.index" routePattern="admin.customers.index" icon="fa-user" label="Pelanggan" />
 
-        <div class="sidebar-section">Laporan</div>
-        <a href="{{ route('admin.analytics.index') }}" class="sidebar-link {{ request()->routeIs('admin.analytics.index') ? 'active' : '' }}">
-            <span class="sidebar-link-icon"><i class="fas fa-chart-line"></i></span> Analisis
-        </a>
-        <a href="{{ route('admin.finance.index') }}" class="sidebar-link {{ request()->routeIs('admin.finance.index') ? 'active' : '' }}">
-            <span class="sidebar-link-icon"><i class="fas fa-money-bill-wave"></i></span> Keuangan
-        </a>
+        <div class="text-[10px] font-bold text-white/30 uppercase tracking-widest px-3 mb-2 mt-5">Laporan</div>
+        <x-admin.nav-link route="admin.analytics.index" routePattern="admin.analytics.index" icon="fa-chart-line" label="Analisis" />
+        <x-admin.nav-link route="admin.finance.index" routePattern="admin.finance.index" icon="fa-money-bill-wave" label="Keuangan" />
 
-        <div class="sidebar-section">Manajemen</div>
-        <a href="{{ route('admin.banners.index') }}" class="sidebar-link {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}">
-            <span class="sidebar-link-icon"><i class="fas fa-image"></i></span> Banner
-        </a>
-        <a href="{{ route('admin.vouchers.index') }}" class="sidebar-link {{ request()->routeIs('admin.vouchers.*') ? 'active' : '' }}">
-            <span class="sidebar-link-icon"><i class="fas fa-ticket-alt"></i></span> Voucher
-        </a>
-        <a href="{{ route('admin.shipping-zones.index') }}" class="sidebar-link {{ request()->routeIs('admin.shipping-zones.*') ? 'active' : '' }}">
-            <span class="sidebar-link-icon"><i class="fas fa-map-marker-alt"></i></span> Zona Kirim
-        </a>
-        <a href="{{ route('admin.reviews.index') }}" class="sidebar-link {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">
-            <span class="sidebar-link-icon"><i class="fas fa-star"></i></span> Ulasan
-        </a>
-        <a href="{{ route('admin.customizations.index') }}" class="sidebar-link {{ request()->routeIs('admin.customizations.*') ? 'active' : '' }}">
-            <span class="sidebar-link-icon"><i class="fas fa-sliders-h"></i></span> Kustomisasi
-        </a>
-        <a href="{{ route('admin.production-calendar.index') }}" class="sidebar-link {{ request()->routeIs('admin.production-calendar.*') ? 'active' : '' }}">
-            <span class="sidebar-link-icon"><i class="fas fa-calendar-alt"></i></span> Kalender
-        </a>
+        <div class="text-[10px] font-bold text-white/30 uppercase tracking-widest px-3 mb-2 mt-5">Manajemen</div>
+        <x-admin.nav-link route="admin.banners.index" routePattern="admin.banners.*" icon="fa-image" label="Banner" />
+        <x-admin.nav-link route="admin.vouchers.index" routePattern="admin.vouchers.*" icon="fa-ticket-alt" label="Voucher" />
+        <x-admin.nav-link route="admin.shipping-zones.index" routePattern="admin.shipping-zones.*" icon="fa-map-marker-alt" label="Zona Kirim" />
+        <x-admin.nav-link route="admin.reviews.index" routePattern="admin.reviews.*" icon="fa-star" label="Ulasan" />
+        <x-admin.nav-link route="admin.customizations.index" routePattern="admin.customizations.*" icon="fa-sliders-h" label="Kustomisasi" />
+        <x-admin.nav-link route="admin.production-calendar.index" routePattern="admin.production-calendar.*" icon="fa-calendar-alt" label="Kalender" />
 
-        <div class="sidebar-section">Sistem</div>
-        <a href="{{ route('admin.settings.index') }}" class="sidebar-link {{ request()->routeIs('admin.settings.index') ? 'active' : '' }}">
-            <span class="sidebar-link-icon"><i class="fas fa-cog"></i></span> Pengaturan
-        </a>
+        <div class="text-[10px] font-bold text-white/30 uppercase tracking-widest px-3 mb-2 mt-5">Sistem</div>
+        <x-admin.nav-link route="admin.settings.index" routePattern="admin.settings.index" icon="fa-cog" label="Pengaturan" />
     </nav>
 
-    <div class="sidebar-footer">
-        <div class="sidebar-avatar">{{ strtoupper(substr(auth()->user()->name ?? 'AD', 0, 2)) }}</div>
-        <div class="sidebar-user">
-            <div class="sidebar-user-name">{{ auth()->user()->name ?? 'Admin' }}</div>
-            <div class="sidebar-user-role">Super admin</div>
+    <div class="px-4 py-4 border-t border-white/10 flex items-center gap-3 bg-brown-dark shrink-0">
+        <div class="w-9 h-9 rounded-full bg-primary text-white text-sm font-bold flex items-center justify-center shrink-0">
+            {{ strtoupper(substr(auth()->user()->name ?? 'AD', 0, 2)) }}
         </div>
-        <form method="POST" action="{{ route('logout') }}">
+        <div class="flex-1 min-w-0">
+            <div class="text-sm font-bold text-white truncate leading-tight">{{ auth()->user()->name ?? 'Admin' }}</div>
+            <div class="text-[11px] text-white/45 truncate">Super admin</div>
+        </div>
+        <form method="POST" action="{{ route('logout') }}" class="m-0 shrink-0">
             @csrf
-            <button type="submit" class="sidebar-logout" title="Logout"><i class="fas fa-sign-out-alt" style="color:white"></i></button>
+            <button type="submit" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-primary text-white text-sm flex items-center justify-center transition-all cursor-pointer border-0" title="Logout">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
         </form>
     </div>
 </aside>
 
 <!-- MAIN CONTENT -->
-<div class="main-content">
-    <div class="topbar">
-        <div class="topbar-left">
-            <button class="topbar-hamburger" onclick="openSidebar()"><i class="fas fa-bars" style="color:var(--brown-dark)"></i></button>
+<div class="ml-0 md:ml-[220px] min-h-screen pt-[69px] bg-cream flex flex-col">
+    <!-- TOPBAR -->
+    <header class="fixed top-0 left-0 md:left-[220px] right-0 z-40 bg-white border-b border-cream-border h-[69px] flex items-center justify-between px-4 md:px-7 shadow-sm">
+        <div class="flex items-center">
+            <button class="md:hidden bg-transparent border-0 text-2xl cursor-pointer text-brown-dark mr-3 flex items-center justify-center" onclick="openSidebar()"><i class="fas fa-bars"></i></button>
             <div>
-                <div class="topbar-title">@yield('page-title', 'Dashboard')</div>
-                <div class="topbar-subtitle">@yield('page-subtitle', '')</div>
+                <h1 class="font-heading text-lg md:text-2xl font-bold text-brown-dark leading-tight">@yield('page-title', 'Dashboard')</h1>
+                <div class="text-xs md:text-sm text-text-secondary mt-0.5">@yield('page-subtitle', '')</div>
             </div>
         </div>
-        <div class="topbar-actions">
+        
+        <div class="flex items-center gap-3">
             {{-- Notification Bell --}}
             @php $unreadCount = auth()->user()->unreadNotifications->count(); @endphp
-            <div style="position:relative;display:inline-block;">
-                <button onclick="toggleNotifPanel()" style="background:none;border:none;cursor:pointer;padding:8px;position:relative;">
-                    <i class="fas fa-bell" style="font-size:18px;color:var(--brown-dark);"></i>
+            <div class="relative inline-block">
+                <button onclick="toggleNotifPanel()" class="bg-transparent border-none cursor-pointer p-2 relative flex items-center justify-center">
+                    <i class="fas fa-bell text-lg text-brown-dark"></i>
                     @if($unreadCount > 0)
-                    <span id="notifBadge" style="position:absolute;top:4px;right:4px;background:#EF4444;color:white;font-size:10px;font-weight:700;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
+                    <span id="notifBadge" class="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
                     @endif
                 </button>
-                <div id="notifPanel" style="display:none;position:absolute;right:0;top:44px;width:320px;background:white;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.15);z-index:100;border:1px solid #EDE0D4;overflow:hidden;">
-                    <div style="padding:14px 16px;border-bottom:1px solid #EDE0D4;display:flex;justify-content:space-between;align-items:center;">
-                        <strong style="font-size:14px;">Notifikasi</strong>
+                <div id="notifPanel" class="hidden absolute right-0 top-11 w-80 bg-white rounded-2xl shadow-lg z-50 border border-cream-border overflow-hidden">
+                    <div class="px-4 py-3.5 border-b border-cream-border flex justify-between items-center">
+                        <strong class="text-sm text-brown-dark">Notifikasi</strong>
                         @if($unreadCount > 0)
-                        <form method="POST" action="{{ route('admin.notifications.readAll') }}">@csrf
-                            <button type="submit" style="background:none;border:none;cursor:pointer;font-size:11px;color:var(--pink);">Tandai semua dibaca</button>
+                        <form method="POST" action="{{ route('admin.notifications.readAll') }}" class="m-0">@csrf
+                            <button type="submit" class="bg-transparent border-none cursor-pointer text-xs text-primary hover:text-primary-hover font-semibold">Tandai semua dibaca</button>
                         </form>
                         @endif
                     </div>
-                    <div style="max-height:320px;overflow-y:auto;">
+                    <div class="max-h-80 overflow-y-auto">
                         @forelse(auth()->user()->notifications->take(10) as $notif)
                         <a href="{{ $notif->data['url'] ?? '#' }}" onclick="markRead('{{ $notif->id }}')"
-                           style="display:block;padding:12px 16px;border-bottom:1px solid #F5F0EB;text-decoration:none;background:{{ $notif->read_at ? 'white' : '#FFF8F8' }};">
-                            <p style="font-size:13px;font-weight:{{ $notif->read_at ? '400' : '600' }};color:#1F2937;margin-bottom:4px;">
+                           class="block px-4 py-3 border-b border-cream-warm text-left hover:bg-cream-warm transition-colors {{ $notif->read_at ? 'bg-white' : 'bg-amber-50/50' }}">
+                            <p class="text-xs text-brown-dark mb-1 leading-snug {{ $notif->read_at ? 'font-normal' : 'font-semibold' }}">
                                 {{ $notif->data['message'] ?? 'Notifikasi baru' }}
                             </p>
-                            <small style="color:#9CA3AF;">{{ $notif->created_at->diffForHumans() }}</small>
+                            <small class="text-[10px] text-text-muted">{{ $notif->created_at->diffForHumans() }}</small>
                         </a>
                         @empty
-                        <div style="padding:24px;text-align:center;color:#9CA3AF;font-size:13px;">Tidak ada notifikasi</div>
+                        <div class="py-6 text-center text-text-muted text-xs">Tidak ada notifikasi</div>
                         @endforelse
                     </div>
                 </div>
             </div>
-            <a href="{{ route('home') }}" class="btn-topbar">← Ke Toko</a>
+            <a href="{{ route('home') }}" class="bg-brown-dark text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-brown-mid transition-all">← Ke Toko</a>
         </div>
-    </div>
+    </header>
 
-    <div class="page-content">
+    <div class="p-4 md:p-7 flex-1">
         @if(session('success'))
-        <div class="flash-success">{{ session('success') }}</div>
+        <div class="bg-green-50 text-green-700 border border-green-200 rounded-xl p-4 text-sm mb-4">{{ session('success') }}</div>
         @endif
         @if($errors->any())
-        <div class="flash-error">
+        <div class="bg-red-50 text-red-700 border border-red-200 rounded-xl p-4 text-sm mb-4">
             @foreach($errors->all() as $error)
                 <p>{{ $error }}</p>
             @endforeach
@@ -156,25 +138,6 @@
 
 <script src="{{ asset('js/admin.js') }}" defer></script>
 <script src="{{ asset('js/app.js') }}" defer></script>
-<script>
-function toggleNotifPanel() {
-    const p = document.getElementById('notifPanel');
-    if (p) p.style.display = p.style.display === 'none' ? 'block' : 'none';
-}
-function markRead(id) {
-    fetch('/admin/notifications/' + id + '/read', {
-        method: 'POST',
-        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content || '' }
-    });
-}
-document.addEventListener('click', function(e) {
-    const panel = document.getElementById('notifPanel');
-    if (panel && !panel.contains(e.target) && !e.target.closest('[onclick="toggleNotifPanel()"]')) {
-        panel.style.display = 'none';
-    }
-});
-</script>
 @stack('scripts')
 </body>
 </html>
-

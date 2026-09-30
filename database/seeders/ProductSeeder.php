@@ -24,15 +24,18 @@ class ProductSeeder extends Seeder
         ];
 
         foreach ($products as $product) {
-            Product::create([
-                'name'         => $product['name'],
-                'slug'         => Str::slug($product['name']),
-                'category_id'  => $product['category_id'],
-                'price'        => $product['price'],
-                'stock'        => $product['stock'],
-                'description'  => 'Deskripsi ' . $product['name'],
-                'is_available' => true,
-            ]);
+            $slug = Str::slug($product['name']);
+            Product::firstOrCreate(
+                ['slug' => $slug],
+                [
+                    'name'         => $product['name'],
+                    'category_id'  => $product['category_id'],
+                    'price'        => $product['price'],
+                    'stock'        => $product['stock'],
+                    'description'  => 'Deskripsi ' . $product['name'],
+                    'is_available' => true,
+                ]
+            );
         }
     }
 }
