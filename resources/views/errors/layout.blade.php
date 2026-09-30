@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --pink: #F0507A;
+            --primary: #C8860A;
             --brown-dark: #2C1810;
             --brown-mid: #5C3D2E;
             --cream: #FFF8EE;
@@ -29,7 +29,7 @@
         @yield('content')
         <a href="{{ route('home') }}"
            class="mt-8 inline-block px-6 py-3 rounded-full text-white font-semibold transition hover:opacity-90"
-           style="background-color: var(--pink);">
+           style="background-color: var(--primary);">
             Kembali ke Beranda
         </a>
     </div>

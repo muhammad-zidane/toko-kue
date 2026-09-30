@@ -1,166 +1,163 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" />
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jagoan Kue - Detail Pesanan {{ $order->order_code }}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    <style>
+@extends('layouts.main')
 
-        body { background-color: var(--cream); }
-        .page { max-width: 900px; margin: 0 auto; padding: 32px 24px 60px; }
-        .page-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; margin-bottom: 8px; }
-        .page-subtitle { font-size: 14px; color: var(--gray); margin-bottom: 24px; }
+@section('title')Jagoan Kue - Detail Pesanan {{ $order->order_code }}@endsection
 
-        .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; align-items: stretch; }
-        .card { background: var(--white); border-radius: 16px; border: 1px solid #EDE0D4; padding: 24px; margin-bottom: 20px; }
-        .detail-grid > .card { margin-bottom: 0; }
-        .info-col { display: flex; flex-direction: column; }
-        .card-info { flex: 1; margin-bottom: 10; }
-        .card-label { font-size: 13px; font-weight: 700; color: var(--pink); margin-bottom: 16px; letter-spacing: 0.5px; }
+@section('content')
+<div class="bg-cream min-h-screen py-8 px-6">
+    <div class="max-w-[1140px] mx-auto">
+        <h1 class="font-heading text-3xl font-bold text-brown-dark mb-1">Detail Pesanan</h1>
+        <p class="text-sm text-text-secondary mb-6">Kode: {{ $order->order_code }} · {{ $order->created_at->format('d M Y, H:i') }}</p>
 
-        .order-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--cream); border-radius: 10px; margin-bottom: 12px; }
-        .order-item img { width: 52px; height: 52px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
-        .order-item-info { flex: 1; }
-        .order-item-info p { font-size: 14px; font-weight: 700; }
-        .order-item-info small { font-size: 12px; color: var(--gray); }
-        .item-note { margin-top: 6px; font-size: 12px; color: var(--brown-dark); line-height: 1.5; background: #FFF4E6; border-radius: 6px; padding: 6px 8px; }
-        .order-item-price { font-size: 14px; font-weight: 600; }
-
-        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #F0E8E0; font-size: 13px; }
-        .info-row:last-child { border-bottom: none; }
-        .info-row span:first-child { color: var(--gray); flex-shrink: 0; }
-        .info-row span:last-child { font-weight: 600; text-align: right; }
-
-        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
-        .badge-pending { background: #FEF3C7; color: #D97706; }
-        .badge-processing { background: #DBEAFE; color: #2563EB; }
-        .badge-completed { background: #DCFCE7; color: #16A34A; }
-        .badge-cancelled { background: #FEE2E2; color: #DC2626; }
-        .badge-unpaid { background: #FEF3C7; color: #D97706; }
-        .badge-paid { background: #DCFCE7; color: #16A34A; }
-
-        .price-total { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--cream); border-radius: 10px; margin-top: 12px; }
-        .price-total span:first-child { font-size: 14px; font-weight: 600; }
-        .price-total span:last-child { font-size: 18px; font-weight: 800; }
-        .review-box { margin-top: 14px; border: 1px solid #EDE0D4; border-radius: 10px; padding: 12px; }
-        .review-stars { color: #F59E0B; font-size: 18px; margin-bottom: 6px; }
-        .review-comment { font-size: 13px; line-height: 1.6; margin-bottom: 10px; }
-        .review-images { display: flex; gap: 8px; flex-wrap: wrap; }
-        .review-images img { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; border: 1px solid #EDE0D4; }
-
-        .btn-back-page { display: inline-block; background: var(--brown-dark); color: white; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 700; }
-
-        @media (max-width: 768px) {
- .detail-grid { grid-template-columns: 1fr; }
- }
-    </style></head>
-<body>
-@include('partials.navbar')
-
-<div class="page">
-    <h1 class="page-title">Detail Pesanan</h1>
-    <p class="page-subtitle">Kode: {{ $order->order_code }} · {{ $order->created_at->format('d M Y, H:i') }}</p>
-
-    <div class="detail-grid">
-        <div class="card">
-            <p class="card-label">PRODUK DIPESAN</p>
-            @foreach($order->orderItems as $item)
-            <div class="order-item">
-                <img src="{{ $item->product && $item->product->image ? asset('storage/' . $item->product->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=200&q=80' }}" alt="{{ $item->product->name ?? 'Produk' }}">
-                <div class="order-item-info">
-                    <p>{{ $item->product->name ?? 'Produk dihapus' }}</p>
-                    <small>{{ $item->quantity }}x · Rp {{ number_format($item->price, 0, ',', '.') }}</small>
-                    @if($item->customizations->isNotEmpty())
-                        <p class="item-note" style="background:#F3E8FF;color:#6B21A8;">
-                            <i class="fas fa-paint-brush" style="margin-right:4px;"></i>
-                            {{ $item->customizations->map(fn($c) => $c->option?->name)->filter()->join(', ') }}
-                        </p>
-                    @endif
-                    @if(!empty($item->note))
-                        <p class="item-note">Catatan: {{ $item->note }}</p>
-                    @endif
-                </div>
-                <span class="order-item-price">Rp {{ number_format($item->price * $item->quantity, 0, ',', '.') }}</span>
-            </div>
-            @endforeach
-
-            @php $subtotalItems = $order->orderItems->sum(fn($i) => $i->price * $i->quantity); @endphp
-            <div style="margin-top:12px;">
-                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span style="color:var(--gray);">Subtotal Produk</span><span>Rp {{ number_format($subtotalItems, 0, ',', '.') }}</span></div>
-                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span style="color:var(--gray);">Ongkos Kirim</span><span>{{ $order->shipping_cost > 0 ? 'Rp ' . number_format($order->shipping_cost, 0, ',', '.') : 'Gratis' }}</span></div>
-                @if($order->discount_amount > 0)
-                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;"><span style="color:var(--gray);">Diskon Voucher</span><span style="color:#059669;">-Rp {{ number_format($order->discount_amount, 0, ',', '.') }}</span></div>
-                @endif
-            </div>
-            <div class="price-total">
-                <span>Total Harga</span>
-                <span>Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
-            </div>
-
-            @php
-                $reviewByProduct = $order->productReviews->keyBy('product_id');
-            @endphp
-
-            @foreach($order->orderItems as $item)
-                @php
-                    $review = $item->product ? ($reviewByProduct[$item->product->id] ?? null) : null;
-                @endphp
-                @if($review)
-                    <div class="review-box">
-                        <p style="font-size:13px;font-weight:700;margin-bottom:6px;">Ulasan: {{ $item->product->name }}</p>
-                        <div class="review-stars">{{ str_repeat('★', (int) $review->rating) }}{{ str_repeat('☆', 5 - (int) $review->rating) }}</div>
-                        <p class="review-comment">{{ $review->comment }}</p>
-                        @if($review->images->isNotEmpty())
-                            <div class="review-images">
-                                @foreach($review->images as $image)
-                                    <img src="{{ asset('storage/' . $image->path) }}" alt="Gambar ulasan">
-                                @endforeach
-                            </div>
+        <div class="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-8 items-start mb-8">
+            <div class="bg-white rounded-2xl border border-cream-border p-6 shadow-sm">
+                <p class="font-heading text-lg font-bold text-brown-dark mb-4 pb-2 border-b border-cream-border">PRODUK DIPESAN</p>
+                <div class="divide-y divide-cream-border mb-4">
+                @foreach($order->orderItems as $item)
+                <div class="flex items-start gap-4 py-4 first:pt-0">
+                    <img src="{{ $item->product && $item->product->image ? asset('storage/' . $item->product->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=200&q=80' }}" alt="{{ $item->product->name ?? 'Produk' }}" class="w-16 h-16 rounded-xl object-cover shrink-0">
+                    <div class="flex-1 min-w-0">
+                        <p class="font-semibold text-sm text-brown-dark truncate">{{ $item->product->name ?? 'Produk dihapus' }}</p>
+                        <small class="text-xs text-text-secondary mt-0.5 block">{{ $item->quantity }}x · Rp {{ number_format($item->price, 0, ',', '.') }}</small>
+                        @if($item->customizations->isNotEmpty())
+                            <p class="text-xs text-purple-700 font-semibold bg-purple-50 border border-purple-100 rounded-lg p-2 flex items-center gap-1.5 mt-1.5">
+                                <i class="fas fa-paint-brush"></i>
+                                {{ $item->customizations->map(fn($c) => $c->option?->name)->filter()->join(', ') }}
+                            </p>
+                        @endif
+                        @if(!empty($item->note))
+                            <p class="text-xs text-text-muted mt-1 bg-cream-warm/50 border border-cream-border rounded-lg p-2 flex items-start gap-1">
+                                <i class="fa-solid fa-note-sticky text-[10px] mt-1 text-primary shrink-0"></i>
+                                <span>{{ $item->note }}</span>
+                            </p>
                         @endif
                     </div>
-                @endif
-            @endforeach
-        </div>
+                    <span class="font-bold text-sm text-primary shrink-0 ml-auto">Rp {{ number_format($item->price * $item->quantity, 0, ',', '.') }}</span>
+                </div>
+                @endforeach
+                </div>
 
-        <div class="info-col">
-            <div class="card card-info">
-                <p class="card-label">INFO PESANAN</p>
-                <div class="info-row"><span>Status</span><span><span class="badge badge-{{ $order->status }}">{{ ucfirst($order->status) }}</span></span></div>
+                @php $subtotalItems = $order->orderItems->sum(fn($i) => $i->price * $i->quantity); @endphp
+                <div class="space-y-2 mb-4 border-t border-cream-border pt-4 text-xs text-text-secondary">
+                    <div class="flex justify-between items-center">
+                        <span>Subtotal Produk</span>
+                        <span class="font-semibold text-brown-dark">Rp {{ number_format($subtotalItems, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span>Ongkos Kirim</span>
+                        <span class="font-semibold text-brown-dark">{{ $order->shipping_cost > 0 ? 'Rp ' . number_format($order->shipping_cost, 0, ',', '.') : 'Gratis' }}</span>
+                    </div>
+                    @if($order->discount_amount > 0)
+                    <div class="flex justify-between items-center text-green-700 font-semibold">
+                        <span>Diskon Voucher</span>
+                        <span>-Rp {{ number_format($order->discount_amount, 0, ',', '.') }}</span>
+                    </div>
+                    @endif
+                </div>
+
+                <div class="flex justify-between items-center pt-4 border-t border-cream-border font-bold text-brown-dark">
+                    <span>Total Harga</span>
+                    <span class="text-xl text-primary font-extrabold">Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
+                </div>
+
                 @php
-                    $payStatus = $order->payment_status ?? $order->payment?->status ?? 'unpaid';
-                    $payLabel  = $payStatus === 'dp' ? 'DP 50%' : ($order->payment?->status_label ?? 'Belum Bayar');
+                    $reviewByProduct = $order->productReviews->keyBy('product_id');
                 @endphp
-                <div class="info-row"><span>Pembayaran</span><span><span class="badge badge-{{ $payStatus }}">{{ $payLabel }}</span></span></div>
-                @if(($order->payment_status ?? '') === 'dp')
-                <div class="info-row"><span>DP Dibayar</span><span>Rp {{ number_format($order->paid_amount, 0, ',', '.') }}</span></div>
-                <div class="info-row"><span>Sisa Pembayaran</span><span style="color:#C2410C;font-weight:700;">Rp {{ number_format($order->total_price - $order->paid_amount, 0, ',', '.') }}</span></div>
-                @endif
-                <div class="info-row"><span>Metode</span><span>{{ ['transfer_bank'=>'Transfer Bank','ewallet'=>'E-Wallet','qris'=>'QRIS','cod'=>'COD'][$order->payment->payment_method ?? ''] ?? ucfirst($order->payment->payment_method ?? '-') }}</span></div>
-                <div class="info-row"><span>Alamat</span><span>{{ $order->shipping_address }}</span></div>
-                @if($order->notes)
-                <div class="info-row"><span>Catatan</span><span>{{ $order->notes }}</span></div>
-                @endif
+
+                @foreach($order->orderItems as $item)
+                    @php
+                        $review = $item->product ? ($reviewByProduct[$item->product->id] ?? null) : null;
+                    @endphp
+                    @if($review)
+                        <div class="mt-6 bg-cream-warm border border-cream-border rounded-2xl p-5">
+                            <p class="text-sm font-bold text-brown-dark mb-1.5">Ulasan: {{ $item->product->name }}</p>
+                            <div class="text-amber-400 text-xs mb-2">
+                                {{ str_repeat('★', (int) $review->rating) }}{{ str_repeat('☆', 5 - (int) $review->rating) }}
+                            </div>
+                            <p class="text-xs text-text-secondary leading-relaxed mb-3">{{ $review->comment }}</p>
+                            @if($review->images->isNotEmpty())
+                                <div class="flex gap-2 flex-wrap">
+                                    @foreach($review->images as $image)
+                                        <img src="{{ asset('storage/' . $image->path) }}" alt="Gambar ulasan" class="w-16 h-16 rounded-xl object-cover border border-cream-border">
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+                @endforeach
             </div>
 
-            @if($order->status === 'pending' && $order->payment && $order->payment->status === 'unpaid' && !$order->payment->proof_image)
-            <a href="{{ route('orders.payment', $order) }}" class="btn-back-page" style="width:100%;text-align:center;display:block;margin-bottom:20px;background:var(--pink);">Bayar Sekarang</a>
-            @endif
+            <div class="space-y-4">
+                <div class="bg-white rounded-2xl border border-cream-border p-6 shadow-sm">
+                    <p class="font-heading text-lg font-bold text-brown-dark mb-4 pb-2 border-b border-cream-border">INFO PESANAN</p>
+                    <div class="space-y-3.5 text-sm">
+                        <div class="flex justify-between py-1 border-b border-cream-border/30 items-center">
+                            <span class="text-text-secondary">Status</span>
+                            <span>
+                                <span class="inline-block px-2.5 py-0.5 text-xs font-bold rounded-full badge-{{ $order->status === 'cancelled' ? 'red' : ($order->status === 'completed' ? 'green' : ($order->status === 'pending' ? 'gold' : 'blue')) }}">
+                                    {{ ucfirst($order->status) }}
+                                </span>
+                            </span>
+                        </div>
+                        @php
+                            $payStatus = $order->payment_status ?? $order->payment?->status ?? 'unpaid';
+                            $payLabel  = $payStatus === 'dp' ? 'DP 50%' : ($order->payment?->status_label ?? 'Belum Bayar');
+                        @endphp
+                        <div class="flex justify-between py-1 border-b border-cream-border/30 items-center">
+                            <span class="text-text-secondary">Pembayaran</span>
+                            <span>
+                                <span class="inline-block px-2.5 py-0.5 text-xs font-bold rounded-full badge-{{ $payStatus === 'paid' ? 'green' : 'gold' }}">
+                                    {{ $payLabel }}
+                                </span>
+                            </span>
+                        </div>
+                        @if(($order->payment_status ?? '') === 'dp')
+                        <div class="flex justify-between py-1 border-b border-cream-border/30">
+                            <span class="text-text-secondary">DP Dibayar</span>
+                            <span class="font-semibold text-brown-dark">Rp {{ number_format($order->paid_amount, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-cream-border/30">
+                            <span class="text-text-secondary">Sisa Pembayaran</span>
+                            <span class="font-bold text-red-650">Rp {{ number_format($order->total_price - $order->paid_amount, 0, ',', '.') }}</span>
+                        </div>
+                        @endif
+                        <div class="flex justify-between py-1 border-b border-cream-border/30">
+                            <span class="text-text-secondary">Metode</span>
+                            <span class="font-semibold text-brown-dark">{{ ['transfer_bank' => 'Transfer Bank', 'ewallet' => 'E-Wallet', 'qris' => 'QRIS', 'cod' => 'COD'][$order->payment->payment_method ?? ''] ?? ucfirst($order->payment->payment_method ?? '-') }}</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-cream-border/30 flex-col gap-1">
+                            <span class="text-text-secondary">Alamat</span>
+                            <span class="font-semibold text-brown-dark leading-relaxed">{{ $order->shipping_address }}</span>
+                        </div>
+                        @if($order->notes)
+                        <div class="flex justify-between py-1 flex-col gap-1">
+                            <span class="text-text-secondary">Catatan</span>
+                            <span class="font-semibold text-brown-dark leading-relaxed">{{ $order->notes }}</span>
+                        </div>
+                        @endif
+                    </div>
+                </div>
 
-            @if(in_array($order->status, ['processing', 'completed']))
-            <a href="{{ route('orders.invoice', $order) }}" class="btn-back-page" style="width:100%;text-align:center;display:block;margin-bottom:20px;">
-                <i class="fas fa-file-pdf" style="margin-right:6px;"></i> Unduh Invoice (PDF)
+                @if($order->status === 'pending' && $order->payment && $order->payment->status === 'unpaid' && !$order->payment->proof_image)
+                <a href="{{ route('orders.payment', $order) }}" class="btn-primary w-full py-3 text-center block text-sm font-bold justify-center">Bayar Sekarang</a>
+                @endif
+
+                @if(in_array($order->status, ['processing', 'completed']))
+                <a href="{{ route('orders.invoice', $order) }}" target="_blank" class="btn-ghost w-full py-3 text-center block text-sm font-semibold justify-center">
+                    <i class="fas fa-file-pdf mr-2"></i> Unduh Invoice (PDF)
+                </a>
+                @endif
+            </div>
+        </div>
+
+        <div class="mt-6">
+            <a href="{{ route('orders.index') }}" class="btn-ghost py-2.5 px-6 text-xs">
+                <i class="fa-solid fa-arrow-left mr-1.5"></i> Kembali ke Daftar Pesanan
             </a>
-            @endif
         </div>
     </div>
-
-    <a href="{{ route('orders.index') }}" class="btn-back-page">← Kembali ke Daftar Pesanan</a>
 </div>
-@include('partials.footer')
+@endsection
+
+@push('scripts')
 <script src="{{ asset('js/app.js') }}" defer></script>
-</body>
-</html>
+@endpush

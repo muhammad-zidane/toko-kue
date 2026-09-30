@@ -1,3 +1,130 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    html { font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background-color: #FDFAF4; color: #1E1008; }
+    a { text-decoration: none; }
+    h1, h2, h3 { font-family: 'Cormorant Garamond', 'Playfair Display', serif; }
+}
+
+@layer components {
+    /* Reusable pill buttons */
+    .btn-primary {
+        @apply inline-flex items-center justify-center px-7 py-3 bg-primary text-white
+               font-bold text-sm rounded-full shadow-gold transition-all duration-200
+               hover:bg-primary-hover hover:-translate-y-0.5 hover:shadow-gold-lg;
+    }
+    .btn-secondary {
+        @apply inline-flex items-center justify-center px-7 py-3 bg-transparent
+               text-primary border-2 border-primary font-bold text-sm rounded-full
+               transition-all duration-200 hover:bg-primary hover:text-white;
+    }
+    .btn-ghost {
+        @apply inline-flex items-center justify-center px-6 py-3 bg-cream-warm
+               text-brown-mid border border-cream-border font-semibold text-sm
+               rounded-full transition-all duration-200 hover:bg-cream-dark;
+    }
+    .btn-danger {
+        @apply inline-flex items-center justify-center px-6 py-3 bg-red-50
+               text-red-700 border border-red-200 font-semibold text-sm
+               rounded-full transition-all duration-200 hover:bg-red-700 hover:text-white;
+    }
+    /* Form input */
+    .input-field {
+        @apply w-full border border-cream-border rounded-xl px-4 py-3 text-sm
+               text-text-primary bg-white outline-none transition-all duration-200
+               focus:border-primary focus:ring-2 focus:ring-primary/20;
+    }
+    .input-label {
+        @apply block text-sm font-semibold text-brown-mid mb-1.5;
+    }
+    /* Card */
+    .card {
+        @apply bg-white rounded-2xl border border-cream-border shadow-sm
+               transition-all duration-200;
+    }
+    .card-hover {
+        @apply hover:-translate-y-1 hover:shadow-md;
+    }
+    /* Section */
+    .section-title {
+        @apply font-heading text-4xl font-bold text-brown-dark text-center;
+    }
+    .section-subtitle {
+        @apply text-sm text-text-secondary text-center mt-2;
+    }
+    /* Badge */
+    .badge {
+        @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold;
+    }
+    .badge-pending,
+    .badge-unpaid    { @apply bg-amber-50 text-amber-700; }
+    .badge-processing{ @apply bg-blue-50 text-blue-700; }
+    .badge-completed,
+    .badge-paid      { @apply bg-green-50 text-green-700; }
+    .badge-cancelled { @apply bg-red-50 text-red-700; }
+
+    /* Admin Table */
+    .admin-th {
+        @apply px-5 py-3 text-xs font-bold text-brown-light uppercase tracking-wider bg-cream/50 border-b border-cream-border;
+    }
+    .admin-td {
+        @apply px-5 py-4 text-sm border-b border-cream-border/50 align-middle;
+    }
+
+    /* Checkout & Orders Classes */
+    .delivery-option {
+        @apply border border-cream-border rounded-2xl p-4 flex flex-col items-center justify-center text-center cursor-pointer transition-all gap-1.5 hover:bg-cream-warm/50;
+    }
+    .delivery-option.selected {
+        @apply border-2 border-primary bg-primary-light/40 shadow-sm;
+    }
+    .slot-option {
+        @apply border border-cream-border rounded-2xl p-3 flex flex-col items-center justify-center text-center cursor-pointer transition-all hover:bg-cream-warm/50;
+    }
+    .slot-option.selected {
+        @apply border-2 border-primary bg-primary-light/40 shadow-sm;
+    }
+    .payment-option {
+        @apply border border-cream-border rounded-2xl p-4 flex items-center gap-3 cursor-pointer transition-all hover:bg-cream-warm/50;
+    }
+    .payment-option:has(input:checked) {
+        @apply border-2 border-primary bg-primary-light/40 shadow-sm;
+    }
+    .field-label {
+        @apply input-label mt-4 first:mt-0;
+    }
+    .field-input {
+        @apply input-field;
+    }
+    .field-textarea {
+        @apply input-field;
+    }
+    .voucher-msg {
+        @apply text-xs font-semibold mt-1.5;
+    }
+    .voucher-msg.ok {
+        @apply text-green-600;
+    }
+    .voucher-msg.err {
+        @apply text-red-600;
+    }
+
+    /* Star Rating */
+    .stars {
+        @apply flex flex-row-reverse justify-end gap-1;
+    }
+    .stars input {
+        @apply hidden;
+    }
+    .stars label {
+        @apply text-3xl text-gray-300 cursor-pointer transition-colors duration-150;
+    }
+    .stars input:checked ~ label,
+    .stars label:hover,
+    .stars label:hover ~ label {
+        @apply text-amber-400;
+    }
+}

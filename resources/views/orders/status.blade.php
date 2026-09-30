@@ -1,265 +1,188 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" />
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jagoan Kue - Status Pesanan {{ $order->order_code }}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    <style>
+@extends('layouts.main')
 
-        .page { max-width: 900px; margin: 0 auto; padding: 32px 24px 60px; }
-        .page-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 800; margin-bottom: 4px; }
-        .page-subtitle { font-size: 13px; color: var(--gray); margin-bottom: 28px; }
+@section('title')Jagoan Kue - Status Pesanan {{ $order->order_code }}@endsection
 
-        /* Status Timeline */
-        .status-card { background: var(--white); border-radius: 16px; border: 1px solid #EDE0D4; padding: 28px 24px; margin-bottom: 20px; }
-        .status-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 10px; }
-        .status-header-left h2 { font-size: 15px; font-weight: 700; color: var(--pink); letter-spacing: 0.5px; text-transform: uppercase; }
-        .status-header-left p { font-size: 13px; color: var(--gray); margin-top: 2px; }
+@section('content')
+<div class="bg-cream min-h-screen py-8 px-6">
+    <div class="max-w-[1140px] mx-auto">
+        <h1 class="font-heading text-3xl font-bold text-brown-dark mb-1">Status Pesanan</h1>
+        <p class="text-sm text-text-secondary mb-6">{{ $order->order_code }} &middot; {{ $order->created_at->translatedFormat('d F Y, H:i') }}</p>
 
-        .badge { display: inline-block; padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; }
-        .badge-pending    { background: #FEF3C7; color: #D97706; }
-        .badge-processing { background: #DBEAFE; color: #2563EB; }
-        .badge-shipped    { background: #EDE9FE; color: #7C3AED; }
-        .badge-completed  { background: #DCFCE7; color: #16A34A; }
-        .badge-cancelled  { background: #FEE2E2; color: #DC2626; }
-        .badge-unpaid { background: #FEF3C7; color: #D97706; }
-        .badge-paid   { background: #DCFCE7; color: #16A34A; }
-
-        /* Timeline */
-        .timeline { display: flex; align-items: flex-start; gap: 0; margin-top: 8px; }
-        .timeline-step { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
-        .timeline-step:not(:last-child)::after {
-            content: '';
-            position: absolute;
-            top: 18px;
-            left: 50%;
-            width: 100%;
-            height: 3px;
-            background: #EDE0D4;
-            z-index: 0;
-        }
-        .timeline-step.done:not(:last-child)::after  { background: var(--pink); }
-        .timeline-icon {
-            width: 36px; height: 36px; border-radius: 50%;
-            background: #EDE0D4; color: #B0A09A;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 14px; z-index: 1; position: relative;
-            border: 3px solid var(--cream);
-            transition: background 0.3s;
-        }
-        .timeline-step.done  .timeline-icon { background: var(--pink);  color: white; }
-        .timeline-step.active .timeline-icon { background: var(--brown-dark); color: white; box-shadow: 0 0 0 4px #F0507A33; }
-        .timeline-step.cancelled .timeline-icon { background: #FEE2E2; color: #DC2626; }
-        .timeline-label { font-size: 11px; font-weight: 700; text-align: center; margin-top: 8px; color: var(--gray); letter-spacing: 0.3px; line-height: 1.4; }
-        .timeline-step.done   .timeline-label { color: var(--pink); }
-        .timeline-step.active .timeline-label { color: var(--brown-dark); }
-        .timeline-step.cancelled .timeline-label { color: #DC2626; }
-
-        .cancelled-notice { display: flex; align-items: center; gap: 10px; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 10px; padding: 12px 16px; margin-top: 20px; }
-        .cancelled-notice i { color: #DC2626; font-size: 16px; }
-        .cancelled-notice p { font-size: 13px; color: #7F1D1D; font-weight: 600; }
-
-        /* Detail Grid */
-        .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-        .card { background: var(--white); border-radius: 16px; border: 1px solid #EDE0D4; padding: 24px; }
-        .card-label { font-size: 13px; font-weight: 700; color: var(--pink); margin-bottom: 16px; letter-spacing: 0.5px; text-transform: uppercase; }
-
-        .order-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--cream); border-radius: 10px; margin-bottom: 10px; }
-        .order-item:last-child { margin-bottom: 0; }
-        .order-item img { width: 52px; height: 52px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
-        .order-item-info { flex: 1; }
-        .order-item-info p { font-size: 14px; font-weight: 700; }
-        .order-item-info small { font-size: 12px; color: var(--gray); }
-        .item-note { margin-top: 5px; font-size: 12px; color: var(--brown-dark); background: #FFF4E6; border-radius: 6px; padding: 5px 8px; line-height: 1.5; }
-        .order-item-price { font-size: 14px; font-weight: 700; white-space: nowrap; }
-
-        .price-total { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--cream); border-radius: 10px; margin-top: 14px; }
-        .price-total span:first-child { font-size: 14px; font-weight: 600; color: var(--gray); }
-        .price-total span:last-child { font-size: 18px; font-weight: 800; color: var(--brown-dark); }
-
-        .info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #F0E8E0; font-size: 13px; }
-        .info-row:last-child { border-bottom: none; }
-        .info-row .info-label { color: var(--gray); flex-shrink: 0; margin-right: 12px; }
-        .info-row .info-value { font-weight: 600; text-align: right; }
-
-        .btn-back { display: inline-flex; align-items: center; gap: 8px; background: var(--brown-dark); color: white; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 700; }
-        .btn-detail { display: inline-flex; align-items: center; gap: 8px; background: var(--pink); color: white; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 700; margin-left: 12px; }
-        .btn-pay { display: block; width: 100%; text-align: center; background: var(--pink); color: white; padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 700; margin-bottom: 12px; }
-
-        @media (max-width: 768px) {
-            .detail-grid { grid-template-columns: 1fr; }
-            .timeline-label { font-size: 10px; }
-        }
-    </style></head>
-<body>
-@include('partials.navbar')
-
-<div class="page">
-    <h1 class="page-title">Status Pesanan</h1>
-    <p class="page-subtitle">{{ $order->order_code }} &middot; {{ $order->created_at->translatedFormat('d F Y, H:i') }}</p>
-
-    {{-- Status Timeline --}}
-    <div class="status-card">
-        <div class="status-header">
-            <div class="status-header-left">
-                <h2>Lacak Pesanan</h2>
-                <p>Terakhir diperbarui: {{ $order->updated_at->translatedFormat('d F Y, H:i') }}</p>
+        {{-- Status Timeline --}}
+        <div class="bg-white rounded-2xl border border-cream-border p-6 mb-6 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-cream-border pb-4 mb-6">
+                <div>
+                    <h2 class="font-heading text-xl font-bold text-brown-dark">Lacak Pesanan</h2>
+                    <p class="text-xs text-text-secondary mt-0.5">Terakhir diperbarui: {{ $order->updated_at->translatedFormat('d F Y, H:i') }}</p>
+                </div>
+                @php
+                    $statusLabels = [
+                        'pending'    => 'Menunggu Konfirmasi',
+                        'processing' => 'Diproses',
+                        'shipped'    => 'Dikirim',
+                        'completed'  => 'Selesai',
+                        'cancelled'  => 'Dibatalkan',
+                    ];
+                @endphp
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full badge-{{ $order->status === 'cancelled' ? 'red' : ($order->status === 'completed' ? 'green' : ($order->status === 'pending' ? 'gold' : 'blue')) }}">
+                    {{ $statusLabels[$order->status] ?? ucfirst($order->status) }}
+                </span>
             </div>
-            @php
-                $statusLabels = [
-                    'pending'    => 'Menunggu Konfirmasi',
-                    'processing' => 'Diproses',
-                    'shipped'    => 'Dikirim',
-                    'completed'  => 'Selesai',
-                    'cancelled'  => 'Dibatalkan',
-                ];
-            @endphp
-            <span class="badge badge-{{ $order->status }}">
-                {{ $statusLabels[$order->status] ?? ucfirst($order->status) }}
-            </span>
-        </div>
 
-        @if($order->status === 'cancelled')
-            {{-- Cancelled state: simple notice --}}
-            <div class="timeline">
-                @php $steps = [
-                    ['pending',    'fa-clock',        'Pesanan\nMasuk'],
-                    ['cancelled',  'fa-times-circle', 'Dibatalkan'],
-                ]; @endphp
-                @foreach($steps as [$key, $icon, $label])
-                    <div class="timeline-step cancelled">
-                        <div class="timeline-icon"><i class="fa-solid fa-{{ $icon === 'fa-clock' ? 'clock' : 'xmark' }}"></i></div>
-                        <div class="timeline-label">{!! nl2br(e(str_replace('\n', "\n", $label))) !!}</div>
-                    </div>
-                @endforeach
-            </div>
-            <div class="cancelled-notice">
-                <i class="fa-solid fa-circle-exclamation"></i>
-                <p>Pesanan ini telah dibatalkan. Hubungi kami jika ada pertanyaan.</p>
-            </div>
-        @else
-            @php
-                $steps = [
-                    ['pending',    'fa-clock',          'Menunggu\nKonfirmasi'],
-                    ['processing', 'fa-gear',           'Sedang\nDiproses'],
-                    ['shipped',    'fa-truck',          'Dalam\nPengiriman'],
-                    ['completed',  'fa-circle-check',  'Selesai'],
-                ];
-                $statusOrder = ['pending' => 0, 'processing' => 1, 'shipped' => 2, 'completed' => 3];
-                $currentIdx  = $statusOrder[$order->status] ?? 0;
-            @endphp
-            <div class="timeline">
-                @foreach($steps as $i => [$key, $icon, $label])
-                    @php
-                        $stepIdx = $statusOrder[$key];
-                        $stepClass = $stepIdx < $currentIdx ? 'done' : ($stepIdx === $currentIdx ? 'active' : '');
-                    @endphp
-                    <div class="timeline-step {{ $stepClass }}">
-                        <div class="timeline-icon">
-                            <i class="fa-solid fa-{{ $icon }}"></i>
+            @if($order->status === 'cancelled')
+                {{-- Cancelled state: simple notice --}}
+                <div class="flex items-center justify-center gap-0 py-4 max-w-md mx-auto flex-wrap">
+                    @php $steps = [
+                        ['pending',    'fa-clock',        'Pesanan\nMasuk'],
+                        ['cancelled',  'fa-times-circle', 'Dibatalkan'],
+                    ]; @endphp
+                    @foreach($steps as $idx => [$key, $icon, $label])
+                        <div class="flex flex-col items-center">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center text-base bg-red-100 text-red-600 border border-red-200">
+                                <i class="fa-solid fa-{{ $icon === 'fa-clock' ? 'clock' : 'xmark' }}"></i>
+                            </div>
+                            <div class="text-xs font-semibold mt-2 text-center text-red-700">{!! nl2br(e(str_replace('\n', "\n", $label))) !!}</div>
                         </div>
-                        <div class="timeline-label">{!! nl2br(e(str_replace('\n', "\n", $label))) !!}</div>
-                    </div>
-                @endforeach
-            </div>
-        @endif
-    </div>
-
-    {{-- Detail Grid --}}
-    <div class="detail-grid">
-        {{-- Produk --}}
-        <div class="card">
-            <p class="card-label">Produk Dipesan</p>
-            @foreach($order->orderItems as $item)
-                <div class="order-item">
-                    <img src="{{ $item->product && $item->product->image ? asset('storage/' . $item->product->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=200&q=80' }}"
-                         alt="{{ $item->product->name ?? 'Produk' }}">
-                    <div class="order-item-info">
-                        <p>{{ $item->product->name ?? 'Produk dihapus' }}</p>
-                        <small>{{ $item->quantity }}x &middot; Rp {{ number_format($item->price, 0, ',', '.') }}</small>
-                        @if(!empty($item->note))
-                            <p class="item-note"><i class="fa-solid fa-note-sticky" style="font-size:10px;margin-right:4px;"></i>{{ $item->note }}</p>
+                        @if($idx === 0)
+                            <div class="flex-1 min-w-[60px] h-0.5 bg-red-200 mb-6"></div>
                         @endif
-                    </div>
-                    <span class="order-item-price">Rp {{ number_format($item->price * $item->quantity, 0, ',', '.') }}</span>
+                    @endforeach
                 </div>
-            @endforeach
-
-            <div class="price-total">
-                <span>Total Pembayaran</span>
-                <span>Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
-            </div>
-        </div>
-
-        {{-- Info Pesanan --}}
-        <div>
-            <div class="card" style="margin-bottom: 14px;">
-                <p class="card-label">Info Pesanan</p>
-                <div class="info-row">
-                    <span class="info-label">Nomor Pesanan</span>
-                    <span class="info-value">{{ $order->order_code }}</span>
+                <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 text-xs font-semibold flex items-center gap-2 mt-4 justify-center">
+                    <i class="fa-solid fa-circle-exclamation text-sm shrink-0"></i>
+                    <p>Pesanan ini telah dibatalkan. Hubungi kami jika ada pertanyaan.</p>
                 </div>
-                <div class="info-row">
-                    <span class="info-label">Tanggal Pesan</span>
-                    <span class="info-value">{{ $order->created_at->translatedFormat('d M Y, H:i') }}</span>
+            @else
+                @php
+                    $steps = [
+                        ['pending',    'fa-clock',          'Menunggu\nKonfirmasi'],
+                        ['processing', 'fa-gear',           'Sedang\nDiproses'],
+                        ['shipped',    'fa-truck',          'Dalam\nPengiriman'],
+                        ['completed',  'fa-circle-check',  'Selesai'],
+                    ];
+                    $statusOrder = ['pending' => 0, 'processing' => 1, 'shipped' => 2, 'completed' => 3];
+                    $currentIdx  = $statusOrder[$order->status] ?? 0;
+                @endphp
+                <div class="flex items-center justify-center gap-0 py-4 max-w-2xl mx-auto flex-wrap">
+                    @foreach($steps as $i => [$key, $icon, $label])
+                        @php
+                            $stepIdx = $statusOrder[$key];
+                            $isDone = $stepIdx < $currentIdx;
+                            $isActive = $stepIdx === $currentIdx;
+                        @endphp
+                        <div class="flex flex-col items-center">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold {{ $isDone ? 'bg-green-500 text-white' : ($isActive ? 'bg-primary text-white shadow-gold' : 'bg-cream-dark text-brown-light') }}">
+                                <i class="fa-solid {{ $isDone ? 'fa-check' : 'fa-' . substr($icon, 3) }}"></i>
+                            </div>
+                            <div class="text-xs font-semibold mt-2 text-center {{ $isDone ? 'text-green-700 font-bold' : ($isActive ? 'text-primary font-bold' : 'text-text-muted') }}">{!! nl2br(e(str_replace('\n', "\n", $label))) !!}</div>
+                        </div>
+                        @if($i < count($steps) - 1)
+                            <div class="flex-1 min-w-[30px] sm:min-w-[60px] h-0.5 mb-6 {{ $stepIdx < $currentIdx ? 'bg-green-500' : 'bg-cream-border' }}"></div>
+                        @endif
+                    @endforeach
                 </div>
-                <div class="info-row">
-                    <span class="info-label">Status</span>
-                    <span class="info-value">
-                        <span class="badge badge-{{ $order->status }}">
-                            {{ $statusLabels[$order->status] ?? ucfirst($order->status) }}
-                        </span>
-                    </span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Pembayaran</span>
-                    <span class="info-value">
-                        <span class="badge badge-{{ $order->payment->status ?? 'unpaid' }}">
-                            {{ $order->payment?->status_label ?? 'Belum Bayar' }}
-                        </span>
-                    </span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Metode</span>
-                    <span class="info-value">
-                        {{ ['transfer_bank' => 'Transfer Bank', 'ewallet' => 'E-Wallet', 'qris' => 'QRIS', 'cod' => 'COD'][$order->payment->payment_method ?? ''] ?? ucfirst($order->payment->payment_method ?? '-') }}
-                    </span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Alamat Kirim</span>
-                    <span class="info-value">{{ $order->shipping_address }}</span>
-                </div>
-                @if($order->notes)
-                    <div class="info-row">
-                        <span class="info-label">Catatan</span>
-                        <span class="info-value">{{ $order->notes }}</span>
-                    </div>
-                @endif
-            </div>
-
-            @if($order->status === 'pending' && $order->payment && $order->payment->status === 'unpaid')
-                <a href="{{ route('orders.payment', $order) }}" class="btn-pay">
-                    <i class="fa-solid fa-credit-card"></i> Bayar Sekarang
-                </a>
             @endif
         </div>
-    </div>
 
-    <div>
-        <a href="{{ route('orders.index') }}" class="btn-back">
-            <i class="fa-solid fa-arrow-left"></i> Daftar Pesanan
-        </a>
-        <a href="{{ route('orders.show', $order) }}" class="btn-detail">
-            <i class="fa-solid fa-receipt"></i> Detail Lengkap
-        </a>
+        {{-- Detail Grid --}}
+        <div class="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-8 items-start mb-8">
+            {{-- Produk --}}
+            <div class="bg-white rounded-2xl border border-cream-border p-6 shadow-sm">
+                <p class="font-heading text-lg font-bold text-brown-dark mb-4 pb-2 border-b border-cream-border">Produk Dipesan</p>
+                <div class="divide-y divide-cream-border mb-4">
+                @foreach($order->orderItems as $item)
+                    <div class="flex items-start gap-4 py-4 first:pt-0">
+                        <img src="{{ $item->product && $item->product->image ? asset('storage/' . $item->product->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=200&q=80' }}"
+                             alt="{{ $item->product->name ?? 'Produk' }}" class="w-16 h-16 rounded-xl object-cover shrink-0">
+                        <div class="flex-1 min-w-0">
+                            <p class="font-semibold text-sm text-brown-dark truncate">{{ $item->product->name ?? 'Produk dihapus' }}</p>
+                            <small class="text-xs text-text-secondary mt-0.5 block">{{ $item->quantity }}x &middot; Rp {{ number_format($item->price, 0, ',', '.') }}</small>
+                            @if(!empty($item->note))
+                                <p class="text-xs text-text-muted mt-1 bg-cream-warm/50 border border-cream-border rounded-lg p-2 flex items-start gap-1">
+                                    <i class="fa-solid fa-note-sticky text-[10px] mt-1 text-primary shrink-0"></i>
+                                    <span>{{ $item->note }}</span>
+                                </p>
+                            @endif
+                        </div>
+                        <span class="font-bold text-sm text-primary shrink-0 ml-auto">Rp {{ number_format($item->price * $item->quantity, 0, ',', '.') }}</span>
+                    </div>
+                @endforeach
+                </div>
+
+                <div class="flex justify-between items-center pt-4 border-t border-cream-border font-bold text-brown-dark">
+                    <span>Total Pembayaran</span>
+                    <span class="text-xl text-primary font-extrabold">Rp {{ number_format($order->total_price, 0, ',', '.') }}</span>
+                </div>
+            </div>
+
+            {{-- Info Pesanan --}}
+            <div class="space-y-4">
+                <div class="bg-white rounded-2xl border border-cream-border p-6 shadow-sm">
+                    <p class="font-heading text-lg font-bold text-brown-dark mb-4 pb-2 border-b border-cream-border">Info Pesanan</p>
+                    <div class="space-y-3.5 text-sm">
+                        <div class="flex justify-between py-1 border-b border-cream-border/30">
+                            <span class="text-text-secondary">Nomor Pesanan</span>
+                            <span class="font-semibold text-brown-dark">{{ $order->order_code }}</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-cream-border/30">
+                            <span class="text-text-secondary">Tanggal Pesan</span>
+                            <span class="font-semibold text-brown-dark">{{ $order->created_at->translatedFormat('d M Y, H:i') }}</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-cream-border/30 items-center">
+                            <span class="text-text-secondary">Status</span>
+                            <span class="font-semibold">
+                                <span class="inline-block px-2.5 py-0.5 text-xs font-bold rounded-full badge-{{ $order->status === 'cancelled' ? 'red' : ($order->status === 'completed' ? 'green' : ($order->status === 'pending' ? 'gold' : 'blue')) }}">
+                                    {{ $statusLabels[$order->status] ?? ucfirst($order->status) }}
+                                </span>
+                            </span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-cream-border/30 items-center">
+                            <span class="text-text-secondary">Pembayaran</span>
+                            <span class="font-semibold">
+                                <span class="inline-block px-2.5 py-0.5 text-xs font-bold rounded-full badge-{{ ($order->payment->status ?? 'unpaid') === 'paid' ? 'green' : 'gold' }}">
+                                    {{ $order->payment?->status_label ?? 'Belum Bayar' }}
+                                </span>
+                            </span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-cream-border/30">
+                            <span class="text-text-secondary">Metode</span>
+                            <span class="font-semibold text-brown-dark">
+                                {{ ['transfer_bank' => 'Transfer Bank', 'ewallet' => 'E-Wallet', 'qris' => 'QRIS', 'cod' => 'COD'][$order->payment->payment_method ?? ''] ?? ucfirst($order->payment->payment_method ?? '-') }}
+                            </span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-cream-border/30 flex-col gap-1">
+                            <span class="text-text-secondary">Alamat Kirim</span>
+                            <span class="font-semibold text-brown-dark leading-relaxed">{{ $order->shipping_address }}</span>
+                        </div>
+                        @if($order->notes)
+                            <div class="flex justify-between py-1 flex-col gap-1">
+                                <span class="text-text-secondary">Catatan</span>
+                                <span class="font-semibold text-brown-dark leading-relaxed">{{ $order->notes }}</span>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                @if($order->status === 'pending' && $order->payment && $order->payment->status === 'unpaid')
+                    <a href="{{ route('orders.payment', $order) }}" class="btn-primary w-full py-3.5 text-sm font-bold justify-center">
+                        <i class="fa-solid fa-credit-card mr-2"></i> Bayar Sekarang
+                    </a>
+                @endif
+            </div>
+        </div>
+
+        <div class="flex flex-wrap gap-4 items-center justify-between mt-6">
+            <a href="{{ route('orders.index') }}" class="btn-ghost py-2.5 px-6 text-xs">
+                <i class="fa-solid fa-arrow-left mr-1.5"></i> Daftar Pesanan
+            </a>
+            <a href="{{ route('orders.show', $order) }}" class="btn-secondary py-2.5 px-6 text-xs">
+                <i class="fa-solid fa-receipt mr-1.5"></i> Detail Lengkap
+            </a>
+        </div>
     </div>
 </div>
+@endsection
 
-@include('partials.footer')
+@push('scripts')
 <script src="{{ asset('js/app.js') }}" defer></script>
-</body>
-</html>
+@endpush
