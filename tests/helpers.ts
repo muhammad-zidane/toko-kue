@@ -1,6 +1,9 @@
 import { execSync } from "child_process";
 
 export const BASE_URL = "http://localhost:8000";
+export const ADMIN_EMAIL = "admin@jagoankue.test";
+export const ADMIN_PASSWORD = "TestAdmin123!";
+export const CUSTOMER_EMAIL = "customer@jagoan-kue.test";
 
 /**
  * Simple cookie jar untuk menyimpan cookies antar request.
@@ -45,22 +48,27 @@ export class CookieJar {
  * Reset database ke kondisi awal (fresh migrate + seed).
  */
 export function resetDatabase() {
-  try {
-    execSync("php artisan migrate:fresh --seed", {
-      stdio: "ignore",
-      cwd: process.cwd(),
-    });
-  } catch (error) {
-    console.error("Failed to reset database.");
+  if (process.env.DB_DATABASE !== "testing") {
+    throw new Error("Bun tests require DB_DATABASE=testing before migrate:fresh.");
   }
+
+  execSync("php artisan migrate:fresh --seed", {
+    stdio: "pipe",
+    cwd: process.cwd(),
+    env: {
+      ...process.env,
+      ADMIN_EMAIL,
+      ADMIN_PASSWORD,
+    },
+  });
 }
 
 /**
  * Buat session login dan kembalikan CookieJar yang sudah ter-autentikasi.
  */
 export async function login(
-  email = "admin@tokokue.com",
-  password = "password"
+  email = ADMIN_EMAIL,
+  password = ADMIN_PASSWORD
 ): Promise<CookieJar> {
   const jar = new CookieJar();
 
@@ -85,6 +93,9 @@ export async function login(
     },
     body: JSON.stringify({ email, password }),
   });
+  if (loginRes.status !== 302) {
+    throw new Error(`Fixture login failed for ${email}: HTTP ${loginRes.status}`);
+  }
   jar.addFromResponse(loginRes);
 
   return jar;

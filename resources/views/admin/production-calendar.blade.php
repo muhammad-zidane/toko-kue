@@ -1,56 +1,7 @@
-﻿@extends('admin.layout')
+@extends('admin.layout')
 @section('title', 'Kalender Produksi')
 @section('page-title', 'Kalender Produksi')
 @section('page-subtitle', 'Lihat jadwal pesanan per tanggal')
-
-@push('styles')
-<style>
-    .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-    .cal-month-label { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--text-dark); }
-    .cal-nav-btns { display: flex; gap: 20px; }
-    .btn-nav { padding: 8px 16px; border-radius: 8px; border: 1.5px solid #EDE0D4; background: white; color: var(--brown-dark); font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s; }
-    .btn-nav:hover { background: var(--cream); }
-    .calendar-card { background: white; border-radius: 16px; border: 1px solid #EDE0D4; overflow: hidden; margin-bottom: 24px; }
-    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
-    .cal-day-header { padding: 12px 8px; text-align: center; font-size: 11px; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; background: #FAFAF8; border-bottom: 1px solid #EDE0D4; }
-    .cal-day-header:first-child { color: #DC2626; }
-    .cal-day-header:last-child { color: #2563EB; }
-    .cal-cell { min-height: 90px; padding: 8px; border-right: 1px solid rgba(237,224,212,0.5); border-bottom: 1px solid rgba(237,224,212,0.5); position: relative; cursor: pointer; transition: background 0.15s; }
-    .cal-cell:hover { background: #FFFBF5; }
-    .cal-cell.empty { background: #FAFAF8; cursor: default; }
-    .cal-cell.today { background: rgba(240,80,122,0.04); }
-    .cal-cell.has-orders { background: rgba(255,248,238,0.6); }
-    .cal-cell.selected { background: rgba(240,80,122,0.08); outline: 2px solid var(--pink); outline-offset: -2px; }
-    .cal-date { font-size: 13px; font-weight: 700; color: var(--text-dark); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin-bottom: 4px; }
-    .cal-date.today-dot { background: var(--pink); color: white; }
-    .order-badge { display: inline-flex; align-items: center; justify-content: center; background: var(--pink); color: white; border-radius: 20px; font-size: 10px; font-weight: 700; padding: 2px 8px; gap: 3px; }
-    .order-badge i { font-size: 9px; }
-
-    /* Detail Panel */
-    .detail-card { background: white; border-radius: 16px; border: 1px solid #EDE0D4; overflow: hidden; display: none; }
-    .detail-card.visible { display: block; }
-    .detail-header { padding: 16px 20px; border-bottom: 1px solid #EDE0D4; background: rgba(255,248,238,0.3); display: flex; justify-content: space-between; align-items: center; }
-    .detail-header h3 { font-size: 14px; font-weight: 700; color: var(--text-dark); }
-    .detail-close { background: none; border: none; cursor: pointer; color: var(--gray); font-size: 16px; }
-    .order-item { padding: 14px 20px; border-bottom: 1px solid rgba(237,224,212,0.5); display: flex; align-items: center; gap: 12px; }
-    .order-item:last-child { border-bottom: none; }
-    .order-id { font-size: 11px; font-family: monospace; background: var(--cream); color: var(--brown-dark); padding: 3px 8px; border-radius: 4px; font-weight: 700; flex-shrink: 0; }
-    .order-customer { font-size: 13px; font-weight: 600; color: var(--text-dark); }
-    .order-total { font-size: 12px; color: var(--pink); font-weight: 700; }
-    .order-status { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; flex-shrink: 0; }
-    .status-pending { background: #FEF3C7; color: #D97706; }
-    .status-processing { background: #DBEAFE; color: #1D4ED8; }
-    .status-completed { background: #DCFCE7; color: #16A34A; }
-    .status-cancelled { background: #FEE2E2; color: #DC2626; }
-    .btn-view { padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; background: #EFF6FF; color: #2563EB; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; margin-left: auto; }
-
-    @media (max-width: 640px) {
-        .cal-cell { min-height: 60px; padding: 4px; }
-        .cal-date { font-size: 11px; width: 22px; height: 22px; }
-        .order-badge { font-size: 9px; padding: 1px 5px; }
-    }
-</style>
-@endpush
 
 @section('content')
 @php
@@ -65,31 +16,31 @@
 @endphp
 
 {{-- NAVIGASI --}}
-<div class="cal-nav">
-    <div class="cal-month-label">{{ $monthNames[$month] }} {{ $year }}</div>
-    <div class="cal-nav-btns">
-        <a href="{{ route('admin.production-calendar.index', ['month' => $prevMonth->month, 'year' => $prevMonth->year]) }}" class="btn-nav">
+<div class="flex justify-between items-center mb-6">
+    <div class="font-heading text-2xl font-bold text-brown-dark">{{ $monthNames[$month] }} {{ $year }}</div>
+    <div class="flex gap-2.5">
+        <a href="{{ route('admin.production-calendar.index', ['month' => $prevMonth->month, 'year' => $prevMonth->year]) }}" class="px-4 py-2 border border-cream-border text-brown-dark rounded-xl bg-white hover:bg-cream hover:border-primary hover:text-primary transition-all duration-200 text-xs font-semibold flex items-center gap-1.5 no-underline">
             <i class="fas fa-chevron-left"></i> Sebelumnya
         </a>
-        <a href="{{ route('admin.production-calendar.index', ['month' => now()->month, 'year' => now()->year]) }}" class="btn-nav">
+        <a href="{{ route('admin.production-calendar.index', ['month' => now()->month, 'year' => now()->year]) }}" class="px-4 py-2 border border-cream-border text-brown-dark rounded-xl bg-white hover:bg-cream hover:border-primary hover:text-primary transition-all duration-200 text-xs font-semibold flex items-center gap-1.5 no-underline">
             Hari ini
         </a>
-        <a href="{{ route('admin.production-calendar.index', ['month' => $nextMonth->month, 'year' => $nextMonth->year]) }}" class="btn-nav">
+        <a href="{{ route('admin.production-calendar.index', ['month' => $nextMonth->month, 'year' => $nextMonth->year]) }}" class="px-4 py-2 border border-cream-border text-brown-dark rounded-xl bg-white hover:bg-cream hover:border-primary hover:text-primary transition-all duration-200 text-xs font-semibold flex items-center gap-1.5 no-underline">
             Berikutnya <i class="fas fa-chevron-right"></i>
         </a>
     </div>
 </div>
 
 {{-- KALENDER --}}
-<div class="calendar-card">
-    <div class="cal-grid">
+<div class="bg-white rounded-2xl border border-cream-border p-5 mb-6 shadow-sm">
+    <div class="grid grid-cols-7 gap-2.5">
         @foreach($dayNames as $i => $day)
-        <div class="cal-day-header">{{ $day }}</div>
+        <div class="text-center font-bold text-xs text-brown-light py-2.5 uppercase tracking-wider">{{ $day }}</div>
         @endforeach
 
         {{-- Sel kosong di awal --}}
         @for($i = 0; $i < $startDow; $i++)
-        <div class="cal-cell empty"></div>
+        <div class="bg-transparent border-0 cursor-default"></div>
         @endfor
 
         @for($d = 1; $d <= $daysInMonth; $d++)
@@ -98,13 +49,13 @@
             $dayOrders = $orders->get($dateKey, collect());
             $isToday = ($today->year == $year && $today->month == $month && $today->day == $d);
         @endphp
-        <div class="cal-cell {{ $isToday ? 'today' : '' }} {{ $dayOrders->isNotEmpty() ? 'has-orders' : '' }}"
+        <div class="aspect-[1.2] bg-cream border border-cream-border rounded-xl p-2.5 flex flex-col justify-between cursor-pointer relative transition-all hover:bg-cream-warm/40 hover:-translate-y-0.5 hover:shadow-sm [&.today]:border-2 [&.today]:border-primary [&.has-orders]:bg-amber-50/50 [&.has-orders]:border-amber-200 [&.selected]:bg-cream-warm/80 [&.selected]:border-primary {{ $isToday ? 'today' : '' }} {{ $dayOrders->isNotEmpty() ? 'has-orders' : '' }}"
              id="cell-{{ $dateKey }}"
              onclick="{{ $dayOrders->isNotEmpty() ? "showDetail('$dateKey', '{$monthNames[$month]} $d, $year')" : '' }}">
-            <div class="cal-date {{ $isToday ? 'today-dot' : '' }}">{{ $d }}</div>
+            <div class="text-sm font-bold text-brown-dark flex items-center justify-center w-6 h-6 {{ $isToday ? 'bg-primary text-white rounded-full' : '' }}">{{ $d }}</div>
             @if($dayOrders->isNotEmpty())
-            <div class="order-badge">
-                <i class="fas fa-box"></i> {{ $dayOrders->count() }}
+            <div class="inline-flex items-center gap-1 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full self-end">
+                <i class="fas fa-box text-[9px]"></i> {{ $dayOrders->count() }}
             </div>
             @endif
         </div>
@@ -113,10 +64,10 @@
 </div>
 
 {{-- DETAIL PANEL --}}
-<div class="detail-card" id="detailPanel">
-    <div class="detail-header">
-        <h3 id="detailTitle">Pesanan</h3>
-        <button class="detail-close" onclick="hideDetail()"><i class="fas fa-times"></i></button>
+<div class="bg-white rounded-2xl border border-cream-border p-5 shadow-sm hidden [&.visible]:block" id="detailPanel">
+    <div class="flex justify-between items-center pb-3 border-b border-cream-border mb-4">
+        <h3 class="font-heading text-lg font-bold text-brown-dark" id="detailTitle">Pesanan</h3>
+        <button class="w-8 h-8 rounded-full hover:bg-cream-warm flex items-center justify-center text-brown-light hover:text-primary transition-all border-0 cursor-pointer" onclick="hideDetail()"><i class="fas fa-times"></i></button>
     </div>
     <div id="detailBody"></div>
 </div>
@@ -141,10 +92,10 @@ const ordersData = {
 };
 
 const statusLabels = {
-    pending: { label: 'Menunggu', cls: 'status-pending' },
-    processing: { label: 'Diproses', cls: 'status-processing' },
-    completed: { label: 'Selesai', cls: 'status-completed' },
-    cancelled: { label: 'Dibatalkan', cls: 'status-cancelled' },
+    pending: { label: 'Menunggu', cls: 'bg-amber-50 text-amber-700 border border-amber-200' },
+    processing: { label: 'Diproses', cls: 'bg-blue-50 text-blue-700 border border-blue-200' },
+    completed: { label: 'Selesai', cls: 'bg-green-50 text-green-700 border border-green-200' },
+    cancelled: { label: 'Dibatalkan', cls: 'bg-red-50 text-red-700 border border-red-200' },
 };
 
 let selectedCell = null;
@@ -160,30 +111,32 @@ function showDetail(dateKey, dateLabel) {
 
     const items = ordersData[dateKey] || [];
     if (items.length === 0) {
-        body.innerHTML = '<div style="padding:24px;text-align:center;color:var(--gray);font-size:13px;">Tidak ada pesanan</div>';
+        body.innerHTML = '<div class="py-6 text-center text-xs text-text-muted">Tidak ada pesanan</div>';
     } else {
         body.innerHTML = items.map(o => {
-            const st = statusLabels[o.status] || { label: o.status, cls: 'status-pending' };
-            return `<div class="order-item">
-                <span class="order-id">${o.code}</span>
-                <div style="flex:1;min-width:0;">
-                    <div class="order-customer">${o.customer}</div>
-                    <div class="order-total">${o.total}</div>
+            const st = statusLabels[o.status] || { label: o.status, cls: 'bg-gray-100 text-gray-700' };
+            return `<div class="flex items-center justify-between gap-4 p-3 border border-cream-border rounded-xl mb-2.5 bg-cream/30 hover:bg-cream-warm/20 transition-all">
+                <span class="font-mono font-bold text-brown-dark bg-white px-2 py-1 border border-cream-border rounded-lg text-xs">${o.code}</span>
+                <div class="flex-1 min-w-0">
+                    <div class="font-bold text-xs text-brown-dark truncate">${o.customer}</div>
+                    <div class="text-xs text-primary font-bold mt-0.5">${o.total}</div>
                 </div>
-                <span class="order-status ${st.cls}">${st.label}</span>
-                <a href="${o.url}" class="btn-view"><i class="fas fa-eye"></i> Lihat</a>
+                <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full ${st.cls}">${st.label}</span>
+                <a href="${o.url}" class="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border border-cream-border text-brown-dark bg-white hover:bg-primary hover:text-white hover:border-primary transition-all font-semibold"><i class="fas fa-eye"></i> Lihat</a>
             </div>`;
         }).join('');
     }
 
     panel.classList.add('visible');
+    panel.classList.remove('hidden');
     panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function hideDetail() {
-    document.getElementById('detailPanel').classList.remove('visible');
+    const panel = document.getElementById('detailPanel');
+    panel.classList.remove('visible');
+    panel.classList.add('hidden');
     if (selectedCell) { selectedCell.classList.remove('selected'); selectedCell = null; }
 }
 </script>
 @endsection
-

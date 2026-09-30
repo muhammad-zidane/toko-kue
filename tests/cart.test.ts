@@ -17,7 +17,8 @@ test("Cart: Berhasil menambah produk ke keranjang", async () => {
     }),
   });
 
-  expect(addRes.status).toBe(302);
+  expect(addRes.status).toBe(200);
+  expect(await addRes.json()).toMatchObject({ success: true, cart_count: 2 });
 
   const cartRes = await request("/cart", { jar });
   expect(cartRes.status).toBe(200);

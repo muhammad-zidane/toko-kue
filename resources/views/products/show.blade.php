@@ -1,159 +1,88 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" />
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $product->name }} — Jagoan Kue</title>
-    <meta name="description" content="{{ Str::limit(strip_tags($product->description ?? $product->name . ' tersedia di Jagoan Kue.'), 155) }}">
-    <meta property="og:title" content="{{ $product->name }} — Jagoan Kue">
-    <meta property="og:description" content="{{ Str::limit(strip_tags($product->description ?? ''), 155) }}">
-    @if($product->image)<meta property="og:image" content="{{ asset('storage/' . $product->image) }}">@endif
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    <style>
-        .product-page { background-color: var(--cream); padding: 60px 24px; min-height: 70vh; }
-        .product-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1.2fr 0.8fr; gap: 40px; align-items: stretch; }
-        .product-image { align-self: start; }
-        .product-image img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); }
-        .product-info { background: white; border-radius: 16px; border: 1px solid #EDE0D4; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
-        .product-info h1 { font-size: 22px; font-weight: 700; color: var(--text-dark); margin-bottom: 6px; }
-        .product-sold { font-size: 12px; color: var(--gray); margin-bottom: 16px; }
-        .product-price { font-size: 22px; font-weight: 700; color: var(--text-dark); margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1.5px solid #E5B8C2; }
-        .product-detail-label { font-size: 14px; font-weight: 600; color: var(--text-dark); margin-bottom: 10px; }
-        .product-description { font-size: 14px; color: var(--gray); line-height: 1.8; }
-        .product-detail-block { background: var(--cream); border-radius: 10px; padding: 14px 16px; margin-top: 4px; }
-        .product-detail-label { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
-        .product-detail-label::before { content: ''; display: inline-block; width: 3px; height: 14px; background: var(--pink); border-radius: 2px; flex-shrink: 0; }
-        .product-widget { background: var(--white); border-radius: 12px; border: 1px solid #E5D5C5; padding: 20px; }
-        .widget-title { font-size: 14px; font-weight: 700; color: var(--text-dark); margin-bottom: 16px; }
-        .quantity-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-        .quantity-control { display: flex; align-items: center; border: 1px solid #D1C4C0; border-radius: 6px; overflow: hidden; }
-        .qty-btn { background: none; border: none; padding: 6px 12px; font-size: 16px; cursor: pointer; color: var(--text-dark); font-weight: 600; transition: background 0.2s; }
-        .qty-btn:hover { background: var(--cream); }
-        .qty-input { width: 40px; text-align: center; border: none; border-left: 1px solid #D1C4C0; border-right: 1px solid #D1C4C0; padding: 6px 0; font-size: 14px; font-weight: 600; font-family: 'Plus Jakarta Sans', sans-serif; outline: none; }
-        .stock-info { font-size: 13px; color: var(--gray); }
-        .stock-info span { font-weight: 700; color: var(--text-dark); }
-        .subtotal-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-top: 1px solid #F0E8E0; margin-bottom: 12px; }
-        .subtotal-label { font-size: 13px; color: var(--gray); }
-        .subtotal-value { font-size: 15px; font-weight: 700; color: var(--text-dark); }
-        .catatan-label { font-size: 13px; font-weight: 600; color: var(--text-dark); margin-bottom: 6px; display: block; }
-        .catatan-input { width: 100%; border: 1px solid #D1C4C0; border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif; resize: none; outline: none; margin-bottom: 16px; background: var(--cream); }
-        .catatan-input:focus { border-color: var(--pink); }
-        /* Kustomisasi */
-        .custom-section { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #F0E8E0; }
-        .custom-section-title { font-size: 14px; font-weight: 700; color: var(--text-dark); margin-bottom: 12px; }
-        .custom-type-block { margin-bottom: 14px; }
-        .custom-type-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray); margin-bottom: 8px; }
-        .custom-options { display: flex; flex-wrap: wrap; gap: 8px; }
-        .custom-option-item { display: none; }
-        .custom-option-label { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1.5px solid #D1C4C0; border-radius: 8px; font-size: 12px; font-weight: 600; color: var(--text-dark); cursor: pointer; transition: border-color 0.2s, background 0.2s; user-select: none; background: white; }
-        .custom-option-item:checked + .custom-option-label { border-color: var(--pink); background: #FFF0F4; color: var(--pink); }
-        .custom-option-label:hover { border-color: var(--pink); }
-        .custom-option-extra { font-size: 10px; font-weight: 500; color: var(--gray); }
-        .price-base { font-size: 13px; color: var(--gray); }
-        .price-extra { font-size: 13px; color: var(--brown-dark); font-weight: 600; }
-        .price-total-label { font-size: 15px; font-weight: 700; color: var(--text-dark); }
-        .btn-add-cart { width: 100%; background-color: var(--pink); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: opacity 0.2s; }
-        .btn-add-cart:hover { opacity: 0.85; }
-        .btn-buy-now { width: 100%; background-color: var(--brown-dark); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: opacity 0.2s; margin-top: 8px; display: block; text-align: center; }
-        .btn-buy-now:hover { opacity: 0.85; }
-        .reviews-section { max-width: 1100px; margin: 24px auto 0; padding: 0 0 60px; }
-        .reviews-card { background: white; border-radius: 16px; border: 1px solid #EDE0D4; padding: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
-        .reviews-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
-        .reviews-count { font-size: 13px; color: var(--gray); margin-bottom: 20px; }
-        .reviews-divider { height: 1px; background: #EDE0D4; margin-bottom: 20px; }
-        .review-card { background: var(--cream); border: 1px solid #EDE0D4; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
-        .review-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 12px; }
-        .review-user { font-size: 14px; font-weight: 700; }
-        .review-date { font-size: 12px; color: var(--gray); }
-        .review-stars { color: #F59E0B; font-size: 18px; }
-        .review-comment { font-size: 14px; line-height: 1.7; margin-bottom: 10px; }
-        .review-images { display: flex; flex-wrap: wrap; gap: 8px; }
-        .review-images img { width: 82px; height: 82px; object-fit: cover; border-radius: 8px; border: 1px solid #EDE0D4; }
-        @media (max-width: 768px) { .product-inner { grid-template-columns: 1fr; } }
-    </style></head>
-<body>
-@include('partials.navbar')
+@extends('layouts.main')
 
+@section('title', $product->name . ' — Jagoan Kue')
+
+@section('content')
 {{-- PRODUCT DETAIL --}}
-<section class="product-page">
-    <div class="product-inner">
+<section class="bg-cream min-h-screen py-12 px-6">
+    <div class="max-w-[1140px] mx-auto grid grid-cols-1 md:grid-cols-[1fr_1.2fr_0.9fr] gap-10">
 
         {{-- Gambar --}}
-        <div class="product-image">
+        <div>
             <img src="{{ $product->image ? asset('storage/' . $product->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=600&q=80' }}"
+                 class="rounded-3xl shadow-lg border-4 border-white w-full object-cover aspect-square"
                  alt="{{ $product->name }}">
         </div>
 
         {{-- Info Produk --}}
-        <div class="product-info">
-            <h1>{{ $product->name }}</h1>
-            <p class="product-sold">30+ Barang Telah Terjual</p>
-            <p class="product-price">Rp{{ number_format($product->price, 0, ',', '.') }}</p>
-            <div class="product-detail-block">
-                <p class="product-detail-label">Detail Produk</p>
-                <p class="product-description">{{ $product->description ?? 'Tidak ada deskripsi untuk produk ini.' }}</p>
+        <div class="bg-white rounded-3xl border border-cream-border p-6 shadow-sm self-start">
+            <h1 class="font-heading text-3xl font-bold text-brown-dark mb-2">{{ $product->name }}</h1>
+            <p class="text-xs text-text-secondary mb-4">30+ Barang Telah Terjual</p>
+            <p class="text-primary text-2xl font-extrabold mb-4 pb-4 border-b border-cream-border">Rp{{ number_format($product->price, 0, ',', '.') }}</p>
+            <div>
+                <p class="text-xs font-bold text-brown-light uppercase tracking-wide mb-2">Detail Produk</p>
+                <p class="text-sm text-text-secondary leading-relaxed">{{ $product->description ?? 'Tidak ada deskripsi untuk produk ini.' }}</p>
             </div>
         </div>
 
         {{-- Widget Keranjang --}}
-        <div class="product-widget">
-            <p class="widget-title">Atur Jumlah dan Catatan</p>
+        <div class="bg-cream-warm rounded-3xl border border-cream-border p-6 self-start shadow-sm">
+            <p class="text-sm font-bold text-brown-dark mb-4">Atur Jumlah dan Catatan</p>
 
-            <div class="quantity-row">
-                <div class="quantity-control">
-                    <button class="qty-btn" onclick="changeQty(-1)">−</button>
-                    <input type="number" id="qty" class="qty-input" value="1" min="1" max="{{ $product->stock }}">
-                    <button class="qty-btn" onclick="changeQty(1)">+</button>
+            <div class="flex items-center gap-3 mb-4 justify-between">
+                <div class="flex items-center gap-3">
+                    <button class="w-9 h-9 rounded-full border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all flex items-center justify-center text-xs" onclick="changeQty(-1)"><i class="fas fa-minus"></i></button>
+                    <input type="number" id="qty" class="w-12 text-center font-bold text-brown-dark bg-transparent border-0 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" value="1" min="1" max="{{ $product->stock }}">
+                    <button class="w-9 h-9 rounded-full border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all flex items-center justify-center text-xs" onclick="changeQty(1)"><i class="fas fa-plus"></i></button>
                 </div>
-                <p class="stock-info">Stok Total: <span>{{ $product->stock }}</span></p>
+                <p class="text-xs text-text-secondary">Stok: <span class="font-bold text-brown-dark">{{ $product->stock }}</span></p>
             </div>
 
             {{-- KUSTOMISASI --}}
             @if(isset($customizationOptions) && $customizationOptions->isNotEmpty())
-            <div class="custom-section">
-                <p class="custom-section-title"><i class="fas fa-paint-brush" style="color:var(--pink);margin-right:6px;font-size:12px;"></i>Pilih Kustomisasi</p>
+            <div class="border-t border-cream-border pt-4 mb-4">
+                <p class="text-xs font-bold text-brown-light uppercase tracking-wide mb-3 flex items-center gap-1.5">
+                    <i class="fas fa-paint-brush text-primary"></i> Pilih Kustomisasi
+                </p>
                 @foreach($customizationOptions as $type => $options)
-                <div class="custom-type-block">
-                    <p class="custom-type-label">
+                <div class="mb-4">
+                    <p class="text-[10px] font-bold text-text-secondary uppercase tracking-wider mb-2">
                         {{ match($type) { 'rasa' => 'Rasa', 'ukuran' => 'Ukuran', 'topping' => 'Topping', default => ucfirst($type) } }}
                     </p>
-                    <div class="custom-options">
+                    <div class="flex flex-wrap gap-2">
                         @foreach($options as $option)
                         @if($type === 'topping')
                         {{-- Topping: checkbox (bisa pilih banyak) --}}
-                        <div>
+                        <div class="relative">
                             <input type="checkbox"
-                                   class="custom-option-item custom-opt-input"
+                                   class="sr-only custom-opt-input peer"
                                    id="opt-{{ $option->id }}"
                                    name="customizations[]"
                                    value="{{ $option->id }}"
                                    data-price="{{ $option->extra_price }}"
                                    data-type="checkbox">
-                            <label class="custom-option-label" for="opt-{{ $option->id }}">
+                            <label class="inline-flex items-center gap-1 px-3 py-1.5 border border-cream-border rounded-xl text-xs font-semibold text-brown-dark cursor-pointer transition-all select-none bg-white hover:border-primary peer-checked:border-primary peer-checked:bg-primary-light peer-checked:text-primary" for="opt-{{ $option->id }}">
                                 {{ $option->name }}
                                 @if($option->extra_price > 0)
-                                    <span class="custom-option-extra">+Rp{{ number_format($option->extra_price, 0, ',', '.') }}</span>
+                                    <span class="text-[9px] font-bold text-text-secondary">+Rp{{ number_format($option->extra_price, 0, ',', '.') }}</span>
                                 @endif
                             </label>
                         </div>
                         @else
                         {{-- Rasa / Ukuran / Lainnya: radio (pilih satu) --}}
-                        <div>
+                        <div class="relative">
                             <input type="radio"
-                                   class="custom-option-item custom-opt-input"
+                                   class="sr-only custom-opt-input peer"
                                    id="opt-{{ $option->id }}"
                                    name="customization_{{ $type }}"
                                    value="{{ $option->id }}"
                                    data-price="{{ $option->extra_price }}"
                                    data-type="radio"
                                    data-group="{{ $type }}">
-                            <label class="custom-option-label" for="opt-{{ $option->id }}">
+                            <label class="inline-flex items-center gap-1 px-3 py-1.5 border border-cream-border rounded-xl text-xs font-semibold text-brown-dark cursor-pointer transition-all select-none bg-white hover:border-primary peer-checked:border-primary peer-checked:bg-primary-light peer-checked:text-primary" for="opt-{{ $option->id }}">
                                 {{ $option->name }}
                                 @if($option->extra_price > 0)
-                                    <span class="custom-option-extra">+Rp{{ number_format($option->extra_price, 0, ',', '.') }}</span>
+                                    <span class="text-[9px] font-bold text-text-secondary">+Rp{{ number_format($option->extra_price, 0, ',', '.') }}</span>
                                 @endif
                             </label>
                         </div>
@@ -168,82 +97,83 @@
             @endif
 
             {{-- Catatan / Tulisan di kue --}}
-            <label class="catatan-label">Tulisan di kue / instruksi khusus</label>
-            <textarea id="note-input" class="catatan-input" rows="3"
+            <label class="block text-xs font-semibold text-brown-mid mb-1.5 mt-4">Tulisan di kue / instruksi khusus</label>
+            <textarea id="note-input" class="w-full border border-cream-border rounded-xl px-3 py-2 text-sm text-text-primary bg-white outline-none transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none" rows="3"
                       placeholder="Contoh: Selamat ulang tahun Budi, warna biru..."
                       maxlength="300"></textarea>
-            <div style="text-align:right;font-size:11px;color:var(--gray);margin-top:-12px;margin-bottom:12px;">
+            <div class="text-right text-[10px] text-text-muted mt-1 mb-3">
                 <span id="note-char-count">0</span>/300
             </div>
 
-            <div class="subtotal-row">
-                <span class="subtotal-label">Subtotal</span>
+            <div class="flex justify-between items-center py-3 border-t border-cream-border mt-4 mb-5">
+                <span class="text-sm font-semibold text-text-secondary">Subtotal</span>
                 <div id="price-display">
-                    <span class="price-total-label" id="subtotal">Rp{{ number_format($product->price, 0, ',', '.') }}</span>
+                    <span class="font-heading text-2xl font-bold text-primary" id="subtotal">Rp{{ number_format($product->price, 0, ',', '.') }}</span>
                 </div>
             </div>
 
         @auth
-            <form id="add-to-cart-form" action="/cart/add" method="POST">
+            <form id="add-to-cart-form" action="/cart/add" method="POST" class="mb-2">
                 @csrf
                     <input type="hidden" name="product_id" value="{{ $product->id }}">
                     <input type="hidden" name="quantity" id="qty-hidden" value="1">
                     <input type="hidden" name="note" id="note-hidden" value="">
                     <input type="hidden" name="customizations_json" id="form-customizations-json" value="[]">
-                    <button type="submit" id="btn-add-cart" class="btn-add-cart">+ Keranjang</button>
-                </form>
-            <a href="{{ route('orders.create', $product) }}" class="btn-buy-now">Beli Sekarang</a>
-            <div id="cart-toast" style="display:none;margin-top:10px;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:8px;padding:10px 14px;font-size:13px;color:#065F46;font-weight:600;">
+                    <button type="submit" id="btn-add-cart" class="btn-primary w-full justify-center shadow-gold hover:shadow-gold-lg transition-all duration-200">+ Keranjang</button>
+            </form>
+            <a href="{{ route('orders.create', $product) }}" class="w-full justify-center py-3 bg-brown-dark text-white font-bold rounded-full hover:bg-brown-mid transition-colors inline-flex items-center text-sm shadow-md">Beli Sekarang</a>
+            <div id="cart-toast" class="mt-3 bg-green-50 border border-green-200 rounded-xl p-3 text-xs text-green-700 font-bold hidden items-center gap-2">
                 ✓ Produk berhasil ditambahkan ke keranjang!
             </div>
         @else
-            <a href="/login">
-                <button class="btn-add-cart">+ Keranjang</button>
+            <a href="/login" class="block mb-2">
+                <button class="btn-primary w-full justify-center shadow-gold hover:shadow-gold-lg transition-all duration-200">+ Keranjang</button>
             </a>
         @endauth
         </div>
 
     </div>
 
-    <div class="reviews-section">
-        <div class="reviews-card">
-            <h2 class="reviews-title">Ulasan Produk</h2>
-            <p class="reviews-count">{{ $product->reviews->count() }} ulasan</p>
-            <div class="reviews-divider"></div>
+    {{-- REVIEWS --}}
+    <div class="max-w-[1140px] mx-auto px-6 pb-12 mt-10">
+        <div class="card p-7">
+            <h2 class="font-heading text-2xl font-bold text-brown-dark mb-1">Ulasan Produk</h2>
+            <p class="text-sm text-text-secondary mb-5">{{ $product->reviews->count() }} ulasan</p>
+            <div class="border-t border-cream-border my-5"></div>
 
             @forelse($product->reviews as $review)
-            <div class="review-card">
-                <div class="review-top">
+            <div class="bg-cream-warm rounded-xl border border-cream-border p-4 mb-3">
+                <div class="flex justify-between items-start mb-3">
                     <div>
-                        <p class="review-user">{{ $review->user->name ?? 'Pelanggan' }}</p>
-                        <p class="review-date">{{ $review->created_at?->format('d M Y, H:i') }}</p>
+                        <p class="font-bold text-sm text-brown-dark">{{ $review->user->name ?? 'Pelanggan' }}</p>
+                        <p class="text-[11px] text-text-muted mt-0.5">{{ $review->created_at?->format('d M Y, H:i') }}</p>
                     </div>
-                    <div class="review-stars">{{ str_repeat('★', (int) $review->rating) }}{{ str_repeat('☆', 5 - (int) $review->rating) }}</div>
+                    <div class="text-amber-400 text-sm">
+                        {{ str_repeat('★', (int) $review->rating) }}{{ str_repeat('☆', 5 - (int) $review->rating) }}
+                    </div>
                 </div>
-                <p class="review-comment">{{ $review->comment }}</p>
+                <p class="text-sm text-text-secondary leading-relaxed mb-3">{{ $review->comment }}</p>
                 @if($review->images->isNotEmpty())
-                <div class="review-images">
+                <div class="flex flex-wrap gap-2">
                     @foreach($review->images as $image)
-                    <img src="{{ asset('storage/' . $image->path) }}" alt="Gambar ulasan" loading="lazy">
+                    <img src="{{ asset('storage/' . $image->path) }}" class="w-20 h-20 object-cover rounded-lg border border-cream-border" alt="Gambar ulasan" loading="lazy">
                     @endforeach
                 </div>
                 @endif
             </div>
             @empty
-            <div style="text-align:center;padding:32px 0;color:var(--gray);">
-                <i class="fas fa-star" style="font-size:32px;color:#E5D5C5;margin-bottom:10px;display:block;"></i>
-                <p style="font-size:14px;">Belum ada ulasan untuk produk ini.</p>
+            <div class="text-center py-12 text-text-secondary">
+                <i class="fas fa-star text-4xl text-cream-dark mb-3 block"></i>
+                <p class="text-sm">Belum ada ulasan untuk produk ini.</p>
             </div>
             @endforelse
         </div>
     </div>
 </section>
+@endsection
 
-@include('partials.footer')
-
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-    const price = {{ $product->price }};
-
+@push('scripts')
+<script>
     function changeQty(delta) {
         const input = document.getElementById('qty');
         const hidden = document.getElementById('qty-hidden');
@@ -253,10 +183,6 @@
         if (val > max) val = max;
         input.value = val;
         hidden.value = val;
-        updateSubtotal(val);
-    }
-
-    function updateSubtotal(qty) {
         updatePriceDisplay();
     }
 
@@ -266,7 +192,7 @@
         if (val > parseInt(this.max)) val = parseInt(this.max);
         this.value = val;
         document.getElementById('qty-hidden').value = val;
-        updateSubtotal(val);
+        updatePriceDisplay();
     });
 
     const noteInput = document.getElementById('note-input');
@@ -310,12 +236,12 @@
         if (priceDisplay) {
             if (extra > 0) {
                 priceDisplay.innerHTML =
-                    '<span class="price-base">Rp' + basePrice.toLocaleString('id-ID') +
-                    ' <span class="price-extra">+ Rp' + extra.toLocaleString('id-ID') + '</span></span>' +
-                    ' <span class="price-total-label" id="subtotal">= Rp' + total.toLocaleString('id-ID') + '</span>';
+                    '<span class="text-xs text-text-secondary">Rp' + basePrice.toLocaleString('id-ID') +
+                    ' <span class="text-xs font-bold text-brown-dark">+ Rp' + extra.toLocaleString('id-ID') + '</span></span>' +
+                    ' <span class="font-heading text-2xl font-bold text-primary" id="subtotal">= Rp' + total.toLocaleString('id-ID') + '</span>';
             } else {
                 priceDisplay.innerHTML =
-                    '<span class="price-total-label" id="subtotal">Rp' + total.toLocaleString('id-ID') + '</span>';
+                    '<span class="font-heading text-2xl font-bold text-primary" id="subtotal">Rp' + total.toLocaleString('id-ID') + '</span>';
             }
         }
 
@@ -329,11 +255,8 @@
     document.querySelectorAll('.custom-opt-input').forEach(function(el) {
         el.addEventListener('change', updatePriceDisplay);
     });
-
-
 </script>
 
-<script src="{{ asset('js/app.js') }}" defer></script>
 @auth
 <script>
 document.getElementById('add-to-cart-form')?.addEventListener('submit', async function(e) {
@@ -354,7 +277,7 @@ document.getElementById('add-to-cart-form')?.addEventListener('submit', async fu
         const data = await resp.json();
 
         if (data.success) {
-            toast.style.display = 'block';
+            toast.style.display = 'flex';
             btn.textContent = '✓ Ditambahkan';
             btn.style.background = '#22C55E';
 
@@ -379,5 +302,4 @@ document.getElementById('add-to-cart-form')?.addEventListener('submit', async fu
 });
 </script>
 @endauth
-</body>
-</html>
+@endpush

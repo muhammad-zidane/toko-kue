@@ -1,170 +1,86 @@
-﻿@extends('admin.layout')
+@extends('admin.layout')
 @section('title', 'Dashboard')
 @section('page-title', 'Dashboard Admin')
 @section('page-subtitle', 'Selamat datang, ' . auth()->user()->name . '!')
 
-@push('styles')
-<style>
-    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-    .stat-card { background: white; border-radius: 16px; padding: 20px; border: 1px solid #EDE0D4; }
-    .stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 12px; }
-    .stat-value { font-size: 26px; font-weight: 800; color: var(--text-dark); margin-bottom: 2px; }
-    .stat-label { font-size: 12px; color: var(--gray); margin-bottom: 6px; }
-    .stat-growth { font-size: 12px; font-weight: 600; }
-    .growth-up { color: #22C55E; }
-    .growth-down { color: #EF4444; }
-
-    .middle-grid { display: grid; grid-template-columns: 1fr 320px; gap: 20px; margin-bottom: 24px; }
-    .card { background: white; border-radius: 16px; border: 1px solid #EDE0D4; overflow: hidden; }
-    .card-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid #F0E8E0; }
-    .card-header h3 { font-size: 14px; font-weight: 700; color: var(--text-dark); }
-    .card-header a { font-size: 13px; color: var(--pink); font-weight: 600; }
-
-    table { width: 100%; border-collapse: collapse; }
-    th { padding: 10px 16px; font-size: 11px; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; background: #FAFAF8; border-bottom: 1px solid #F0E8E0; text-align: left; }
-    td { padding: 12px 16px; font-size: 13px; border-bottom: 1px solid #F9F4EE; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover { background: #FAFAF8; }
-
-    .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-    .badge-pending { background: #DBEAFE; color: #2563EB; }
-    .badge-processing { background: #FEF3C7; color: #D97706; }
-    .badge-completed { background: #DCFCE7; color: #16A34A; }
-    .badge-cancelled { background: #FEE2E2; color: #DC2626; }
-
-    .avatar-sm { width: 26px; height: 26px; border-radius: 50%; background: var(--blue); color: white; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .btn-detail { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; background: #F3F4F6; color: var(--text-dark); }
-    .btn-detail:hover { opacity: 0.8; }
-
-    .activity-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid #F9F4EE; }
-    .activity-item:last-child { border-bottom: none; }
-    .activity-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
-    .activity-dot.bg-pink { background: var(--pink); }
-    .activity-dot.bg-blue { background: var(--blue); }
-    .activity-dot.bg-green { background: var(--green); }
-    .activity-dot.bg-red { background: var(--red); }
-    .activity-text { font-size: 12px; color: var(--text-dark); line-height: 1.5; }
-    .activity-time { font-size: 11px; color: var(--gray); margin-top: 2px; }
-
-    .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .quick-link { background: var(--cream); border-radius: 12px; padding: 12px; display: flex; align-items: flex-start; gap: 10px; transition: background 0.2s; }
-    .quick-link:hover { background: var(--cream-dark); }
-    .quick-link-icon { font-size: 18px; flex-shrink: 0; transition: transform 0.2s; }
-    .quick-link:hover .quick-link-icon { transform: scale(1.1); }
-    .quick-link-title { font-size: 12px; font-weight: 700; color: var(--text-dark); }
-    .quick-link-desc { font-size: 11px; color: var(--gray); margin-top: 2px; }
-
-    .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .chart-bars { display: flex; align-items: flex-end; gap: 8px; height: 80px; margin-bottom: 10px; }
-    .chart-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
-    .chart-bar { width: 100%; border-radius: 3px 3px 0 0; min-height: 4px; transition: all 0.3s; }
-    .chart-bar.high { background: var(--pink); }
-    .chart-bar.mid { background: #F5EDD8; }
-    .chart-bar.low { background: #EDE0D4; }
-    .chart-label { font-size: 10px; color: var(--gray); }
-    .chart-legend { display: flex; gap: 16px; margin-top: 8px; }
-    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--gray); }
-    .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
-
-    .top-product-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #F9F4EE; }
-    .top-product-item:last-child { border-bottom: none; }
-    .top-product-rank { font-size: 13px; font-weight: 700; color: var(--gray); width: 16px; flex-shrink: 0; }
-    .top-product-info { flex: 1; }
-    .top-product-name { font-size: 13px; font-weight: 600; color: var(--text-dark); }
-    .top-product-cat { font-size: 11px; color: var(--gray); }
-    .top-product-sold { font-size: 12px; font-weight: 700; color: var(--text-dark); }
-    .top-product-bar { width: 60px; height: 3px; background: #EDE0D4; border-radius: 2px; margin-top: 4px; }
-    .top-product-bar-fill { height: 3px; background: var(--pink); border-radius: 2px; }
-
-    @media (max-width: 1024px) {
-        .stats-grid { grid-template-columns: repeat(2, 1fr); }
-        .middle-grid { grid-template-columns: 1fr; }
-        .bottom-grid { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 640px) {
-        .stats-grid { grid-template-columns: 1fr; }
-    }
-</style>
-@endpush
-
 @section('content')
 {{-- STATS --}}
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(240,80,122,0.1);"><i class="fas fa-clipboard-list" style="color:var(--pink)"></i></div>
-        <div class="stat-value">{{ $ordersThisMonth }}</div>
-        <div class="stat-label">Total Pesanan Bulan Ini</div>
-        <div class="stat-growth {{ $orderGrowth >= 0 ? 'growth-up' : 'growth-down' }}">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-2xl border border-cream-border p-5 shadow-sm hover:-translate-y-1 hover:shadow-md transition-all duration-200">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl mb-4 bg-primary/10 text-primary"><i class="fas fa-clipboard-list"></i></div>
+        <div class="font-heading text-3xl font-bold text-brown-dark mt-1">{{ $ordersThisMonth }}</div>
+        <div class="text-sm text-text-secondary">Total Pesanan Bulan Ini</div>
+        <div class="text-xs font-bold mt-1 {{ $orderGrowth >= 0 ? 'text-green-600' : 'text-red-500' }}">
             {{ $orderGrowth >= 0 ? '+' : '' }}{{ $orderGrowth }}% dari bulan lalu
         </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(20,184,166,0.1);"><i class="fas fa-money-bill-wave" style="color:var(--pink)"></i></div>
-        <div class="stat-value" style="color:#0D9488;">Rp {{ number_format($revenueThisMonth/1000, 0, ',', '.') }}k</div>
-        <div class="stat-label">Pendapatan Bulan Ini</div>
-        <div class="stat-growth {{ $revenueGrowth >= 0 ? 'growth-up' : 'growth-down' }}">
+    <div class="bg-white rounded-2xl border border-cream-border p-5 shadow-sm hover:-translate-y-1 hover:shadow-md transition-all duration-200">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl mb-4 bg-teal-50 text-teal-600"><i class="fas fa-money-bill-wave"></i></div>
+        <div class="font-heading text-3xl font-bold text-teal-600 mt-1">Rp {{ number_format($revenueThisMonth/1000, 0, ',', '.') }}k</div>
+        <div class="text-sm text-text-secondary">Pendapatan Bulan Ini</div>
+        <div class="text-xs font-bold mt-1 {{ $revenueGrowth >= 0 ? 'text-green-600' : 'text-red-500' }}">
             {{ $revenueGrowth >= 0 ? '+' : '' }}{{ $revenueGrowth }}% dari bulan lalu
         </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-icon" style="background:rgba(59,130,246,0.1);"><i class="fas fa-user" style="color:var(--pink)"></i></div>
-        <div class="stat-value">{{ $customersThisMonth }}</div>
-        <div class="stat-label">Pelanggan Baru</div>
-        <div class="stat-growth {{ $customerGrowth >= 0 ? 'growth-up' : 'growth-down' }}">
+    <div class="bg-white rounded-2xl border border-cream-border p-5 shadow-sm hover:-translate-y-1 hover:shadow-md transition-all duration-200">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl mb-4 bg-blue-50 text-blue-600"><i class="fas fa-user"></i></div>
+        <div class="font-heading text-3xl font-bold text-brown-dark mt-1">{{ $customersThisMonth }}</div>
+        <div class="text-sm text-text-secondary">Pelanggan Baru</div>
+        <div class="text-xs font-bold mt-1 {{ $customerGrowth >= 0 ? 'text-green-600' : 'text-red-500' }}">
             {{ $customerGrowth >= 0 ? '+' : '' }}{{ $customerGrowth }}% dari bulan lalu
         </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-icon" style="background:var(--cream);"><i class="fas fa-home" style="color:var(--pink)"></i></div>
-        <div class="stat-value">{{ $pendingOrdersCount }}</div>
-        <div class="stat-label">Pesanan Perlu Diproses</div>
+    <div class="bg-white rounded-2xl border border-cream-border p-5 shadow-sm hover:-translate-y-1 hover:shadow-md transition-all duration-200">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl mb-4 bg-cream-warm/50 text-primary"><i class="fas fa-home"></i></div>
+        <div class="font-heading text-3xl font-bold text-brown-dark mt-1">{{ $pendingOrdersCount }}</div>
+        <div class="text-sm text-text-secondary">Pesanan Perlu Diproses</div>
         @if($pendingOrdersCount > 0)
-            <div class="stat-growth" style="color:var(--pink);">Segera proses!</div>
+            <div class="text-xs font-bold mt-1 text-primary">Segera proses!</div>
         @else
-            <div class="stat-growth" style="color:var(--gray);">Semua pesanan tertangani</div>
+            <div class="text-xs font-bold mt-1 text-text-muted">Semua pesanan tertangani</div>
         @endif
     </div>
 </div>
 
 {{-- MIDDLE --}}
-<div class="middle-grid">
+<div class="grid grid-cols-1 lg:grid-cols-[2fr_1.2fr] gap-6 mb-8">
     {{-- TABEL PESANAN --}}
-    <div class="card">
-        <div class="card-header">
-            <h3>Pesanan Terbaru</h3>
-            <a href="{{ route('admin.orders.index') }}">Lihat Semua →</a>
+    <div class="bg-white rounded-2xl border border-cream-border overflow-hidden shadow-sm">
+        <div class="px-5 py-4 border-b border-cream-border flex justify-between items-center bg-cream-warm/10">
+            <h3 class="font-heading text-lg font-bold text-brown-dark">Pesanan Terbaru</h3>
+            <a href="{{ route('admin.orders.index') }}" class="text-sm font-semibold text-primary hover:text-primary-hover transition-colors">Lihat Semua →</a>
         </div>
-        <div style="overflow-x:auto;">
-            <table style="min-width:700px;">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse" style="min-width:700px;">
                 <thead>
                     <tr>
-                        <th>No. Pesanan</th>
-                        <th>Pelanggan</th>
-                        <th>Produk</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
+                        <th class="admin-th">No. Pesanan</th>
+                        <th class="admin-th">Pelanggan</th>
+                        <th class="admin-th">Produk</th>
+                        <th class="admin-th">Total</th>
+                        <th class="admin-th">Status</th>
+                        <th class="admin-th">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($latestOrders as $order)
-                    <tr>
-                        <td style="font-weight:700;">{{ $order->order_code }}</td>
-                        <td>
-                            <div style="display:flex;align-items:center;gap:8px;">
-                                <span class="avatar-sm">{{ strtoupper(substr($order->user->name ?? '-', 0, 2)) }}</span>
-                                {{ $order->user->name ?? '-' }}
+                    <tr class="hover:bg-cream-warm/20 transition-colors">
+                        <td class="px-5 py-4 text-sm border-b border-cream-border/50 align-middle font-bold text-brown-dark">{{ $order->order_code }}</td>
+                        <td class="px-5 py-4 text-sm border-b border-cream-border/50 align-middle">
+                            <div class="flex items-center gap-2">
+                                <span class="w-7 h-7 rounded-full bg-cream-warm text-brown-dark text-xs font-bold flex items-center justify-center shrink-0">{{ strtoupper(substr($order->user->name ?? '-', 0, 2)) }}</span>
+                                <span class="font-medium text-brown-dark">{{ $order->user->name ?? '-' }}</span>
                             </div>
                         </td>
-                        <td>
+                        <td class="px-5 py-4 text-sm border-b border-cream-border/50 align-middle text-text-secondary">
                             {{ $order->orderItems->first()->product->name ?? '-' }}
                             @if($order->orderItems->count() > 1)
-                                (+{{ $order->orderItems->count() - 1 }})
+                                <span class="text-xs font-semibold text-primary">(+{{ $order->orderItems->count() - 1 }})</span>
                             @endif
                         </td>
-                        <td style="font-weight:600;">Rp {{ number_format($order->total_price, 0, ',', '.') }}</td>
-                        <td>
-                            <span class="badge badge-{{ $order->status }}">
+                        <td class="px-5 py-4 text-sm border-b border-cream-border/50 align-middle font-bold text-brown-dark">Rp {{ number_format($order->total_price, 0, ',', '.') }}</td>
+                        <td class="px-5 py-4 text-sm border-b border-cream-border/50 align-middle">
+                            <span class="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold @if($order->status == 'pending') bg-amber-50 text-amber-700 @elseif($order->status == 'processing') bg-blue-50 text-blue-700 @elseif($order->status == 'completed') bg-green-50 text-green-700 @else bg-red-50 text-red-700 @endif">
                                 @switch($order->status)
                                     @case('pending') Menunggu @break
                                     @case('processing') Diproses @break
@@ -174,12 +90,14 @@
                                 @endswitch
                             </span>
                         </td>
-                        <td>
-                            <a href="{{ route('admin.orders.show', $order) }}" class="btn-detail">Detail</a>
+                        <td class="px-5 py-4 text-sm border-b border-cream-border/50 align-middle">
+                            <a href="{{ route('admin.orders.show', $order) }}" class="text-xs px-3 py-1.5 rounded-lg border border-cream-border text-brown-mid hover:bg-cream-dark transition-all">Detail</a>
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="6" style="text-align:center;color:var(--gray);padding:24px;">Belum ada pesanan terbaru</td></tr>
+                    <tr>
+                        <td colspan="6" class="px-5 py-8 text-center text-text-muted text-sm border-b border-cream-border/50">Belum ada pesanan terbaru</td>
+                    </tr>
                     @endforelse
                 </tbody>
             </table>
@@ -187,67 +105,69 @@
     </div>
 
     {{-- KANAN --}}
-    <div style="display:flex;flex-direction:column;gap:20px;">
+    <div class="flex flex-col gap-6">
         {{-- AKTIVITAS --}}
-        <div class="card" style="padding:18px 20px;">
-            <h3 style="font-size:14px;font-weight:700;color:var(--text-dark);margin-bottom:14px;">Aktivitas Terkini</h3>
-            @forelse($recentActivities as $act)
-            <div class="activity-item">
-                <div class="activity-dot {{ $act['color'] }}"></div>
-                <div>
-                    <p class="activity-text">
-                        @switch($act['status'])
-                            @case('pending')
-                                Pesanan baru <strong>{{ $act['order_code'] }}</strong> masuk dari {{ $act['user_name'] }}.
-                                @break
-                            @case('processing')
-                                Pesanan <strong>{{ $act['order_code'] }}</strong> sedang diproses.
-                                @break
-                            @case('completed')
-                                Pesanan <strong>{{ $act['order_code'] }}</strong> telah selesai.
-                                @break
-                            @default
-                                Pesanan <strong>{{ $act['order_code'] }}</strong> dibatalkan.
-                        @endswitch
-                    </p>
-                    <span class="activity-time">{{ $act['time_label'] }}</span>
+        <div class="bg-white rounded-2xl border border-cream-border p-5 shadow-sm">
+            <h3 class="text-sm font-bold text-brown-dark mb-4">Aktivitas Terkini</h3>
+            <div class="flex flex-col">
+                @forelse($recentActivities as $act)
+                <div class="flex gap-3 mb-4 last:mb-0 relative">
+                    <div class="w-3 h-3 rounded-full border-2 border-white ring-1 ring-cream-border mt-1 shrink-0 {{ $act['color'] === 'green' ? 'bg-green-500' : ($act['color'] === 'blue' ? 'bg-blue-500' : ($act['color'] === 'amber' ? 'bg-amber-500' : 'bg-red-500')) }}"></div>
+                    <div class="flex-1">
+                        <p class="text-xs text-text-primary leading-snug">
+                            @switch($act['status'])
+                                @case('pending')
+                                    Pesanan baru <strong>{{ $act['order_code'] }}</strong> masuk dari {{ $act['user_name'] }}.
+                                    @break
+                                @case('processing')
+                                    Pesanan <strong>{{ $act['order_code'] }}</strong> sedang diproses.
+                                    @break
+                                @case('completed')
+                                    Pesanan <strong>{{ $act['order_code'] }}</strong> telah selesai.
+                                    @break
+                                @default
+                                    Pesanan <strong>{{ $act['order_code'] }}</strong> dibatalkan.
+                            @endswitch
+                        </p>
+                        <span class="text-[10px] text-text-muted mt-1 block">{{ $act['time_label'] }}</span>
+                    </div>
                 </div>
+                @empty
+                <p class="text-xs text-text-muted py-2">Belum ada aktivitas</p>
+                @endforelse
             </div>
-            @empty
-            <p style="font-size:12px;color:var(--gray);padding:8px 0;">Belum ada aktivitas</p>
-            @endforelse
         </div>
 
         {{-- AKSI CEPAT --}}
-        <div class="card" style="padding:18px 20px;">
-            <h3 style="font-size:14px;font-weight:700;color:var(--text-dark);margin-bottom:14px;">Aksi Cepat</h3>
-            <div class="quick-grid">
-                <a href="{{ route('admin.products.create') }}" class="quick-link">
-                    <span class="quick-link-icon"><i class="fas fa-plus" style="color:var(--pink)"></i></span>
-                    <div>
-                        <div class="quick-link-title">Tambah Produk</div>
-                        <div class="quick-link-desc">Daftarkan kue baru</div>
+        <div class="bg-white rounded-2xl border border-cream-border p-5 shadow-sm">
+            <h3 class="text-sm font-bold text-brown-dark mb-4">Aksi Cepat</h3>
+            <div class="grid grid-cols-2 gap-3">
+                <a href="{{ route('admin.products.create') }}" class="flex items-center gap-3 p-3 bg-cream/40 border border-cream-border rounded-xl hover:bg-cream-warm hover:border-primary hover:-translate-y-0.5 transition-all">
+                    <span class="w-8 h-8 bg-white border border-cream-border rounded-lg flex items-center justify-center text-sm shrink-0"><i class="fas fa-plus text-primary"></i></span>
+                    <div class="min-w-0">
+                        <div class="text-xs font-bold text-brown-dark truncate">Tambah Produk</div>
+                        <div class="text-[10px] text-text-muted mt-0.5 truncate">Daftarkan kue baru</div>
                     </div>
                 </a>
-                <a href="{{ route('admin.analytics.index') }}" class="quick-link">
-                    <span class="quick-link-icon"><i class="fas fa-chart-bar" style="color:var(--pink)"></i></span>
-                    <div>
-                        <div class="quick-link-title">Lihat Laporan</div>
-                        <div class="quick-link-desc">Analisis penjualan</div>
+                <a href="{{ route('admin.analytics.index') }}" class="flex items-center gap-3 p-3 bg-cream/40 border border-cream-border rounded-xl hover:bg-cream-warm hover:border-primary hover:-translate-y-0.5 transition-all">
+                    <span class="w-8 h-8 bg-white border border-cream-border rounded-lg flex items-center justify-center text-sm shrink-0"><i class="fas fa-chart-bar text-primary"></i></span>
+                    <div class="min-w-0">
+                        <div class="text-xs font-bold text-brown-dark truncate">Lihat Laporan</div>
+                        <div class="text-[10px] text-text-muted mt-0.5 truncate">Analisis penjualan</div>
                     </div>
                 </a>
-                <a href="{{ route('admin.orders.index') }}" class="quick-link">
-                    <span class="quick-link-icon"><i class="fas fa-clipboard-list" style="color:var(--pink)"></i></span>
-                    <div>
-                        <div class="quick-link-title">Kelola Pesanan</div>
-                        <div class="quick-link-desc">Lihat semua pesanan</div>
+                <a href="{{ route('admin.orders.index') }}" class="flex items-center gap-3 p-3 bg-cream/40 border border-cream-border rounded-xl hover:bg-cream-warm hover:border-primary hover:-translate-y-0.5 transition-all">
+                    <span class="w-8 h-8 bg-white border border-cream-border rounded-lg flex items-center justify-center text-sm shrink-0"><i class="fas fa-clipboard-list text-primary"></i></span>
+                    <div class="min-w-0">
+                        <div class="text-xs font-bold text-brown-dark truncate">Kelola Pesanan</div>
+                        <div class="text-[10px] text-text-muted mt-0.5 truncate">Lihat semua</div>
                     </div>
                 </a>
-                <a href="{{ route('admin.customers.index') }}" class="quick-link">
-                    <span class="quick-link-icon"><i class="fas fa-users" style="color:var(--pink)"></i></span>
-                    <div>
-                        <div class="quick-link-title">Data Pelanggan</div>
-                        <div class="quick-link-desc">Lihat Semua User</div>
+                <a href="{{ route('admin.customers.index') }}" class="flex items-center gap-3 p-3 bg-cream/40 border border-cream-border rounded-xl hover:bg-cream-warm hover:border-primary hover:-translate-y-0.5 transition-all">
+                    <span class="w-8 h-8 bg-white border border-cream-border rounded-lg flex items-center justify-center text-sm shrink-0"><i class="fas fa-users text-primary"></i></span>
+                    <div class="min-w-0">
+                        <div class="text-xs font-bold text-brown-dark truncate">Data Pelanggan</div>
+                        <div class="text-[10px] text-text-muted mt-0.5 truncate">Lihat Semua User</div>
                     </div>
                 </a>
             </div>
@@ -256,56 +176,55 @@
 </div>
 
 {{-- BOTTOM --}}
-<div class="bottom-grid">
+<div class="grid grid-cols-1 lg:grid-cols-[2fr_1.2fr] gap-6">
     {{-- GRAFIK --}}
-    <div class="card" style="padding:20px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-            <h3 style="font-size:13px;font-weight:700;color:var(--text-dark);">Pendapatan 7 Hari Terakhir</h3>
-            <span style="font-size:12px;color:var(--pink);font-weight:600;">Rp {{ number_format($revenueThisWeek/1000, 0, ',', '.') }}k minggu ini</span>
+    <div class="bg-white rounded-2xl border border-cream-border p-5 shadow-sm">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xs font-bold text-brown-dark">Pendapatan 7 Hari Terakhir</h3>
+            <span class="text-xs text-primary font-semibold">Rp {{ number_format($revenueThisWeek/1000, 0, ',', '.') }}k minggu ini</span>
         </div>
-        <div class="chart-bars">
+        <div class="flex justify-between items-end h-[180px] pt-2 mb-4 border-b border-cream-border">
             @foreach($dailyRevenue as $d)
                 @php
                     $pct = $maxDaily > 0 ? ($d['amount'] / $maxDaily) * 100 : 0;
                     $barClass = $pct > 70 ? 'high' : ($pct > 30 ? 'mid' : 'low');
                 @endphp
-                <div class="chart-bar-col">
-                    <div class="chart-bar {{ $barClass }}" style="height:{{ max($pct, 5) }}%"></div>
-                    <span class="chart-label">{{ $d['day'] }}</span>
+                <div class="flex flex-col items-center w-[calc(100%/7)] h-full justify-end">
+                    <div class="w-3/5 rounded-t-md transition-all duration-300 {{ $barClass === 'high' ? 'bg-primary' : ($barClass === 'mid' ? 'bg-brown-light' : 'bg-cream-border') }}" style="height:{{ max($pct, 5) }}%"></div>
+                    <span class="text-[10px] text-text-muted mt-2 uppercase">{{ $d['day'] }}</span>
                 </div>
             @endforeach
         </div>
-        <div class="chart-legend">
-            <div class="legend-item"><div class="legend-dot" style="background:var(--pink);"></div> Tertinggi</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#F5EDD8;border:1px solid #D1C0B8;"></div> Normal</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#EDE0D4;"></div> Rendah</div>
+        <div class="flex justify-center gap-4 mt-2 text-xs">
+            <div class="flex items-center gap-1.5 text-[11px] text-text-secondary"><div class="w-2.5 h-2.5 rounded-full bg-primary"></div> Tertinggi</div>
+            <div class="flex items-center gap-1.5 text-[11px] text-text-secondary"><div class="w-2.5 h-2.5 rounded-full bg-brown-light"></div> Normal</div>
+            <div class="flex items-center gap-1.5 text-[11px] text-text-secondary"><div class="w-2.5 h-2.5 rounded-full bg-cream-border"></div> Rendah</div>
         </div>
     </div>
 
     {{-- TOP PRODUK --}}
-    <div class="card" style="padding:20px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-            <h3 style="font-size:13px;font-weight:700;color:var(--text-dark);">Produk Terlaris</h3>
-            <span style="font-size:12px;color:var(--gray);">Semua Waktu</span>
+    <div class="bg-white rounded-2xl border border-cream-border p-5 shadow-sm">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xs font-bold text-brown-dark">Produk Terlaris</h3>
+            <span class="text-xs text-text-muted">Semua Waktu</span>
         </div>
         @forelse($topProducts as $i => $p)
-        <div class="top-product-item">
-            <span class="top-product-rank">{{ $i + 1 }}</span>
-            <div class="top-product-info">
-                <div class="top-product-name">{{ $p->name }}</div>
-                <div class="top-product-cat">{{ $p->category->name ?? '-' }}</div>
+        <div class="flex items-center gap-3 py-3 border-b border-cream-border last:border-0 last:pb-0">
+            <span class="w-6 h-6 bg-cream/40 border border-cream-border rounded-full flex items-center justify-center text-xs font-bold text-brown-mid shrink-0">{{ $i + 1 }}</span>
+            <div class="flex-1 min-w-0">
+                <div class="text-xs font-bold text-brown-dark truncate">{{ $p->name }}</div>
+                <div class="text-[10px] text-text-muted mt-0.5">{{ $p->category->name ?? '-' }}</div>
             </div>
-            <div style="text-align:right;">
-                <div class="top-product-sold">{{ $p->order_items_count }} terjual</div>
-                <div class="top-product-bar">
-                    <div class="top-product-bar-fill" style="width:{{ ($p->order_items_count / $maxSold) * 100 }}%"></div>
+            <div class="text-right">
+                <div class="text-xs font-bold text-brown-dark">{{ $p->order_items_count }} terjual</div>
+                <div class="w-20 h-1 bg-cream-border rounded-full mt-1 overflow-hidden ml-auto">
+                    <div class="h-full bg-primary rounded-full" style="width:{{ ($p->order_items_count / $maxSold) * 100 }}%"></div>
                 </div>
             </div>
         </div>
         @empty
-        <p style="text-align:center;font-size:12px;color:var(--gray);padding:16px;">Belum ada data penjualan</p>
+        <p class="text-center text-xs text-text-muted py-4">Belum ada data penjualan</p>
         @endforelse
     </div>
 </div>
 @endsection
-

@@ -1,5 +1,5 @@
 import { expect, test, beforeEach } from "bun:test";
-import { request, resetDatabase, login, CookieJar, BASE_URL } from "./helpers";
+import { request, resetDatabase, login, CookieJar, BASE_URL, ADMIN_EMAIL } from "./helpers";
 
 beforeEach(() => {
   resetDatabase();
@@ -17,8 +17,8 @@ test("Register: Berhasil mendaftar dengan data valid", async () => {
     body: JSON.stringify({
       name: "Test User",
       email: "test@example.com",
-      password: "password123",
-      password_confirmation: "password123",
+      password: "Password123!",
+      password_confirmation: "Password123!",
     }),
   });
 
@@ -31,16 +31,18 @@ test("Register: Gagal mendaftar karena email sudah terdaftar", async () => {
   const csrf1 = await fetch(`${BASE_URL}/register`, { redirect: "manual" });
   jar1.addFromResponse(csrf1);
 
-  await request("/register", {
+  const firstResponse = await request("/register", {
     method: "POST",
     jar: jar1,
     body: JSON.stringify({
       name: "User 1",
       email: "duplicate@example.com",
-      password: "password",
-      password_confirmation: "password",
+      password: "Password123!",
+      password_confirmation: "Password123!",
     }),
   });
+
+  expect(firstResponse.status).toBe(302);
 
   // Register kedua dengan email yang sama
   const jar2 = new CookieJar();
@@ -53,8 +55,8 @@ test("Register: Gagal mendaftar karena email sudah terdaftar", async () => {
     body: JSON.stringify({
       name: "User 2",
       email: "duplicate@example.com",
-      password: "password",
-      password_confirmation: "password",
+      password: "Password123!",
+      password_confirmation: "Password123!",
     }),
   });
 
@@ -67,16 +69,18 @@ test("Login: Berhasil login dengan kredensial benar", async () => {
   const csrfReg = await fetch(`${BASE_URL}/register`, { redirect: "manual" });
   regJar.addFromResponse(csrfReg);
 
-  await request("/register", {
+  const registerResponse = await request("/register", {
     method: "POST",
     jar: regJar,
     body: JSON.stringify({
       name: "Login User",
       email: "login@example.com",
-      password: "password",
-      password_confirmation: "password",
+      password: "Password123!",
+      password_confirmation: "Password123!",
     }),
   });
+
+  expect(registerResponse.status).toBe(302);
 
   // Login
   const jar = new CookieJar();
@@ -88,7 +92,7 @@ test("Login: Berhasil login dengan kredensial benar", async () => {
     jar,
     body: JSON.stringify({
       email: "login@example.com",
-      password: "password",
+      password: "Password123!",
     }),
   });
 
@@ -104,7 +108,7 @@ test("Login: Gagal login dengan password salah", async () => {
     method: "POST",
     jar,
     body: JSON.stringify({
-      email: "admin@tokokue.com",
+      email: ADMIN_EMAIL,
       password: "wrongpassword",
     }),
   });

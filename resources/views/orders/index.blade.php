@@ -1,140 +1,104 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" />
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jagoan Kue - Riwayat Pesanan</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    <style>
-        body { background: var(--cream); }
-        .page { max-width: 1100px; margin: 0 auto; padding: 32px 24px 60px; }
-        .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 800; margin-bottom: 8px; }
-        .page-subtitle { font-size: 14px; color: var(--gray); margin-bottom: 22px; line-height: 1.6; }
-        .top-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
-        .btn-primary { background: var(--pink); color: white; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; display: inline-block; }
+@extends('layouts.main')
 
-        .alert-success { background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; padding: 12px 14px; border-radius: 12px; font-size: 13px; margin: 14px 0 0; }
-        .alert-error { background: #FFF1F2; border: 1px solid #FECDD3; color: #9F1239; padding: 12px 14px; border-radius: 12px; font-size: 13px; margin: 14px 0 0; }
+@section('title', 'Jagoan Kue - Riwayat Pesanan')
 
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 20px; }
-        .card { background: var(--white); border-radius: 16px; border: 1px solid #EDE0D4; padding: 20px; }
-        .card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
-        .card-left { display:flex; align-items:flex-start; gap:12px; min-width: 0; }
-        .thumb { width: 56px; height: 56px; border-radius: 12px; background: var(--cream-dark); overflow: hidden; flex-shrink: 0; border: 1px solid #EDE0D4; }
-        .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .left-info { min-width: 0; }
-        .meta { font-size: 12px; color: var(--gray); font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; }
-        .code { margin-top: 6px; font-size: 16px; font-weight: 800; }
-        .total { margin-top: 10px; font-size: 13px; color: var(--gray); }
-        .total strong { color: var(--brown-dark); }
-        .badges { width: 120px; display: flex; flex-direction: column; gap: 8px; align-items: center; text-align: center; flex-shrink: 0; }
-        .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #F3F4F6; color: #111827; white-space: nowrap; text-align: center; }
-        .badge-warn { background: #FEF3C7; color: #92400E; }
-        .badge-success { background: #DCFCE7; color: #166534; }
-        .actions { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; }
-        .btn-outline { border: 1.5px solid #D1C0B8; color: var(--brown-dark); padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; display: inline-block; }
-
-        .badge-completed { background: #FFF0F3; color: var(--pink); }
-        .badge-cancelled { background: #FEE2E2; color: var(--red); }
-        .empty { grid-column: 1 / -1; text-align: center; padding: 28px; }
-
-        @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
-    </style>
-</head>
-<body>
-@include('partials.navbar')
-
-<div class="page">
-    <div class="top-row">
-        <div>
-            <h1 class="page-title">Riwayat Pesanan</h1>
-            <p class="page-subtitle">Lihat status pesanan dan lanjutkan pembayaran bila diperlukan.</p>
+@section('content')
+<div class="bg-cream min-h-screen py-8 px-6">
+    <div class="max-w-[1140px] mx-auto">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+                <h1 class="font-heading text-3xl font-bold text-brown-dark mb-1">Riwayat Pesanan</h1>
+                <p class="text-sm text-text-secondary">Lihat status pesanan dan lanjutkan pembayaran bila diperlukan.</p>
+            </div>
+            <a href="/products" class="btn-primary shrink-0">+ Belanja Lagi</a>
         </div>
-        <a href="/products" class="btn-primary">+ Belanja Lagi</a>
-    </div>
 
-    @if (session('success'))
-        <div class="alert-success">{{ session('success') }}</div>
-    @endif
+        @if (session('success'))
+            <div class="bg-green-50 border border-green-200 text-green-700 rounded-xl p-4 text-xs font-semibold mb-6">
+                {{ session('success') }}
+            </div>
+        @endif
 
-    @if ($errors->any())
-        <div class="alert-error">{{ $errors->first() }}</div>
-    @endif
+        @if ($errors->any())
+            <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 text-xs font-semibold mb-6">
+                {{ $errors->first() }}
+            </div>
+        @endif
 
-    <div class="grid">
-        @forelse ($orders as $order)
-            @php
-                $paymentStatus = $order->payment?->status ?? 'unpaid';
-                $status = $order->status ?? 'pending';
-                $firstItem = $order->orderItems->first();
-                $thumbPath = $firstItem?->product?->image ? asset('storage/' . $firstItem->product->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=200&q=80';
-            @endphp
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            @forelse ($orders as $order)
+                @php
+                    $paymentStatus = $order->payment?->status ?? 'unpaid';
+                    $status = $order->status ?? 'pending';
+                    $firstItem = $order->orderItems->first();
+                    $thumbPath = $firstItem?->product?->image ? asset('storage/' . $firstItem->product->image) : 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=200&q=80';
+                @endphp
 
-            <div class="card">
-                <div class="card-top">
-                    <div class="card-left">
-                        <div class="thumb">
-                            <img src="{{ $thumbPath }}" alt="Produk">
+                <div class="bg-white rounded-2xl border border-cream-border p-6 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-start gap-4 mb-4">
+                            <img src="{{ $thumbPath }}" alt="Produk" class="w-16 h-16 rounded-xl object-cover shrink-0">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-[11px] text-text-muted font-medium mb-0.5">{{ $order->created_at?->format('d M Y, H:i') }} WIB</p>
+                                <p class="font-mono text-sm font-bold text-brown-dark truncate mb-1">{{ $order->order_code }}</p>
+                                <p class="text-sm text-text-secondary">Total: <strong class="text-primary font-bold">Rp {{ number_format((int) $order->total_price, 0, ',', '.') }}</strong></p>
+                                <p class="text-[10px] text-text-muted mt-0.5">Ongkir: {{ $order->shipping_cost > 0 ? 'Rp ' . number_format((int)$order->shipping_cost, 0, ',', '.') : 'Gratis' }}</p>
+                            </div>
                         </div>
-                        <div class="left-info">
-                            <p class="meta">{{ $order->created_at?->format('d M Y, H:i') }} WIB</p>
-                            <p class="code">{{ $order->order_code }}</p>
-                            <p class="total">Total: <strong>Rp {{ number_format((int) $order->total_price, 0, ',', '.') }}</strong></p>
-                        @if($order->shipping_cost > 0)
-                        <p style="font-size:11px;color:var(--gray);margin-top:2px;">Ongkir: Rp {{ number_format((int)$order->shipping_cost, 0, ',', '.') }}</p>
-                        @else
-                        <p style="font-size:11px;color:var(--gray);margin-top:2px;">Ongkir: Gratis</p>
+
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="inline-block px-2.5 py-0.5 text-xs font-bold rounded-full badge-{{ $status === 'completed' ? 'green' : ($status === 'cancelled' ? 'red' : 'blue') }}">
+                                {{ ucfirst($status) }}
+                            </span>
+                            <span class="inline-block px-2.5 py-0.5 text-xs font-bold rounded-full badge-{{ $paymentStatus === 'paid' ? 'green' : 'gold' }}">
+                                {{ $order->payment?->status_label ?? 'Belum Bayar' }}
+                            </span>
+                        </div>
+
+                        @if($paymentStatus === 'dp')
+                        @php $sisaBayar = $order->total_price - $order->paid_amount; @endphp
+                        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800 font-semibold mb-4 flex items-center gap-1.5">
+                            <i class="fas fa-exclamation-circle text-sm shrink-0"></i>
+                            <span>Sisa pembayaran: Rp {{ number_format($sisaBayar, 0, ',', '.') }}</span>
+                        </div>
                         @endif
-                        </div>
                     </div>
-                    <div class="badges">
-                        <span class="badge {{ $status === 'completed' ? 'badge-completed' : ($status === 'cancelled' ? 'badge-cancelled' : '') }}">{{ ucfirst($status) }}</span>
-                        <span class="badge {{ $paymentStatus === 'paid' ? 'badge-success' : 'badge-warn' }}">{{ $order->payment?->status_label ?? 'Belum Bayar' }}</span>
+
+                    <div class="flex flex-wrap gap-2 items-center border-t border-cream-border pt-4 mt-2">
+                        <a class="btn-ghost py-2 px-4 text-xs" href="{{ route('orders.show', $order) }}">Detail</a>
+                        <a class="btn-primary py-2 px-4 text-xs flex items-center gap-1.5" href="{{ route('orders.status', $order) }}">
+                            <i class="fa-solid fa-location-dot"></i> Lacak
+                        </a>
+
+                        @if ($status === 'completed' && $paymentStatus === 'paid')
+                            <a class="btn-secondary py-2 px-4 text-xs" href="{{ route('orders.reviews.index', $order) }}">Ulasan</a>
+                        @endif
+
+                        @if ($status === 'pending' && $paymentStatus === 'unpaid' && $order->payment?->payment_method !== 'cod' && !($order->payment && $order->payment->proof_image))
+                            <a class="btn-primary py-2 px-4 text-xs" href="{{ route('orders.payment', $order) }}">Bayar Sekarang</a>
+                        @endif
+
+                        @if ($paymentStatus === 'dp')
+                            <a class="btn-primary py-2 px-4 text-xs bg-amber-500 hover:bg-amber-600 border-0" href="{{ route('orders.payment', $order) }}">Bayar Sisa</a>
+                        @endif
                     </div>
                 </div>
-
-                @if($paymentStatus === 'dp')
-                @php $sisaBayar = $order->total_price - $order->paid_amount; @endphp
-                <div style="margin:10px 0 0;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:8px 12px;font-size:12px;color:#C2410C;font-weight:600;">
-                    <i class="fas fa-exclamation-circle" style="margin-right:4px;"></i>
-                    Sisa pembayaran: Rp {{ number_format($sisaBayar, 0, ',', '.') }}
+            @empty
+                <div class="col-span-full text-center py-20 bg-white rounded-2xl border border-cream-border p-6 flex flex-col items-center justify-center shadow-sm">
+                    <p class="text-lg font-bold text-brown-dark mb-1">Belum ada pesanan</p>
+                    <p class="text-xs text-text-secondary mb-4">Yuk mulai belanja kue favoritmu.</p>
+                    <a href="/products" class="btn-primary">Lihat Katalog</a>
                 </div>
-                @endif
+            @endforelse
+        </div>
 
-                <div class="actions">
-                    <a class="btn-outline" href="{{ route('orders.show', $order) }}">Detail</a>
-                    <a class="btn-primary" href="{{ route('orders.status', $order) }}"><i class="fa-solid fa-location-dot" style="margin-right:5px;"></i>Lacak</a>
-
-                    @if ($status === 'completed' && $paymentStatus === 'paid')
-                        <a class="btn-outline" href="{{ route('orders.reviews.index', $order) }}">Ulasan</a>
-                    @endif
-
-                    @if ($status === 'pending' && $paymentStatus === 'unpaid' && !($order->payment && $order->payment->proof_image))
-                        <a class="btn-primary" href="{{ route('orders.payment', $order) }}">Bayar Sekarang</a>
-                    @endif
-
-                    @if ($paymentStatus === 'dp')
-                        <a class="btn-primary" href="{{ route('orders.payment', $order) }}" style="background:#F59E0B;">Bayar Sisa</a>
-                    @endif
-                </div>
-            </div>
-        @empty
-            <div class="card empty">
-                <p style="font-size:18px; font-weight:800;">Belum ada pesanan</p>
-                <p style="font-size:13px; color:var(--gray); margin-top:8px; line-height:1.6;">Yuk mulai belanja kue favoritmu.</p>
-                <a href="/products" class="btn-primary" style="margin-top:14px;">Lihat Katalog</a>
-            </div>
-        @endforelse
-    </div>
-
-    <div style="margin-top:18px;">
-        {{ $orders->links() }}
+        <div class="mt-6 flex justify-center">
+            {{ $orders->links() }}
+        </div>
     </div>
 </div>
-@include('partials.footer')
+@endsection
+
+@push('scripts')
 <script src="{{ asset('js/app.js') }}" defer></script>
-</body>
-</html>
+@endpush
