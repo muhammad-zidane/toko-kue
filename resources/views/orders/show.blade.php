@@ -137,7 +137,7 @@
                     </div>
                 </div>
 
-                @if($order->status === 'pending' && $order->payment && $order->payment->status === 'unpaid' && !$order->payment->proof_image)
+                @if($order->status === 'pending' && $order->payment && $order->payment->status === 'unpaid' && $order->payment->payment_method !== 'cod' && !$order->payment->proof_image)
                 <a href="{{ route('orders.payment', $order) }}" class="btn-primary w-full py-3 text-center block text-sm font-bold justify-center">Bayar Sekarang</a>
                 @endif
 

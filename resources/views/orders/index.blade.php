@@ -74,7 +74,7 @@
                             <a class="btn-secondary py-2 px-4 text-xs" href="{{ route('orders.reviews.index', $order) }}">Ulasan</a>
                         @endif
 
-                        @if ($status === 'pending' && $paymentStatus === 'unpaid' && !($order->payment && $order->payment->proof_image))
+                        @if ($status === 'pending' && $paymentStatus === 'unpaid' && $order->payment?->payment_method !== 'cod' && !($order->payment && $order->payment->proof_image))
                             <a class="btn-primary py-2 px-4 text-xs" href="{{ route('orders.payment', $order) }}">Bayar Sekarang</a>
                         @endif
 

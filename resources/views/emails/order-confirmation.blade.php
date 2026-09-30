@@ -3,7 +3,11 @@
 
 Halo **{{ $order->user->name }}**,
 
+@if($order->payment?->payment_method === 'cod')
+Terima kasih telah memesan di **Jagoan Kue**! Pesananmu sudah kami terima dan sedang diproses. Pembayaran COD dilakukan saat pesanan diterima atau diambil.
+@else
 Terima kasih telah memesan di **Jagoan Kue**! Pesananmu sudah kami terima dan sedang menunggu konfirmasi pembayaran.
+@endif
 
 **Detail Pesanan:**
 
@@ -21,7 +25,7 @@ Terima kasih telah memesan di **Jagoan Kue**! Pesananmu sudah kami terima dan se
 - {{ $item->product->name }} × {{ $item->quantity }} — Rp {{ number_format($item->price * $item->quantity, 0, ',', '.') }}
 @endforeach
 
-@if($order->payment && $order->payment->status === 'unpaid')
+@if($order->payment && $order->payment->status === 'unpaid' && $order->payment->payment_method !== 'cod')
 Silakan lakukan pembayaran dan upload bukti transfer melalui tombol di bawah.
 
 <x-mail::button :url="route('orders.payment', $order)">
